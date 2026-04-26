@@ -1,0 +1,400 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
+@import "tailwindcss";
+
+/* ──────────────────────────────────────────────────────────────
+   LIQUID GLASS DESIGN SYSTEM
+   Color palette: Sky-300 (#7dd3fc), Purple-400 (#c084fc), Pure whites
+   Inspired by Apple/Stripe glassmorphism
+   ────────────────────────────────────────────────────────────── */
+
+@theme inline {
+  --color-background: #050510;
+  --color-foreground: #f0f0f5;
+
+  /* Brand palette */
+  --color-sky-300: #7dd3fc;
+  --color-sky-400: #38bdf8;
+  --color-sky-500: #0ea5e9;
+  --color-purple-300: #d8b4fe;
+  --color-purple-400: #c084fc;
+  --color-purple-500: #a855f7;
+
+  /* Glass tokens */
+  --color-glass-bg: rgba(255, 255, 255, 0.06);
+  --color-glass-bg-hover: rgba(255, 255, 255, 0.1);
+  --color-glass-bg-strong: rgba(255, 255, 255, 0.12);
+  --color-glass-border: rgba(255, 255, 255, 0.12);
+  --color-glass-border-hover: rgba(255, 255, 255, 0.22);
+
+  /* Shadows */
+  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --shadow-glass-hover: 0 12px 40px rgba(0, 0, 0, 0.4);
+  --shadow-glow-sky: 0 0 20px rgba(125, 211, 252, 0.15);
+  --shadow-glow-purple: 0 0 20px rgba(192, 132, 252, 0.15);
+
+  /* Radius */
+  --radius-organic: 20px;
+  --radius-organic-lg: 28px;
+  --radius-organic-sm: 14px;
+
+  /* Fonts */
+  --font-sans: "Inter", var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+}
+
+
+
+/* ─── Base ────────────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ─── Custom Scrollbar ────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ─── Mesh Gradient Background ────────────────────────────── */
+.mesh-background {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: #050510;
+}
+
+.mesh-background::before,
+.mesh-background::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.5;
+  animation: mesh-float 20s ease-in-out infinite;
+}
+
+.mesh-background::before {
+  width: 50vw;
+  height: 50vw;
+  top: -10%;
+  left: -10%;
+  background: radial-gradient(circle, #7dd3fc33 0%, transparent 70%);
+  animation-delay: 0s;
+}
+
+.mesh-background::after {
+  width: 45vw;
+  height: 45vw;
+  bottom: -15%;
+  right: -10%;
+  background: radial-gradient(circle, #c084fc33 0%, transparent 70%);
+  animation-delay: -10s;
+}
+
+.mesh-orb-1,
+.mesh-orb-2,
+.mesh-orb-3 {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.mesh-orb-1 {
+  width: 35vw;
+  height: 35vw;
+  top: 30%;
+  right: 20%;
+  background: radial-gradient(circle, #7dd3fc22 0%, transparent 70%);
+  animation: mesh-float-alt 25s ease-in-out infinite;
+}
+
+.mesh-orb-2 {
+  width: 30vw;
+  height: 30vw;
+  bottom: 10%;
+  left: 25%;
+  background: radial-gradient(circle, #c084fc22 0%, transparent 70%);
+  animation: mesh-float 30s ease-in-out infinite reverse;
+}
+
+.mesh-orb-3 {
+  width: 25vw;
+  height: 25vw;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, #7dd3fc18 0%, #c084fc18 50%, transparent 70%);
+  animation: mesh-pulse 15s ease-in-out infinite;
+}
+
+@keyframes mesh-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(5%, 10%) scale(1.05); }
+  50% { transform: translate(-3%, 5%) scale(0.95); }
+  75% { transform: translate(8%, -5%) scale(1.02); }
+}
+
+@keyframes mesh-float-alt {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-8%, 6%) scale(1.08); }
+  66% { transform: translate(5%, -8%) scale(0.96); }
+}
+
+@keyframes mesh-pulse {
+  0%, 100% { opacity: 0.2; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.15); }
+}
+
+/* ─── Glass Utilities ─────────────────────────────────────── */
+.glass {
+  background: var(--color-glass-bg);
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  border: 1px solid var(--color-glass-border);
+  box-shadow: var(--shadow-glass);
+}
+
+.glass-strong {
+  background: var(--color-glass-bg-strong);
+  backdrop-filter: blur(32px) saturate(1.8);
+  -webkit-backdrop-filter: blur(32px) saturate(1.8);
+  border: 1px solid var(--color-glass-border-hover);
+  box-shadow: var(--shadow-glass);
+}
+
+.glass-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-hover:hover {
+  background: var(--color-glass-bg-hover);
+  border-color: var(--color-glass-border-hover);
+  box-shadow: var(--shadow-glass-hover);
+  transform: translateY(-1px) scale(1.005);
+}
+
+/* ─── Glow Effects ────────────────────────────────────────── */
+.glow-sky {
+  box-shadow: var(--shadow-glow-sky), var(--shadow-glass);
+}
+
+.glow-purple {
+  box-shadow: var(--shadow-glow-purple), var(--shadow-glass);
+}
+
+.glow-gradient {
+  box-shadow:
+    0 0 20px rgba(125, 211, 252, 0.1),
+    0 0 40px rgba(192, 132, 252, 0.08),
+    var(--shadow-glass);
+}
+
+/* ─── Gradient Text ───────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, #7dd3fc 0%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Liquid Button ───────────────────────────────────────── */
+.liquid-button {
+  position: relative;
+  padding: 10px 24px;
+  border-radius: var(--radius-organic);
+  background: linear-gradient(135deg, rgba(125, 211, 252, 0.15), rgba(192, 132, 252, 0.15));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.liquid-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(125, 211, 252, 0.3), rgba(192, 132, 252, 0.3));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.liquid-button:hover {
+  transform: translateY(-1px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow:
+    0 0 20px rgba(125, 211, 252, 0.15),
+    0 0 40px rgba(192, 132, 252, 0.1),
+    0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.liquid-button:hover::before {
+  opacity: 1;
+}
+
+.liquid-button:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.liquid-button span {
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Input Styles ────────────────────────────────────────── */
+.glass-input {
+  width: 100%;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  padding-left: 16px;
+  padding-right: 16px;
+  border-radius: var(--radius-organic-sm);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  outline: none;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.glass-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.glass-input:focus {
+  border-color: rgba(125, 211, 252, 0.5);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(125, 211, 252, 0.1);
+}
+
+/* Fix Chrome/Edge autofill background & text bleed */
+.glass-input:-webkit-autofill,
+.glass-input:-webkit-autofill:hover,
+.glass-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px rgba(10, 10, 20, 1) inset !important;
+  -webkit-text-fill-color: white !important;
+  caret-color: white;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Ensure icons in input wrappers don't steal events */
+.glass-input-icon {
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Force left padding when input has an icon — Tailwind v4 utilities
+   can't override .glass-input's padding-left due to cascade order */
+.glass-input-with-icon {
+  padding-left: 44px !important;
+}
+
+/* ─── Badge ───────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-sky {
+  background: rgba(125, 211, 252, 0.15);
+  color: #7dd3fc;
+  border: 1px solid rgba(125, 211, 252, 0.2);
+}
+
+.badge-purple {
+  background: rgba(192, 132, 252, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(192, 132, 252, 0.2);
+}
+
+.badge-green {
+  background: rgba(74, 222, 128, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.2);
+}
+
+.badge-amber {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+.badge-red {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.2);
+}
+
+/* ─── Drag Overlay ────────────────────────────────────────── */
+.drag-overlay {
+  opacity: 0.9;
+  transform: scale(1.03) rotate(2deg);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(125, 211, 252, 0.2);
+}
+
+/* ─── Animations ──────────────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(125, 211, 252, 0.1); }
+  50% { box-shadow: 0 0 25px rgba(125, 211, 252, 0.25); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-slide-in {
+  animation: slide-in-right 0.4s ease-out forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}

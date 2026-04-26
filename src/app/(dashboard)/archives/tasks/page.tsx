@@ -1,0 +1,186 @@
+"use client";
+
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  CheckSquare, Calendar, Tag, AlertCircle, Clock,
+  CheckCircle2, Filter, Archive,
+} from "lucide-react";
+import GlassCard from "@/components/ui/GlassCard";
+import GlassButton from "@/components/ui/GlassButton";
+import { useArchivedTasksQuery, useArchiveMonthsQuery } from "@/hooks/useArchives";
+
+const priorityConfig = [
+  { label: "Baja", color: "#4ade80", icon: CheckCircle2 },
+  { label: "Media", color: "#fbbf24", icon: Clock },
+  { label: "Alta", color: "#f87171", icon: AlertCircle },
+];
+
+export default function ArchivedTasksPage() {
+  const [selectedMonth, setSelectedMonth] = useState<string | undefined>();
+  const { data: months, isLoading: monthsLoading } = useArchiveMonthsQuery();
+  const { data: tasks, isLoading: tasksLoading } = useArchivedTasksQuery(selectedMonth);
+
+  const isLoading = monthsLoading || tasksLoading;
+
+  function formatMonth(m: string) {
+    const [year, month] = m.split("-");
+    const date = new Date(parseInt(year), parseInt(month) - 1);
+    return date.toLocaleDateString("es-MX", { year: "numeric", month: "long" });
+  }
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+            <Archive size={24} className="text-sky-300" />
+            Archivo de Tareas
+          </h1>
+          <p className="text-white/40 text-sm mt-1">
+            Tareas completadas archivadas por mes
+          </p>
+        </div>
+      </div>
+
+      {/* Month Filter */}
+      {months && months.length > 0 && (
+        <motion.div
+          className="flex items-center gap-2 mb-6 flex-wrap"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <Filter size={14} className="text-white/30" />
+          <GlassButton
+            variant={!selectedMonth ? "primary" : "ghost"}
+            size="sm"
+            onClick={() => setSelectedMonth(undefined)}
+          >
+            Todos
+          </GlassButton>
+          {months.map((m) => (
+            <GlassButton
+              key={m}
+              variant={selectedMonth === m ? "primary" : "ghost"}
+              size="sm"
+              onClick={() => setSelectedMonth(m)}
+            >
+              {formatMonth(m)}
+            </GlassButton>
+          ))}
+        </motion.div>
+      )}
+
+      {/* Loading */}
+      {isLoading && (
+        <div className="flex items-center justify-center h-[40vh]">
+          <motion.div
+            className="w-12 h-12 rounded-full border-2 border-transparent border-t-sky-300 border-r-purple-400"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          />
+        </div>
+      )}
+
+      {/* Tasks Grid */}
+      {!isLoading && tasks && tasks.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <AnimatePresence mode="popLayout">
+            {tasks.map((task, index) => {
+              const priority = priorityConfig[Math.min(task.priority, 2)];
+              const PriorityIcon = priority.icon;
+
+              return (
+                <motion.div
+                  key={task.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ delay: index * 0.05, duration: 0.3 }}
+                >
+                  <GlassCard padding="md" hover>
+                    <div className="space-y-3">
+                      {/* Priority + Category */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <PriorityIcon size={12} style={{ color: priority.color }} />
+                          <span className="text-[10px] font-medium" style={{ color: priority.color }}>
+                            {priority.label}
+                          </span>
+                        </div>
+                        {task.category_name && (
+                          <span
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider"
+                            style={{
+                              backgroundColor: `${task.category_color || "#7dd3fc"}20`,
+                              color: task.category_color || "#7dd3fc",
+                              border: `1px solid ${task.category_color || "#7dd3fc"}30`,
+                            }}
+                          >
+                            <Tag size={8} />
+                            {task.category_name}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Title */}
+                      <h4 className="text-sm font-medium text-white/90">
+                        {task.title}
+                      </h4>
+
+                      {/* Description */}
+                      {task.description && (
+                        <p className="text-xs text-white/35 line-clamp-2">
+                          {task.description}
+                        </p>
+                      )}
+
+                      {/* Footer */}
+                      <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                        <div className="flex flex-col gap-0.5">
+                          {task.task_created_at && (
+                            <span className="text-[10px] text-white/25 flex items-center gap-1">
+                              <Calendar size={9} />
+                              Creada: {new Date(task.task_created_at).toLocaleDateString("es-MX", { month: "short", day: "numeric" })}
+                            </span>
+                          )}
+                          {task.task_completed_at && (
+                            <span className="text-[10px] text-green-400/50 flex items-center gap-1">
+                              <CheckCircle2 size={9} />
+                              Completada: {new Date(task.task_completed_at).toLocaleDateString("es-MX", { month: "short", day: "numeric" })}
+                            </span>
+                          )}
+                        </div>
+                        <span className="badge badge-green" style={{ fontSize: "9px", padding: "1px 6px" }}>
+                          {task.status}
+                        </span>
+                      </div>
+                    </div>
+                  </GlassCard>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!isLoading && (!tasks || tasks.length === 0) && (
+        <motion.div
+          className="flex flex-col items-center justify-center h-[40vh]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-4 border border-white/10">
+            <CheckSquare size={28} className="text-white/15" />
+          </div>
+          <p className="text-white/30 text-sm">No hay tareas archivadas</p>
+          <p className="text-white/20 text-xs mt-1">
+            Las tareas completadas se archivarán aquí
+          </p>
+        </motion.div>
+      )}
+    </div>
+  );
+}
