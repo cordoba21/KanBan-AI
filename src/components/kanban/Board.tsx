@@ -196,10 +196,7 @@ export default function Board() {
           ))}
         </div>
 
-        <DragOverlay dropAnimation={{
-          duration: 250,
-          easing: "cubic-bezier(0.25, 1, 0.5, 1)",
-        }}>
+        <DragOverlay dropAnimation={null}>
           {activeTask && (
             <TaskCard task={activeTask} isDragOverlay />
           )}

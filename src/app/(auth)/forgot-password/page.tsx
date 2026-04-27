@@ -21,7 +21,7 @@ type Step = "email" | "code" | "password" | "success";
 export default function ForgotPasswordPage() {
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [otp, setOtp] = useState(["", "", "", "", "", "", "", ""]);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
         body: JSON.stringify({ email }),
       });
       setCountdown(60);
-      setOtp(["", "", "", "", "", ""]);
+      setOtp(["", "", "", "", "", "", "", ""]);
     } catch {
       setError("Error resending code.");
     } finally {
@@ -96,7 +96,7 @@ export default function ForgotPasswordPage() {
       setOtp(newOtp);
 
       // Auto-focus next input
-      if (value && index < 5) {
+      if (value && index < 7) {
         otpRefs.current[index + 1]?.focus();
       }
     },
@@ -111,31 +111,52 @@ export default function ForgotPasswordPage() {
 
   function handleOtpPaste(e: React.ClipboardEvent) {
     e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 8);
     const newOtp = [...otp];
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 8; i++) {
       newOtp[i] = pasted[i] || "";
     }
     setOtp(newOtp);
     const nextEmpty = newOtp.findIndex((d) => !d);
-    otpRefs.current[nextEmpty === -1 ? 5 : nextEmpty]?.focus();
+    otpRefs.current[nextEmpty === -1 ? 7 : nextEmpty]?.focus();
   }
 
-  // ── Step 2: Verify OTP → go to password step ──────────────
+  // ── Step 2: Verify OTP server-side before advancing ────────
   async function handleVerifyCode(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
     const code = otp.join("");
-    if (code.length !== 6) {
-      setError("Please enter the full 6-digit code.");
+    if (code.length !== 8) {
+      setError("Please enter the full 8-digit code.");
       return;
     }
 
-    setStep("password");
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp: code }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Invalid code.");
+        setOtp(["", "", "", "", "", "", "", ""]);
+      } else {
+        setStep("password");
+      }
+    } catch {
+      setError("Connection error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  // ── Step 3: Set New Password ──────────────────────────────
+  // ── Step 3: Set New Password (user already verified via OTP) ─
   async function handleSetPassword(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -167,10 +188,6 @@ export default function ForgotPasswordPage() {
 
       if (!res.ok) {
         setError(data.error || "Error updating password.");
-        if (res.status === 400) {
-          setStep("code");
-          setOtp(["", "", "", "", "", ""]);
-        }
       } else {
         setStep("success");
       }
@@ -371,7 +388,7 @@ export default function ForgotPasswordPage() {
                         type="text"
                         inputMode="numeric"
                         maxLength={1}
-                        className="glass-input w-12 h-14 text-center text-xl font-bold tracking-wider"
+                        className="glass-input w-11 h-14 text-center text-lg font-bold tracking-wider"
                         style={{
                           paddingLeft: 0,
                           paddingRight: 0,
@@ -445,7 +462,7 @@ export default function ForgotPasswordPage() {
                     size="lg"
                     loading={loading}
                     className="flex-1"
-                    disabled={otp.join("").length !== 6}
+                    disabled={otp.join("").length !== 8}
                   >
                     Verify
                     <ShieldCheck size={16} />
