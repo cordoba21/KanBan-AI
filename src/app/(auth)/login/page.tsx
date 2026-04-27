@@ -114,7 +114,7 @@ export default function LoginPage() {
                 href="/forgot-password"
                 className="text-sky-300/70 hover:text-sky-200 text-xs transition-colors font-medium"
               >
-                ¿Olvidaste tu contraseña?
+                ¿Forgot your password?
               </Link>
             </div>
 
@@ -134,8 +134,10 @@ export default function LoginPage() {
               loading={loading}
               className="w-full"
             >
-              Sign In
-              <ArrowRight size={16} />
+              <span className="flex items-center gap-2">
+                Sign In
+                <ArrowRight size={16} />
+              </span>
             </GlassButton>
           </form>
 
