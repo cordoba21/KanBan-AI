@@ -65,7 +65,7 @@ export function useArchiveTasksMutation() {
 
       if (tasksError) throw tasksError;
       if (!tasks || tasks.length === 0) {
-        throw new Error("No hay tareas completadas para archivar");
+        throw new Error("No completed tasks to archive");
       }
 
       // Insert into archived_tasks

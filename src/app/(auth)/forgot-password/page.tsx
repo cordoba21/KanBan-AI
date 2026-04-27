@@ -53,13 +53,13 @@ export default function ForgotPasswordPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Error al enviar el código.");
+        setError(data.error || "Error sending code.");
       } else {
         setStep("code");
         setCountdown(60);
       }
     } catch {
-      setError("Error de conexión. Intenta de nuevo.");
+      setError("Connection error. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -80,7 +80,7 @@ export default function ForgotPasswordPage() {
       setCountdown(60);
       setOtp(["", "", "", "", "", ""]);
     } catch {
-      setError("Error al reenviar el código.");
+      setError("Error resending code.");
     } finally {
       setLoading(false);
     }
@@ -117,19 +117,18 @@ export default function ForgotPasswordPage() {
       newOtp[i] = pasted[i] || "";
     }
     setOtp(newOtp);
-    // Focus the next empty field or the last
     const nextEmpty = newOtp.findIndex((d) => !d);
     otpRefs.current[nextEmpty === -1 ? 5 : nextEmpty]?.focus();
   }
 
-  // ── Step 2: Verify OTP + Update Password ──────────────────
-  async function handleVerifyAndUpdate(e: React.FormEvent) {
+  // ── Step 2: Verify OTP → go to password step ──────────────
+  async function handleVerifyCode(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
     const code = otp.join("");
     if (code.length !== 6) {
-      setError("Ingresa el código completo de 6 dígitos.");
+      setError("Please enter the full 6-digit code.");
       return;
     }
 
@@ -142,12 +141,12 @@ export default function ForgotPasswordPage() {
     setError(null);
 
     if (newPassword.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres.");
+      setError("Password must be at least 6 characters.");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError("Las contraseñas no coinciden.");
+      setError("Passwords do not match.");
       return;
     }
 
@@ -167,8 +166,7 @@ export default function ForgotPasswordPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Error al actualizar la contraseña.");
-        // If OTP was invalid, go back to code step
+        setError(data.error || "Error updating password.");
         if (res.status === 400) {
           setStep("code");
           setOtp(["", "", "", "", "", ""]);
@@ -177,7 +175,7 @@ export default function ForgotPasswordPage() {
         setStep("success");
       }
     } catch {
-      setError("Error de conexión. Intenta de nuevo.");
+      setError("Connection error. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -185,9 +183,9 @@ export default function ForgotPasswordPage() {
 
   // ── Step indicator ────────────────────────────────────────
   const steps: { key: Step; label: string }[] = [
-    { key: "email", label: "Correo" },
-    { key: "code", label: "Código" },
-    { key: "password", label: "Contraseña" },
+    { key: "email", label: "Email" },
+    { key: "code", label: "Code" },
+    { key: "password", label: "Password" },
   ];
 
   const currentStepIndex = steps.findIndex((s) => s.key === step);
@@ -205,7 +203,7 @@ export default function ForgotPasswordPage() {
     }),
   };
 
-  const direction = 1; // always forward
+  const direction = 1;
 
   return (
     <div className="min-h-screen flex items-center justify-center relative">
@@ -232,15 +230,13 @@ export default function ForgotPasswordPage() {
             )}
           </motion.div>
           <h1 className="text-3xl font-bold gradient-text mb-2">
-            {step === "success"
-              ? "¡Listo!"
-              : "Restablecer Contraseña"}
+            {step === "success" ? "All Done!" : "Reset Password"}
           </h1>
           <p className="text-white/40 text-sm">
-            {step === "email" && "Ingresa tu correo para recibir un código de verificación"}
-            {step === "code" && "Ingresa el código de 6 dígitos enviado a tu correo"}
-            {step === "password" && "Establece tu nueva contraseña"}
-            {step === "success" && "Tu contraseña ha sido actualizada exitosamente"}
+            {step === "email" && "Enter your email to receive a verification code"}
+            {step === "code" && "Enter the 6-digit code sent to your email"}
+            {step === "password" && "Set your new password"}
+            {step === "success" && "Your password has been updated successfully"}
           </p>
         </div>
 
@@ -301,7 +297,7 @@ export default function ForgotPasswordPage() {
               >
                 <div>
                   <label className="block text-xs font-medium text-white/50 mb-2 ml-1">
-                    Correo Electrónico
+                    Email Address
                   </label>
                   <div className="relative">
                     <Mail
@@ -312,7 +308,7 @@ export default function ForgotPasswordPage() {
                       id="reset-email"
                       type="email"
                       className="glass-input glass-input-with-icon"
-                      placeholder="tu@empresa.com"
+                      placeholder="you@company.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
@@ -337,7 +333,7 @@ export default function ForgotPasswordPage() {
                   loading={loading}
                   className="w-full"
                 >
-                  Enviar Código
+                  Send Code
                   <ArrowRight size={16} />
                 </GlassButton>
               </motion.form>
@@ -347,7 +343,7 @@ export default function ForgotPasswordPage() {
             {step === "code" && (
               <motion.form
                 key="code"
-                onSubmit={handleVerifyAndUpdate}
+                onSubmit={handleVerifyCode}
                 className="space-y-6"
                 custom={direction}
                 variants={slideVariants}
@@ -359,7 +355,7 @@ export default function ForgotPasswordPage() {
                 {/* OTP Inputs */}
                 <div>
                   <label className="block text-xs font-medium text-white/50 mb-3 ml-1 text-center">
-                    Código de Verificación
+                    Verification Code
                   </label>
                   <div
                     className="flex justify-center gap-2"
@@ -396,7 +392,7 @@ export default function ForgotPasswordPage() {
                 {/* Sent to email indicator */}
                 <div className="text-center">
                   <p className="text-white/30 text-xs">
-                    Código enviado a{" "}
+                    Code sent to{" "}
                     <span className="text-sky-300 font-medium">{email}</span>
                   </p>
                 </div>
@@ -405,7 +401,7 @@ export default function ForgotPasswordPage() {
                 <div className="text-center">
                   {countdown > 0 ? (
                     <p className="text-white/25 text-xs">
-                      Reenviar código en{" "}
+                      Resend code in{" "}
                       <span className="text-purple-400 font-semibold">
                         {countdown}s
                       </span>
@@ -417,7 +413,7 @@ export default function ForgotPasswordPage() {
                       disabled={loading}
                       className="text-sky-300 hover:text-sky-200 text-xs font-medium transition-colors cursor-pointer disabled:opacity-50"
                     >
-                      Reenviar código
+                      Resend code
                     </button>
                   )}
                 </div>
@@ -451,7 +447,7 @@ export default function ForgotPasswordPage() {
                     className="flex-1"
                     disabled={otp.join("").length !== 6}
                   >
-                    Verificar
+                    Verify
                     <ShieldCheck size={16} />
                   </GlassButton>
                 </div>
@@ -473,7 +469,7 @@ export default function ForgotPasswordPage() {
               >
                 <div>
                   <label className="block text-xs font-medium text-white/50 mb-2 ml-1">
-                    Nueva Contraseña
+                    New Password
                   </label>
                   <div className="relative">
                     <Lock
@@ -484,7 +480,7 @@ export default function ForgotPasswordPage() {
                       id="new-password"
                       type="password"
                       className="glass-input glass-input-with-icon"
-                      placeholder="Mínimo 6 caracteres"
+                      placeholder="Minimum 6 characters"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       required
@@ -496,7 +492,7 @@ export default function ForgotPasswordPage() {
 
                 <div>
                   <label className="block text-xs font-medium text-white/50 mb-2 ml-1">
-                    Confirmar Contraseña
+                    Confirm Password
                   </label>
                   <div className="relative">
                     <Lock
@@ -507,7 +503,7 @@ export default function ForgotPasswordPage() {
                       id="confirm-password"
                       type="password"
                       className="glass-input glass-input-with-icon"
-                      placeholder="Repite tu nueva contraseña"
+                      placeholder="Repeat your new password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
@@ -548,7 +544,7 @@ export default function ForgotPasswordPage() {
                       })}
                     </div>
                     <p className="text-white/25 text-[10px] ml-1">
-                      Usa mayúsculas, números y símbolos para mayor seguridad
+                      Use uppercase, numbers and symbols for stronger security
                     </p>
                   </div>
                 )}
@@ -581,7 +577,7 @@ export default function ForgotPasswordPage() {
                     loading={loading}
                     className="flex-1"
                   >
-                    Actualizar Contraseña
+                    Update Password
                     <ArrowRight size={16} />
                   </GlassButton>
                 </div>
@@ -614,10 +610,10 @@ export default function ForgotPasswordPage() {
                 </motion.div>
                 <div>
                   <h2 className="text-lg font-semibold text-white mb-2">
-                    Contraseña Actualizada
+                    Password Updated
                   </h2>
                   <p className="text-white/40 text-sm">
-                    Ya puedes iniciar sesión con tu nueva contraseña.
+                    You can now sign in with your new password.
                   </p>
                 </div>
                 <GlassButton
@@ -625,7 +621,7 @@ export default function ForgotPasswordPage() {
                   className="w-full"
                   onClick={() => router.push("/login")}
                 >
-                  Ir a Iniciar Sesión
+                  Go to Sign In
                   <ArrowRight size={16} />
                 </GlassButton>
               </motion.div>
@@ -636,12 +632,12 @@ export default function ForgotPasswordPage() {
           {step !== "success" && (
             <div className="mt-6 text-center">
               <p className="text-white/30 text-xs">
-                ¿Recordaste tu contraseña?{" "}
+                Remember your password?{" "}
                 <Link
                   href="/login"
                   className="text-sky-300 hover:text-sky-200 transition-colors font-medium"
                 >
-                  Iniciar sesión
+                  Sign in
                 </Link>
               </p>
             </div>

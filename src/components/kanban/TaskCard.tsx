@@ -3,20 +3,24 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { motion } from "framer-motion";
-import { GripVertical, AlertCircle, Clock, CheckCircle2, Tag, Calendar } from "lucide-react";
+import { GripVertical, AlertCircle, Clock, CheckCircle2, Tag, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCategoriesQuery } from "@/hooks/useCategories";
-import type { Task } from "@/types/supabase";
+import type { Task, TaskStatus } from "@/types/supabase";
 
 interface TaskCardProps {
   task: Task;
   isDragOverlay?: boolean;
   onClick?: () => void;
+  onMoveLeft?: () => void;
+  onMoveRight?: () => void;
+  canMoveLeft?: boolean;
+  canMoveRight?: boolean;
 }
 
 const priorityConfig = [
-  { label: "Baja", color: "#4ade80", icon: CheckCircle2 },
-  { label: "Media", color: "#fbbf24", icon: Clock },
-  { label: "Alta", color: "#f87171", icon: AlertCircle },
+  { label: "Low", color: "#4ade80", icon: CheckCircle2 },
+  { label: "Medium", color: "#fbbf24", icon: Clock },
+  { label: "High", color: "#f87171", icon: AlertCircle },
 ];
 
 function CategoryBadge({ categoryId }: { categoryId: string | null }) {
@@ -53,17 +57,17 @@ function DueDateBadge({ dueDate }: { dueDate: string | null }) {
   const isTomorrow = due.toDateString() === tomorrow.toDateString();
 
   let color = "#7dd3fc";
-  let label = due.toLocaleDateString("es-MX", { month: "short", day: "numeric" });
+  let label = due.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
   if (isOverdue) {
     color = "#f87171";
-    label = "Vencida";
+    label = "Overdue";
   } else if (isToday) {
     color = "#fbbf24";
-    label = "Hoy";
+    label = "Today";
   } else if (isTomorrow) {
     color = "#fb923c";
-    label = "Mañana";
+    label = "Tomorrow";
   }
 
   return (
@@ -77,7 +81,7 @@ function DueDateBadge({ dueDate }: { dueDate: string | null }) {
   );
 }
 
-export default function TaskCard({ task, isDragOverlay, onClick }: TaskCardProps) {
+export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onMoveRight, canMoveLeft, canMoveRight }: TaskCardProps) {
   const {
     attributes,
     listeners,
@@ -97,7 +101,7 @@ export default function TaskCard({ task, isDragOverlay, onClick }: TaskCardProps
   const priority = priorityConfig[Math.min(task.priority, 2)] || priorityConfig[0];
   const PriorityIcon = priority.icon;
 
-  const createdFormatted = new Date(task.created_at).toLocaleString("es-MX", {
+  const createdFormatted = new Date(task.created_at).toLocaleString("en-US", {
     month: "short",
     day: "numeric",
     hour: "2-digit",
@@ -230,6 +234,37 @@ export default function TaskCard({ task, isDragOverlay, onClick }: TaskCardProps
             <div className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-300/20 to-purple-400/20 border border-white/10" />
           </div>
         </div>
+
+        {/* Move arrows — visible on hover */}
+        {(canMoveLeft || canMoveRight) && (
+          <div className="flex items-center justify-center gap-1 mt-2 pt-2 border-t border-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onMoveLeft?.();
+              }}
+              disabled={!canMoveLeft}
+              className="flex items-center gap-1 px-2 py-1 rounded-lg text-white/30 hover:text-sky-300 hover:bg-sky-300/10 disabled:opacity-0 disabled:pointer-events-none transition-all duration-200 cursor-pointer"
+              title="Move to previous stage"
+            >
+              <ChevronLeft size={12} />
+              <span className="text-[9px] font-medium">Prev</span>
+            </button>
+            <div className="w-px h-3 bg-white/10" />
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onMoveRight?.();
+              }}
+              disabled={!canMoveRight}
+              className="flex items-center gap-1 px-2 py-1 rounded-lg text-white/30 hover:text-purple-300 hover:bg-purple-300/10 disabled:opacity-0 disabled:pointer-events-none transition-all duration-200 cursor-pointer"
+              title="Move to next stage"
+            >
+              <span className="text-[9px] font-medium">Next</span>
+              <ChevronRight size={12} />
+            </button>
+          </div>
+        )}
       </div>
     </motion.div>
   );

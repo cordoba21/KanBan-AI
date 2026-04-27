@@ -7,7 +7,7 @@ export async function POST(request: Request) {
 
     if (!email || typeof email !== "string") {
       return NextResponse.json(
-        { error: "El correo electrónico es requerido." },
+        { error: "Email address is required." },
         { status: 400 }
       );
     }
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     const supabase = await createClient();
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: undefined, // We use OTP flow, no redirect needed
+      redirectTo: undefined, // OTP flow — no redirect, code is entered manually
     });
 
     if (error) {
@@ -26,11 +26,11 @@ export async function POST(request: Request) {
     // Always return success to prevent email enumeration attacks
     return NextResponse.json({
       message:
-        "Si el correo está registrado, recibirás un código de verificación.",
+        "If this email is registered, you will receive a verification code.",
     });
   } catch {
     return NextResponse.json(
-      { error: "Error al procesar la solicitud." },
+      { error: "Error processing the request." },
       { status: 500 }
     );
   }

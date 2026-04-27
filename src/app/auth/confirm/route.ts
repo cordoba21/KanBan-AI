@@ -27,12 +27,20 @@ export async function GET(request: NextRequest) {
     });
 
     if (!error) {
-      // Successful verification — redirect to the intended page
       const redirectTo = request.nextUrl.clone();
-      redirectTo.pathname = next;
       redirectTo.searchParams.delete("token_hash");
       redirectTo.searchParams.delete("type");
       redirectTo.searchParams.delete("next");
+
+      if (type === "recovery") {
+        // For password recovery, redirect to the new-password page
+        // The user is now authenticated via the token, so they can update their password
+        redirectTo.pathname = "/new-password";
+      } else {
+        // For signup confirmation or other types, redirect to the intended page
+        redirectTo.pathname = next;
+      }
+
       return NextResponse.redirect(redirectTo);
     }
   }

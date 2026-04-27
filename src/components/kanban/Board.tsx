@@ -10,9 +10,7 @@ import {
   useSensors,
   type DragStartEvent,
   type DragEndEvent,
-  type DragOverEvent,
 } from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable";
 import { motion } from "framer-motion";
 import { Plus, Tag, Archive } from "lucide-react";
 import Column from "./Column";
@@ -20,7 +18,7 @@ import TaskCard from "./TaskCard";
 import TaskModal from "./TaskModal";
 import CategoryManager from "./CategoryManager";
 import GlassButton from "@/components/ui/GlassButton";
-import { useGroupedTasks, useMoveTask, useCreateTaskMutation } from "@/hooks/useTasks";
+import { useGroupedTasks, useMoveTask } from "@/hooks/useTasks";
 import { useArchiveTasksMutation } from "@/hooks/useArchives";
 import { useUser } from "@/lib/auth/hooks";
 import type { Task, TaskStatus } from "@/types/supabase";
@@ -36,7 +34,6 @@ const COLUMNS: { id: TaskStatus; title: string; color: string }[] = [
 export default function Board() {
   const { grouped, isLoading } = useGroupedTasks();
   const { moveTask } = useMoveTask();
-  const createTask = useCreateTaskMutation();
   const archiveMutation = useArchiveTasksMutation();
   const { user } = useUser();
 
@@ -91,6 +88,23 @@ export default function Board() {
     [grouped, moveTask, user]
   );
 
+  // Handle arrow-based movement between columns
+  const handleMoveTaskByArrow = useCallback(
+    (taskId: string, direction: "left" | "right", currentColumnId: TaskStatus) => {
+      if (!user) return;
+
+      const currentIndex = COLUMNS.findIndex((col) => col.id === currentColumnId);
+      const targetIndex = direction === "left" ? currentIndex - 1 : currentIndex + 1;
+
+      if (targetIndex < 0 || targetIndex >= COLUMNS.length) return;
+
+      const targetColumn = COLUMNS[targetIndex];
+      const tasksInTarget = grouped[targetColumn.id];
+      moveTask(taskId, targetColumn.id, tasksInTarget.length, user.id);
+    },
+    [grouped, moveTask, user]
+  );
+
   const handleCreateTask = useCallback(() => {
     if (!user) return;
     setShowCreateModal(true);
@@ -98,7 +112,7 @@ export default function Board() {
 
   const handleArchive = useCallback(() => {
     if (!user) return;
-    if (confirm("¿Archivar todas las tareas completadas? Se moverán al archivo mensual.")) {
+    if (confirm("Archive all completed tasks? They will be moved to the monthly archive.")) {
       archiveMutation.mutate({ userId: user.id });
     }
   }, [user, archiveMutation]);
@@ -124,13 +138,13 @@ export default function Board() {
         <div>
           <h1 className="text-2xl font-bold text-white">Kanban Board</h1>
           <p className="text-white/40 text-sm mt-1">
-            Gestiona tus tareas en flujos de trabajo
+            Manage your tasks in workflow stages
           </p>
         </div>
         <div className="flex items-center gap-2">
           <GlassButton variant="ghost" size="sm" onClick={() => setShowCategoryManager(true)}>
             <Tag size={14} />
-            Categorías
+            Categories
           </GlassButton>
           {doneCount > 0 && (
             <GlassButton
@@ -140,12 +154,12 @@ export default function Board() {
               loading={archiveMutation.isPending}
             >
               <Archive size={14} />
-              Archivar ({doneCount})
+              Archive ({doneCount})
             </GlassButton>
           )}
           <GlassButton onClick={handleCreateTask}>
             <Plus size={16} />
-            Nueva Tarea
+            New Task
           </GlassButton>
         </div>
       </div>
@@ -172,6 +186,11 @@ export default function Board() {
                 color={column.color}
                 tasks={grouped[column.id]}
                 onTaskClick={setEditingTask}
+                onMoveTask={(taskId, direction) =>
+                  handleMoveTaskByArrow(taskId, direction, column.id)
+                }
+                columnIndex={index}
+                totalColumns={COLUMNS.length}
               />
             </motion.div>
           ))}

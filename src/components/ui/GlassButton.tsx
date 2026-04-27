@@ -73,7 +73,7 @@ export default function GlassButton({
           />
         </svg>
       )}
-      <span>{children}</span>
+      <span className="inline-flex items-center gap-2">{children}</span>
     </motion.button>
   );
 }

@@ -111,7 +111,7 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
           {/* Header */}
           <div className="flex items-center justify-between p-6 pb-4 border-b border-white/5">
             <h2 className="text-lg font-semibold text-white">
-              {isEditing ? "Editar Tarea" : "Nueva Tarea"}
+              {isEditing ? "Edit Task" : "New Task"}
             </h2>
             <button
               onClick={onClose}
@@ -126,11 +126,11 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
             {/* Title */}
             <div>
               <label className="block text-xs font-medium text-white/50 mb-2">
-                Título
+                Title
               </label>
               <input
                 className="glass-input"
-                placeholder="Título de la tarea..."
+                placeholder="Task title..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 autoFocus
@@ -140,12 +140,12 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
             {/* Description */}
             <div>
               <label className="block text-xs font-medium text-white/50 mb-2">
-                Descripción
+                Description
               </label>
               <textarea
                 className="glass-input resize-none"
                 rows={3}
-                placeholder="Describe la tarea..."
+                placeholder="Describe the task..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
@@ -155,7 +155,7 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium text-white/50 mb-2">
-                  Estado
+                  Status
                 </label>
                 <select
                   className="glass-input appearance-none"
@@ -175,7 +175,7 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
               </div>
               <div>
                 <label className="block text-xs font-medium text-white/50 mb-2">
-                  Prioridad
+                  Priority
                 </label>
                 <select
                   className="glass-input appearance-none"
@@ -183,13 +183,13 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
                   onChange={(e) => setPriority(Number(e.target.value))}
                 >
                   <option value={0} style={{ background: "#1a1a2e" }}>
-                    Baja
+                    Low
                   </option>
                   <option value={1} style={{ background: "#1a1a2e" }}>
-                    Media
+                    Medium
                   </option>
                   <option value={2} style={{ background: "#1a1a2e" }}>
-                    Alta
+                    High
                   </option>
                 </select>
               </div>
@@ -199,7 +199,7 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
             <div>
               <label className="flex items-center gap-1.5 text-xs font-medium text-white/50 mb-2">
                 <Tag size={12} />
-                Categoría
+                Category
               </label>
               <select
                 className="glass-input appearance-none"
@@ -207,7 +207,7 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
                 onChange={(e) => setCategoryId(e.target.value)}
               >
                 <option value="" style={{ background: "#1a1a2e", color: "white" }}>
-                  Sin categoría
+                  No category
                 </option>
                 {categories?.map((cat) => (
                   <option
@@ -225,7 +225,7 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
             <div>
               <label className="flex items-center gap-1.5 text-xs font-medium text-white/50 mb-2">
                 <Calendar size={12} />
-                Fecha Límite
+                Due Date
               </label>
               <input
                 type="datetime-local"
@@ -240,7 +240,7 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
               <div className="flex items-center gap-2 pt-2 border-t border-white/5">
                 <Clock size={12} className="text-white/25" />
                 <span className="text-[11px] text-white/30">
-                  Creada: {new Date(task.created_at).toLocaleString("es-MX", {
+                  Created: {new Date(task.created_at).toLocaleString("en-US", {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
@@ -263,13 +263,13 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
                   loading={deleteMutation.isPending}
                 >
                   <Trash2 size={14} />
-                  Eliminar
+                  Delete
                 </GlassButton>
               )}
             </div>
             <div className="flex gap-3">
               <GlassButton variant="ghost" size="sm" onClick={onClose}>
-                Cancelar
+                Cancel
               </GlassButton>
               <GlassButton
                 size="sm"
@@ -277,7 +277,7 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
                 loading={createMutation.isPending || updateMutation.isPending}
               >
                 <Save size={14} />
-                {isEditing ? "Actualizar" : "Crear"}
+                {isEditing ? "Update" : "Create"}
               </GlassButton>
             </div>
           </div>

@@ -67,7 +67,7 @@ export default function CategoryManager({ onClose }: CategoryManagerProps) {
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-400/20 to-sky-300/20 flex items-center justify-center border border-white/10">
                 <Tag size={16} className="text-purple-400" />
               </div>
-              <h2 className="text-lg font-semibold text-white">Categorías</h2>
+              <h2 className="text-lg font-semibold text-white">Categories</h2>
             </div>
             <button
               onClick={onClose}
@@ -82,7 +82,7 @@ export default function CategoryManager({ onClose }: CategoryManagerProps) {
             <div className="flex gap-3 mb-3">
               <input
                 className="glass-input flex-1"
-                placeholder="Nombre de categoría..."
+                placeholder="Category name..."
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleCreate()}
@@ -153,7 +153,7 @@ export default function CategoryManager({ onClose }: CategoryManagerProps) {
               <div className="text-center py-8">
                 <Tag size={24} className="mx-auto text-white/15 mb-2" />
                 <p className="text-xs text-white/30">
-                  No hay categorías. Crea una arriba.
+                  No categories yet. Create one above.
                 </p>
               </div>
             )}

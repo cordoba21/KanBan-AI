@@ -15,9 +15,12 @@ interface ColumnProps {
   color: string;
   tasks: Task[];
   onTaskClick: (task: Task) => void;
+  onMoveTask?: (taskId: string, direction: "left" | "right") => void;
+  columnIndex: number;
+  totalColumns: number;
 }
 
-export default function Column({ id, title, color, tasks, onTaskClick }: ColumnProps) {
+export default function Column({ id, title, color, tasks, onTaskClick, onMoveTask, columnIndex, totalColumns }: ColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id });
 
   return (
@@ -71,6 +74,10 @@ export default function Column({ id, title, color, tasks, onTaskClick }: ColumnP
                 key={task.id}
                 task={task}
                 onClick={() => onTaskClick(task)}
+                canMoveLeft={columnIndex > 0}
+                canMoveRight={columnIndex < totalColumns - 1}
+                onMoveLeft={() => onMoveTask?.(task.id, "left")}
+                onMoveRight={() => onMoveTask?.(task.id, "right")}
               />
             ))}
           </AnimatePresence>

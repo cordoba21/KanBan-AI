@@ -84,8 +84,8 @@ export async function updateSession(request: NextRequest) {
     );
   }
 
-  // Redirect authenticated users away from auth pages
-  if (user && isAuthRoute) {
+  // Redirect authenticated users away from auth pages (except new-password which is used during recovery)
+  if (user && isAuthRoute && !request.nextUrl.pathname.startsWith("/new-password")) {
     const url = request.nextUrl.clone();
     url.pathname = "/kanban";
     return NextResponse.redirect(url);

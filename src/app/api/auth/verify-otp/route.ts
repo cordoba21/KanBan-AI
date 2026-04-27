@@ -7,14 +7,14 @@ export async function POST(request: Request) {
 
     if (!email || !otp || !newPassword) {
       return NextResponse.json(
-        { error: "Todos los campos son requeridos." },
+        { error: "All fields are required." },
         { status: 400 }
       );
     }
 
     if (newPassword.length < 6) {
       return NextResponse.json(
-        { error: "La contraseña debe tener al menos 6 caracteres." },
+        { error: "Password must be at least 6 characters." },
         { status: 400 }
       );
     }
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            "Código de verificación inválido o expirado. Intenta de nuevo.",
+            "Invalid or expired verification code. Please try again.",
         },
         { status: 400 }
       );
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
     if (updateError) {
       return NextResponse.json(
-        { error: "Error al actualizar la contraseña. Intenta de nuevo." },
+        { error: "Error updating password. Please try again." },
         { status: 500 }
       );
     }
@@ -54,11 +54,11 @@ export async function POST(request: Request) {
     await supabase.auth.signOut();
 
     return NextResponse.json({
-      message: "Contraseña actualizada exitosamente.",
+      message: "Password updated successfully.",
     });
   } catch {
     return NextResponse.json(
-      { error: "Error al procesar la solicitud." },
+      { error: "Error processing the request." },
       { status: 500 }
     );
   }
