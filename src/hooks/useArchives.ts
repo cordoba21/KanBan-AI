@@ -118,7 +118,7 @@ export function useArchiveTasksMutation() {
         due_date: task.due_date,
         task_created_at: task.created_at,
         task_completed_at: task.updated_at,
-        board_id: profile.active_board_id,
+        board_id: profile.active_board_id!,
         archive_month: archiveMonth,
       }));
 
@@ -224,7 +224,7 @@ export function useArchiveReportMutation() {
           content,
           report_month: reportMonth,
           user_id: userId,
-          board_id: profile.active_board_id,
+          board_id: profile.active_board_id!,
           task_count: taskCount,
           completed_count: completedCount,
           completion_rate: completionRate,

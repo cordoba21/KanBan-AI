@@ -79,7 +79,7 @@ export function useCreateTaskMutation() {
 
       const { data, error } = await supabase
         .from("tasks")
-        .insert({ ...task, board_id: profile.active_board_id })
+        .insert({ ...task, board_id: profile.active_board_id! })
         .select()
         .single();
 

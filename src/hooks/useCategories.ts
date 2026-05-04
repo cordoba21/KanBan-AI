@@ -58,7 +58,7 @@ export function useCreateCategoryMutation() {
 
       const { data, error } = await supabase
         .from("categories")
-        .insert({ ...category, board_id: profile.active_board_id })
+        .insert({ ...category, board_id: profile.active_board_id! })
         .select()
         .single();
 
