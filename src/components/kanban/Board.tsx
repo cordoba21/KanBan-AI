@@ -179,36 +179,38 @@ export default function Board() {
             <Tag size={14} />
             Categories
           </GlassButton>
-          <GlassButton
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setShowInvitePanel((prev) => !prev);
-              setShowCollaboratorsPanel(false);
-            }}
-            disabled={!isOwner}
-            ref={inviteButtonRef}
-          >
-            <UserPlus size={14} />
-            Invitar
-          </GlassButton>
-          <GlassButton
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setShowCollaboratorsPanel((prev) => !prev);
-              setShowInvitePanel(false);
-            }}
-            ref={collaboratorsButtonRef}
-          >
-            <Users size={14} />
-            Colaboradores
-            {!!members?.length && (
-              <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/60">
-                {members.length}
-              </span>
-            )}
-          </GlassButton>
+          <span ref={inviteButtonRef}>
+            <GlassButton
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setShowInvitePanel((prev) => !prev);
+                setShowCollaboratorsPanel(false);
+              }}
+              disabled={!isOwner}
+            >
+              <UserPlus size={14} />
+              Invitar
+            </GlassButton>
+          </span>
+          <span ref={collaboratorsButtonRef}>
+            <GlassButton
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setShowCollaboratorsPanel((prev) => !prev);
+                setShowInvitePanel(false);
+              }}
+            >
+              <Users size={14} />
+              Colaboradores
+              {!!members?.length && (
+                <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/60">
+                  {members.length}
+                </span>
+              )}
+            </GlassButton>
+          </span>
           {doneCount > 0 && (
             <GlassButton
               variant="ghost"
