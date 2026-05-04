@@ -31,17 +31,17 @@ export default function CollaborationPage() {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"EDITOR" | "VIEWER">("EDITOR");
   const [inviteLink, setInviteLink] = useState<string | null>(null);
-  const canManage = member?.role === "OWNER";
+
+  const currentMember = useMemo(() => {
+    return (members || []).find((m: BoardMemberView) => m.user_id === user?.id);
+  }, [members, user?.id]);
+
+  const isOwner = currentMember?.role === "OWNER";
+  const canManage = isOwner;
 
   const visibleMembers = useMemo(() => {
     return (members || []).filter((member: BoardMemberView) => member.status === "active");
   }, [members]);
-
-  const member = useMemo(() => {
-    return (members || []).find((m: BoardMemberView) => m.user_id === user?.id);
-  }, [members, user?.id]);
-
-  const isOwner = member?.role === "OWNER";
 
   async function handleInvite() {
     if (!email.trim()) return;
