@@ -69,6 +69,7 @@ export function useCreateTaskMutation() {
 
   return useMutation({
     mutationFn: async (task: TaskInsert & { assigneeIds?: string[] }) => {
+      const { assigneeIds, ...taskData } = task;
       const { data: profile } = await supabase
         .from("profiles")
         .select("active_board_id")
@@ -79,7 +80,7 @@ export function useCreateTaskMutation() {
 
       const { data, error } = await supabase
         .from("tasks")
-        .insert({ ...task, board_id: profile.active_board_id! })
+        .insert({ ...taskData, board_id: profile.active_board_id! })
         .select()
         .single();
 
@@ -93,8 +94,8 @@ export function useCreateTaskMutation() {
         details: { title: task.title, status: task.status || "BACKLOG" },
       });
 
-      if (task.assigneeIds && task.assigneeIds.length > 0) {
-        const assignees = task.assigneeIds.map((userId) => ({
+      if (assigneeIds && assigneeIds.length > 0) {
+        const assignees = assigneeIds.map((userId) => ({
           task_id: data.id,
           user_id: userId,
         }));
