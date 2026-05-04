@@ -71,9 +71,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Email mismatch" }, { status: 403 });
     }
 
+    let profileData: { id: string; active_board_id: string | null } | null = null;
+
     const { data: profile, error: profileError } = await admin
       .from("profiles")
-      .select("id")
+      .select("id, active_board_id")
       .eq("id", user.id)
       .single();
 
@@ -85,12 +87,16 @@ export async function POST(request: Request) {
           email: user.email || invite.email,
           full_name: user.user_metadata?.full_name || null,
           avatar_url: user.user_metadata?.avatar_url || null,
+          active_board_id: invite.board_id,
         });
       if (createProfileError) throw createProfileError;
+      profileData = { id: user.id, active_board_id: invite.board_id };
+    } else {
+      profileData = profile;
     }
 
     // Set active_board_id if not set
-    if (!profile?.active_board_id) {
+    if (!profileData?.active_board_id) {
       await admin
         .from("profiles")
         .update({ active_board_id: invite.board_id })
