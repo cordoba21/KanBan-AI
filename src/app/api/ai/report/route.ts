@@ -162,7 +162,7 @@ export async function POST(request: Request) {
 
     let profilesById = new Map<string, Profile>();
     if (userIds.size > 0) {
-      const { data: profiles, error: profilesError } = await supabase
+      const { data: profiles, error: profilesError } = await adminSupabase
         .from("profiles")
         .select("id, full_name, email")
         .in("id", Array.from(userIds));
