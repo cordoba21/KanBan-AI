@@ -36,11 +36,16 @@ const STATUS_LABELS: Record<TaskStatus, string> = {
   DONE: "Done",
 };
 
-export function useDashboardMetrics(dateRange?: DateRange) {
+export function useDashboardMetrics(dateRange?: DateRange, boardId?: string | null) {
   const supabase = createClient();
 
   return useQuery({
-    queryKey: ["dashboard-metrics", dateRange?.from?.toISOString(), dateRange?.to?.toISOString()],
+    queryKey: [
+      "dashboard-metrics",
+      dateRange?.from?.toISOString(),
+      dateRange?.to?.toISOString(),
+      boardId || "active",
+    ],
     queryFn: async (): Promise<DashboardMetrics> => {
       const {
         data: { user },
@@ -58,13 +63,17 @@ export function useDashboardMetrics(dateRange?: DateRange) {
         };
       }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("active_board_id")
-        .eq("id", user.id)
-        .single();
+      let resolvedBoardId = boardId || null;
+      if (!resolvedBoardId) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("active_board_id")
+          .eq("id", user.id)
+          .single();
+        resolvedBoardId = profile?.active_board_id || null;
+      }
 
-      if (!profile?.active_board_id) {
+      if (!resolvedBoardId) {
         return {
           totalTasks: 0,
           completedTasks: 0,
@@ -79,7 +88,7 @@ export function useDashboardMetrics(dateRange?: DateRange) {
       let query = supabase
         .from("tasks")
         .select("*")
-        .eq("board_id", profile.active_board_id)
+        .eq("board_id", resolvedBoardId)
         .order("created_at", { ascending: true });
 
       if (dateRange?.from) {

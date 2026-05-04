@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Trash2, Save, Calendar, Tag, Clock } from "lucide-react";
+import { X, Trash2, Save, Calendar, Tag, Clock, Users } from "lucide-react";
 import GlassButton from "@/components/ui/GlassButton";
 import {
   useCreateTaskMutation,
@@ -11,11 +11,12 @@ import {
 } from "@/hooks/useTasks";
 import { useCategoriesQuery } from "@/hooks/useCategories";
 import { useUser } from "@/lib/auth/hooks";
+import { useBoardMembersQuery } from "@/hooks/useBoards";
 import { useBoardRole } from "@/lib/boards/access";
-import type { Task, TaskStatus } from "@/types/supabase";
+import type { TaskStatus, TaskWithPeople } from "@/types/supabase";
 
 interface TaskModalProps {
-  task: Task | null;
+  task: TaskWithPeople | null;
   onClose: () => void;
 }
 
@@ -28,12 +29,13 @@ const STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
 ];
 
 export default function TaskModal({ task, onClose }: TaskModalProps) {
-  const { user } = useUser();
+  const { user, profile } = useUser();
   const createMutation = useCreateTaskMutation();
   const updateMutation = useUpdateTaskMutation();
   const deleteMutation = useDeleteTaskMutation();
-  const { data: categories } = useCategoriesQuery();
+  const { data: categories } = useCategoriesQuery(profile?.active_board_id || null);
   const { isEditor } = useBoardRole();
+  const { data: members } = useBoardMembersQuery(profile?.active_board_id || null);
 
   const [title, setTitle] = useState(task?.title || "");
   const [description, setDescription] = useState(task?.description || "");
@@ -45,6 +47,13 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
       ? new Date(task.due_date).toISOString().slice(0, 16)
       : ""
   );
+  const [assigneeIds, setAssigneeIds] = useState<string[]>(
+    task?.task_assignees?.map((assignee) => assignee.user_id) || []
+  );
+
+  useEffect(() => {
+    setAssigneeIds(task?.task_assignees?.map((assignee) => assignee.user_id) || []);
+  }, [task]);
 
   const isEditing = !!task;
 
@@ -64,19 +73,21 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
       updateMutation.mutate(
         {
           id: task.id,
-        updates: taskData,
+          updates: taskData,
           userId: user.id,
+          assigneeIds,
         },
         { onSuccess: onClose }
       );
     } else {
-        createMutation.mutate(
-          {
-            ...taskData,
-            user_id: user.id,
-          },
-          { onSuccess: onClose }
-        );
+      createMutation.mutate(
+        {
+          ...taskData,
+          user_id: user.id,
+          assigneeIds,
+        },
+        { onSuccess: onClose }
+      );
     }
   }
 
@@ -243,18 +254,65 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
               />
             </div>
 
+            {/* Assignees */}
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-medium text-white/50 mb-2">
+                <Users size={12} />
+                Assignees
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {(members || []).map((member) => {
+                  const label = member.profiles?.full_name || member.profiles?.email || "Unknown";
+                  const isChecked = assigneeIds.includes(member.user_id);
+                  return (
+                    <label
+                      key={member.user_id}
+                      className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs cursor-pointer transition-colors ${
+                        isChecked
+                          ? "bg-sky-500/10 border-sky-500/30 text-white"
+                          : "bg-white/5 border-white/10 text-white/60 hover:text-white"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        className="accent-sky-400"
+                        checked={isChecked}
+                        onChange={(e) => {
+                          if (!isEditor) return;
+                          const next = e.target.checked
+                            ? [...assigneeIds, member.user_id]
+                            : assigneeIds.filter((id) => id !== member.user_id);
+                          setAssigneeIds(next);
+                        }}
+                        disabled={!isEditor}
+                      />
+                      <span className="truncate">{label}</span>
+                    </label>
+                  );
+                })}
+                {(members || []).length === 0 && (
+                  <p className="text-xs text-white/30">No members available.</p>
+                )}
+              </div>
+            </div>
+
             {/* Created at info (editing only) */}
             {isEditing && task && (
-              <div className="flex items-center gap-2 pt-2 border-t border-white/5">
-                <Clock size={12} className="text-white/25" />
+              <div className="flex flex-col gap-1 pt-2 border-t border-white/5">
+                <div className="flex items-center gap-2">
+                  <Clock size={12} className="text-white/25" />
+                  <span className="text-[11px] text-white/30">
+                    Created: {new Date(task.created_at).toLocaleString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
                 <span className="text-[11px] text-white/30">
-                  Created: {new Date(task.created_at).toLocaleString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  Created by {task.creator?.full_name || task.creator?.email || "Unknown"}
                 </span>
               </div>
             )}

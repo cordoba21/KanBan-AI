@@ -186,6 +186,39 @@ export interface Database {
           }
         ];
       };
+      task_assignees: {
+        Row: {
+          id: string;
+          task_id: string;
+          user_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          task_id: string;
+          user_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          task_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "task_assignees_task_id_fkey";
+            columns: ["task_id"];
+            referencedRelation: "tasks";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "task_assignees_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       tasks: {
         Row: {
           id: string;
@@ -497,6 +530,7 @@ export type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
 export type Task = Database["public"]["Tables"]["tasks"]["Row"];
 export type TaskInsert = Database["public"]["Tables"]["tasks"]["Insert"];
 export type TaskUpdate = Database["public"]["Tables"]["tasks"]["Update"];
+export type TaskAssignee = Database["public"]["Tables"]["task_assignees"]["Row"];
 
 export type Category = Database["public"]["Tables"]["categories"]["Row"];
 export type CategoryInsert = Database["public"]["Tables"]["categories"]["Insert"];
@@ -522,3 +556,10 @@ export type ArchivedTaskInsert = Database["public"]["Tables"]["archived_tasks"][
 
 export type ArchivedReport = Database["public"]["Tables"]["archived_reports"]["Row"];
 export type ArchivedReportInsert = Database["public"]["Tables"]["archived_reports"]["Insert"];
+
+export type ProfileSummary = Pick<Profile, "id" | "full_name" | "email" | "avatar_url">;
+export type TaskAssigneeView = { user_id: string; profiles: ProfileSummary | null };
+export type TaskWithPeople = Task & {
+  creator?: ProfileSummary | null;
+  task_assignees?: TaskAssigneeView[];
+};

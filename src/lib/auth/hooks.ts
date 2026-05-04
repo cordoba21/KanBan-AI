@@ -11,41 +11,46 @@ interface AuthState {
   loading: boolean;
 }
 
-export function useUser(): AuthState {
+interface AuthActions {
+  refreshProfile: () => Promise<void>;
+}
+
+export function useUser(): AuthState & AuthActions {
   const [state, setState] = useState<AuthState>({
     user: null,
     profile: null,
     loading: true,
   });
 
+  const refreshProfile = useCallback(async () => {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      setState({ user, profile, loading: false });
+    } else {
+      setState({ user: null, profile: null, loading: false });
+    }
+  }, []);
+
   useEffect(() => {
     const supabase = createClient();
 
-    async function getUser() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single();
-
-        setState({ user, profile, loading: false });
-      } else {
-        setState({ user: null, profile: null, loading: false });
-      }
-    }
-
-    getUser();
+    refreshProfile();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        getUser();
+        refreshProfile();
       } else {
         setState({ user: null, profile: null, loading: false });
       }
@@ -54,7 +59,7 @@ export function useUser(): AuthState {
     return () => subscription.unsubscribe();
   }, []);
 
-  return state;
+  return { ...state, refreshProfile };
 }
 
 export function useSignOut() {

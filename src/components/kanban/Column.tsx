@@ -7,14 +7,14 @@ import {
 } from "@dnd-kit/sortable";
 import { motion, AnimatePresence } from "framer-motion";
 import TaskCard from "./TaskCard";
-import type { Task, TaskStatus } from "@/types/supabase";
+import type { TaskStatus, TaskWithPeople } from "@/types/supabase";
 
 interface ColumnProps {
   id: TaskStatus;
   title: string;
   color: string;
-  tasks: Task[];
-  onTaskClick: (task: Task) => void;
+  tasks: TaskWithPeople[];
+  onTaskClick: (task: TaskWithPeople) => void;
   onMoveTask?: (taskId: string, direction: "left" | "right") => void;
   columnIndex: number;
   totalColumns: number;

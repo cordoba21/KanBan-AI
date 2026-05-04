@@ -5,29 +5,33 @@ import { createClient } from "@/lib/supabase/client";
 import type { Category, CategoryInsert } from "@/types/supabase";
 
 /* ─── Fetch all categories for current user ──────────────── */
-export function useCategoriesQuery() {
+export function useCategoriesQuery(boardId?: string | null) {
   const supabase = createClient();
 
   return useQuery({
-    queryKey: ["categories", "active"],
+    queryKey: ["categories", boardId || "active"],
     queryFn: async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return [] as Category[];
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("active_board_id")
-        .eq("id", user.id)
-        .single();
+      let resolvedBoardId = boardId || null;
+      if (!resolvedBoardId) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("active_board_id")
+          .eq("id", user.id)
+          .single();
+        resolvedBoardId = profile?.active_board_id || null;
+      }
 
-      if (!profile?.active_board_id) return [] as Category[];
+      if (!resolvedBoardId) return [] as Category[];
 
       const { data, error } = await supabase
         .from("categories")
         .select("*")
-        .eq("board_id", profile.active_board_id)
+        .eq("board_id", resolvedBoardId)
         .order("name", { ascending: true });
 
       if (error) throw error;

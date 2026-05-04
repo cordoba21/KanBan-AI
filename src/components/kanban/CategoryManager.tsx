@@ -23,8 +23,8 @@ interface CategoryManagerProps {
 }
 
 export default function CategoryManager({ onClose }: CategoryManagerProps) {
-  const { user } = useUser();
-  const { data: categories, isLoading } = useCategoriesQuery();
+  const { user, profile } = useUser();
+  const { data: categories, isLoading } = useCategoriesQuery(profile?.active_board_id || null);
   const createMutation = useCreateCategoryMutation();
   const updateMutation = useUpdateCategoryMutation();
   const deleteMutation = useDeleteCategoryMutation();

@@ -20,11 +20,12 @@ import {
   CheckSquare,
   Trash2,
   AlertTriangle,
-  Users,
   Plus,
   Pencil,
+  Save,
 } from "lucide-react";
 import { useUser, useSignOut } from "@/lib/auth/hooks";
+import { createClient } from "@/lib/supabase/client";
 import { useUserBoardsQuery, useSwitchBoardMutation, useCreateBoardMutation, useUpdateBoardMutation } from "@/hooks/useBoards";
 
 const navItems = [
@@ -38,9 +39,6 @@ const archiveItems = [
   { href: "/archives/reports", label: "Report Archive", icon: FileText },
 ];
 
-const collabItems = [
-  { href: "/collab", label: "Collaboration", icon: Users },
-];
 
 export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -51,12 +49,16 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [showBoardSelector, setShowBoardSelector] = useState(false);
   const [showUserBoardSelector, setShowUserBoardSelector] = useState(false);
   const [showCreateBoard, setShowCreateBoard] = useState(false);
+  const [showEditNameModal, setShowEditNameModal] = useState(false);
+  const [fullNameInput, setFullNameInput] = useState("");
+  const [updateNameLoading, setUpdateNameLoading] = useState(false);
+  const [updateNameError, setUpdateNameError] = useState<string | null>(null);
   const [newBoardName, setNewBoardName] = useState("");
   const [editingBoardId, setEditingBoardId] = useState<string | null>(null);
   const [editingBoardName, setEditingBoardName] = useState("");
   const pathname = usePathname();
   const router = useRouter();
-  const { profile } = useUser();
+  const { profile, refreshProfile } = useUser();
   const { signOut } = useSignOut();
   const { data: userBoards } = useUserBoardsQuery();
   const switchBoard = useSwitchBoardMutation();
@@ -86,6 +88,30 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       setDeleteError("Connection error. Please try again.");
     } finally {
       setDeleteLoading(false);
+    }
+  }
+
+  async function handleUpdateFullName() {
+    if (!profile) return;
+    const nextName = fullNameInput.trim();
+    if (!nextName) return;
+    setUpdateNameLoading(true);
+    setUpdateNameError(null);
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("profiles")
+        .update({ full_name: nextName })
+        .eq("id", profile.id);
+
+      if (error) throw error;
+      await refreshProfile();
+      setShowEditNameModal(false);
+    } catch (error: any) {
+      setUpdateNameError(error?.message || "Error updating name.");
+    } finally {
+      setUpdateNameLoading(false);
     }
   }
 
@@ -171,7 +197,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                         </motion.span>
                       )}
                     </AnimatePresence>
-                    {userBoards.length > 1 && !collapsed && (
+                    {userBoards.length > 0 && !collapsed && (
                       <button
                         onClick={(e) => {
                           e.preventDefault();
@@ -189,7 +215,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
                 {/* Board Dropdown Submenu */}
                 <AnimatePresence>
-                  {showBoardSelector && !collapsed && (
+                  {showBoardSelector && !collapsed && userBoards.length > 0 && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
@@ -210,11 +236,12 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                           >
                             <button
                               onClick={async () => {
-                                if (!isCurrent) {
-                                  await switchBoard.mutateAsync({ boardId: board.id });
-                                }
-                                setShowBoardSelector(false);
-                              }}
+                              if (!isCurrent) {
+                                await switchBoard.mutateAsync({ boardId: board.id });
+                                await refreshProfile();
+                              }
+                              setShowBoardSelector(false);
+                            }}
                               className="flex-1 text-left truncate"
                             >
                               {board.name}
@@ -429,69 +456,6 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           );
         })}
 
-        {/* Collaboration Section Divider */}
-        <div className="pt-4 pb-2">
-          <AnimatePresence>
-            {!collapsed ? (
-              <motion.div
-                className="flex items-center gap-2 px-3"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <Users size={12} className="text-white/20" />
-                <span className="text-[10px] uppercase tracking-widest text-white/20 font-semibold">
-                  Collaboration
-                </span>
-                <div className="flex-1 h-px bg-white/5" />
-              </motion.div>
-            ) : (
-              <div className="mx-auto w-6 h-px bg-white/10" />
-            )}
-          </AnimatePresence>
-        </div>
-
-        {collabItems.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname === href;
-          return (
-            <Link key={href} href={href}>
-              <motion.div
-                className={`
-                  flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-organic-sm)]
-                  transition-colors duration-200 group relative
-                  ${isActive
-                    ? "bg-white/10 text-white"
-                    : "text-white/50 hover:text-white/80 hover:bg-white/5"
-                  }
-                `}
-                whileHover={{ x: 2 }}
-                transition={{ duration: 0.2 }}
-              >
-                {isActive && (
-                  <motion.div
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-gradient-to-b from-sky-300 to-purple-400"
-                    layoutId="activeNav"
-                    transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
-                  />
-                )}
-                <Icon size={20} className="flex-shrink-0" />
-                <AnimatePresence>
-                  {!collapsed && (
-                    <motion.span
-                      className="text-sm font-medium whitespace-nowrap"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.15 }}
-                    >
-                      {label}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            </Link>
-          );
-        })}
       </nav>
 
       {/* User section */}
@@ -519,10 +483,10 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                   <p className="text-xs font-medium text-white/80 truncate">
                     {profile?.full_name || profile?.email || "User"}
                   </p>
-                  {userBoards && userBoards.length > 1 && (
-                    <ChevronDown size={12} className="text-white/40" />
-                  )}
-                </button>
+                {userBoards && userBoards.length > 0 && (
+                  <ChevronDown size={12} className="text-white/40" />
+                )}
+              </button>
                 {profile?.role && (
                   <span
                     className={`badge ${roleBadge[profile.role]} mt-0.5`}
@@ -531,6 +495,17 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                     {profile.role}
                   </span>
                 )}
+                <button
+                  onClick={() => {
+                    setFullNameInput(profile?.full_name || profile?.email || "");
+                    setUpdateNameError(null);
+                    setShowEditNameModal(true);
+                  }}
+                  className="mt-2 inline-flex items-center gap-1 text-[10px] text-white/40 hover:text-white/70 transition-colors"
+                >
+                  <Pencil size={10} />
+                  Edit name
+                </button>
               </motion.div>
             )}
           </AnimatePresence>
@@ -538,7 +513,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
         {/* Board selector dropdown */}
         <AnimatePresence>
-          {showUserBoardSelector && !collapsed && userBoards && userBoards.length > 1 && (
+          {showUserBoardSelector && !collapsed && userBoards && userBoards.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
@@ -555,6 +530,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                   onClick={async () => {
                     if (board.id !== profile?.active_board_id) {
                       await switchBoard.mutateAsync({ boardId: board.id });
+                      await refreshProfile();
                     }
                     setShowUserBoardSelector(false);
                   }}
@@ -710,6 +686,93 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                     <Trash2 size={14} />
                   )}
                   Delete Forever
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Edit Name Modal */}
+      <AnimatePresence>
+        {showEditNameModal && (
+          <motion.div
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+              onClick={() => {
+                if (updateNameLoading) return;
+                setShowEditNameModal(false);
+                setUpdateNameError(null);
+              }}
+            />
+            <motion.div
+              className="glass-strong relative w-full max-w-md z-10 p-6"
+              style={{ borderRadius: "var(--radius-organic-lg)" }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10">
+                  <User size={18} className="text-white/70" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Edit name</h3>
+                  <p className="text-xs text-white/40">Update your full name</p>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-xs font-medium text-white/50 mb-2">
+                  Full name
+                </label>
+                <input
+                  type="text"
+                  className="glass-input w-full"
+                  placeholder="Your full name"
+                  value={fullNameInput}
+                  onChange={(e) => setFullNameInput(e.target.value)}
+                  autoFocus
+                />
+              </div>
+
+              {updateNameError && (
+                <div className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-xl p-3 mb-4">
+                  {updateNameError}
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    if (updateNameLoading) return;
+                    setShowEditNameModal(false);
+                    setUpdateNameError(null);
+                  }}
+                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white/60 hover:text-white bg-white/5 hover:bg-white/10 rounded-[var(--radius-organic-sm)] transition-all duration-200 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUpdateFullName}
+                  disabled={!fullNameInput.trim() || updateNameLoading}
+                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-sky-500/80 hover:bg-sky-500 disabled:opacity-30 disabled:cursor-not-allowed rounded-[var(--radius-organic-sm)] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  {updateNameLoading ? (
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                  ) : (
+                    <Save size={14} />
+                  )}
+                  Save
                 </button>
               </div>
             </motion.div>

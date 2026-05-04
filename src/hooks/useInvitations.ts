@@ -6,11 +6,19 @@ export function useCreateInvitation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ email, role }: { email: string; role?: "OWNER" | "EDITOR" | "VIEWER" }) => {
+    mutationFn: async ({
+      email,
+      role,
+      boardId,
+    }: {
+      email: string;
+      role?: "OWNER" | "EDITOR" | "VIEWER";
+      boardId?: string | null;
+    }) => {
       const res = await fetch("/api/boards/invitations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, role }),
+        body: JSON.stringify({ email, role, boardId }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to invite");

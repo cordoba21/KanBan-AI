@@ -3,7 +3,7 @@
 import { useMemo, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
-import type { Task, TaskInsert, TaskUpdate, TaskStatus } from "@/types/supabase";
+import type { TaskInsert, TaskUpdate, TaskStatus, TaskWithPeople } from "@/types/supabase";
 
 /* ─── Fetch all tasks ─────────────────────────────────────── */
 export function useTasksQuery() {
@@ -15,7 +15,7 @@ export function useTasksQuery() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) return [] as Task[];
+      if (!user) return [] as TaskWithPeople[];
 
       const { data: profile } = await supabase
         .from("profiles")
@@ -23,16 +23,16 @@ export function useTasksQuery() {
         .eq("id", user.id)
         .single();
 
-      if (!profile?.active_board_id) return [] as Task[];
+      if (!profile?.active_board_id) return [] as TaskWithPeople[];
 
       const { data, error } = await supabase
         .from("tasks")
-        .select("*")
+        .select("*, creator:profiles!tasks_user_id_fkey(id, full_name, email, avatar_url), task_assignees(user_id, profiles(id, full_name, email, avatar_url))")
         .eq("board_id", profile.active_board_id)
         .order("position", { ascending: true });
 
       if (error) throw error;
-      return data as Task[];
+      return data as TaskWithPeople[];
     },
   });
 }
@@ -42,7 +42,7 @@ export function useGroupedTasks() {
   const { data: tasks, ...rest } = useTasksQuery();
 
   const grouped = useMemo(() => {
-    const columns: Record<TaskStatus, Task[]> = {
+    const columns: Record<TaskStatus, TaskWithPeople[]> = {
       BACKLOG: [],
       TODO: [],
       IN_PROGRESS: [],
@@ -68,7 +68,7 @@ export function useCreateTaskMutation() {
   const supabase = createClient();
 
   return useMutation({
-    mutationFn: async (task: TaskInsert) => {
+    mutationFn: async (task: TaskInsert & { assigneeIds?: string[] }) => {
       const { data: profile } = await supabase
         .from("profiles")
         .select("active_board_id")
@@ -93,7 +93,18 @@ export function useCreateTaskMutation() {
         details: { title: task.title, status: task.status || "BACKLOG" },
       });
 
-      return data as Task;
+      if (task.assigneeIds && task.assigneeIds.length > 0) {
+        const assignees = task.assigneeIds.map((userId) => ({
+          task_id: data.id,
+          user_id: userId,
+        }));
+        const { error: assigneeError } = await supabase
+          .from("task_assignees")
+          .insert(assignees);
+        if (assigneeError) throw assigneeError;
+      }
+
+      return data as TaskWithPeople;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
@@ -113,10 +124,12 @@ export function useUpdateTaskMutation() {
       id,
       updates,
       userId,
+      assigneeIds,
     }: {
       id: string;
       updates: TaskUpdate;
       userId?: string;
+      assigneeIds?: string[];
     }) => {
       const { data, error } = await supabase
         .from("tasks")
@@ -126,6 +139,25 @@ export function useUpdateTaskMutation() {
         .single();
 
       if (error) throw error;
+
+      if (assigneeIds) {
+        const { error: removeError } = await supabase
+          .from("task_assignees")
+          .delete()
+          .eq("task_id", id);
+        if (removeError) throw removeError;
+
+        if (assigneeIds.length > 0) {
+          const assignees = assigneeIds.map((userId) => ({
+            task_id: id,
+            user_id: userId,
+          }));
+          const { error: assigneeError } = await supabase
+            .from("task_assignees")
+            .insert(assignees);
+          if (assigneeError) throw assigneeError;
+        }
+      }
 
       // Log status changes
       if (updates.status && userId) {
@@ -137,15 +169,15 @@ export function useUpdateTaskMutation() {
         });
       }
 
-      return data as Task;
+      return data as TaskWithPeople;
     },
     // Optimistic update
     onMutate: async ({ id, updates }) => {
       await queryClient.cancelQueries({ queryKey: ["tasks"] });
 
-      const previousTasks = queryClient.getQueryData<Task[]>(["tasks"]);
+      const previousTasks = queryClient.getQueryData<TaskWithPeople[]>(["tasks"]);
 
-      queryClient.setQueryData<Task[]>(["tasks"], (old) =>
+      queryClient.setQueryData<TaskWithPeople[]>(["tasks"], (old) =>
         old?.map((task) =>
           task.id === id ? { ...task, ...updates } : task
         ) ?? []

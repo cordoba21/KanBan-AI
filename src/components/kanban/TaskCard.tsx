@@ -3,12 +3,12 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { motion } from "framer-motion";
-import { GripVertical, AlertCircle, Clock, CheckCircle2, Tag, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { GripVertical, AlertCircle, Clock, CheckCircle2, Tag, Calendar, ChevronLeft, ChevronRight, User } from "lucide-react";
 import { useCategoriesQuery } from "@/hooks/useCategories";
-import type { Task, TaskStatus } from "@/types/supabase";
+import type { TaskWithPeople } from "@/types/supabase";
 
 interface TaskCardProps {
-  task: Task;
+  task: TaskWithPeople;
   isDragOverlay?: boolean;
   onClick?: () => void;
   onMoveLeft?: () => void;
@@ -24,7 +24,7 @@ const priorityConfig = [
 ];
 
 function CategoryBadge({ categoryId }: { categoryId: string | null }) {
-  const { data: categories } = useCategoriesQuery();
+  const { data: categories } = useCategoriesQuery(task.board_id);
   if (!categoryId || !categories) return null;
 
   const cat = categories.find((c) => c.id === categoryId);
@@ -108,6 +108,9 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
     minute: "2-digit",
   });
 
+  const creatorName = task.creator?.full_name || task.creator?.email || "Unknown";
+  const assignees = task.task_assignees || [];
+
   // Drag overlay — the card that follows the cursor
   if (isDragOverlay) {
     return (
@@ -157,6 +160,29 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-white/25">{createdFormatted}</span>
             <DueDateBadge dueDate={task.due_date} />
+          </div>
+          <div className="mt-2 flex items-center justify-between text-[10px] text-white/35">
+            <span className="truncate">Created by {creatorName}</span>
+            <div className="flex items-center gap-1">
+              {assignees.length > 0 ? (
+                assignees.slice(0, 3).map((assignee) => (
+                  <div
+                    key={assignee.user_id}
+                    className="w-4 h-4 rounded-full bg-gradient-to-br from-sky-300/20 to-purple-400/20 border border-white/10 flex items-center justify-center"
+                    title={assignee.profiles?.full_name || assignee.profiles?.email || "User"}
+                  >
+                    <span className="text-[8px] text-white/70">
+                      {(assignee.profiles?.full_name || assignee.profiles?.email || "?").slice(0, 1).toUpperCase()}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div className="flex items-center gap-1 text-white/25">
+                  <User size={10} />
+                  Unassigned
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </motion.div>
@@ -240,9 +266,30 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
           </span>
           <div className="flex items-center gap-2">
             <DueDateBadge dueDate={task.due_date} />
-            {/* Assignee avatar placeholder */}
-            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-300/20 to-purple-400/20 border border-white/10" />
+            <div className="flex items-center gap-1">
+              {assignees.length > 0 ? (
+                assignees.slice(0, 3).map((assignee) => (
+                  <div
+                    key={assignee.user_id}
+                    className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-300/20 to-purple-400/20 border border-white/10 flex items-center justify-center"
+                    title={assignee.profiles?.full_name || assignee.profiles?.email || "User"}
+                  >
+                    <span className="text-[9px] text-white/70">
+                      {(assignee.profiles?.full_name || assignee.profiles?.email || "?").slice(0, 1).toUpperCase()}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div className="flex items-center gap-1 text-white/25">
+                  <User size={12} />
+                  <span className="text-[9px]">Unassigned</span>
+                </div>
+              )}
+            </div>
           </div>
+        </div>
+        <div className="mt-2 text-[10px] text-white/35 truncate">
+          Created by {creatorName}
         </div>
 
         {/* Move arrows — visible on hover */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -12,17 +12,19 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { motion } from "framer-motion";
-import { Plus, Tag, Archive } from "lucide-react";
+import { Plus, Tag, Archive, UserPlus, Users } from "lucide-react";
 import Column from "./Column";
 import TaskCard from "./TaskCard";
 import TaskModal from "./TaskModal";
 import CategoryManager from "./CategoryManager";
+import CollaboratorsPanel from "./CollaboratorsPanel";
 import GlassButton from "@/components/ui/GlassButton";
 import { useGroupedTasks, useMoveTask } from "@/hooks/useTasks";
 import { useArchiveTasksMutation } from "@/hooks/useArchives";
+import { useBoardMembersQuery } from "@/hooks/useBoards";
 import { useUser } from "@/lib/auth/hooks";
 import { useBoardRole } from "@/lib/boards/access";
-import type { Task, TaskStatus } from "@/types/supabase";
+import type { TaskStatus, TaskWithPeople } from "@/types/supabase";
 
 const COLUMNS: { id: TaskStatus; title: string; color: string }[] = [
   { id: "BACKLOG", title: "Backlog", color: "rgba(255,255,255,0.4)" },
@@ -38,11 +40,17 @@ export default function Board() {
   const archiveMutation = useArchiveTasksMutation();
   const { user, profile } = useUser();
   const { isEditor, isOwner } = useBoardRole();
+  const { data: members } = useBoardMembersQuery(profile?.active_board_id || null);
 
-  const [activeTask, setActiveTask] = useState<Task | null>(null);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [activeTask, setActiveTask] = useState<TaskWithPeople | null>(null);
+  const [editingTask, setEditingTask] = useState<TaskWithPeople | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
+  const [showInvitePanel, setShowInvitePanel] = useState(false);
+  const [showCollaboratorsPanel, setShowCollaboratorsPanel] = useState(false);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const inviteButtonRef = useRef<HTMLButtonElement | null>(null);
+  const collaboratorsButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -119,6 +127,29 @@ export default function Board() {
     }
   }, [user, isEditor, archiveMutation]);
 
+  useEffect(() => {
+    if (!showInvitePanel && !showCollaboratorsPanel) return;
+
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      if (panelRef.current?.contains(target)) return;
+      if (inviteButtonRef.current?.contains(target)) return;
+      if (collaboratorsButtonRef.current?.contains(target)) return;
+      setShowInvitePanel(false);
+      setShowCollaboratorsPanel(false);
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      setShowInvitePanel(false);
+      setShowCollaboratorsPanel(false);
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showInvitePanel, showCollaboratorsPanel]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -143,10 +174,40 @@ export default function Board() {
             Manage your tasks in workflow stages
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <GlassButton variant="ghost" size="sm" onClick={() => setShowCategoryManager(true)} disabled={!isEditor}>
             <Tag size={14} />
             Categories
+          </GlassButton>
+          <GlassButton
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setShowInvitePanel((prev) => !prev);
+              setShowCollaboratorsPanel(false);
+            }}
+            disabled={!isOwner}
+            ref={inviteButtonRef}
+          >
+            <UserPlus size={14} />
+            Invitar
+          </GlassButton>
+          <GlassButton
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setShowCollaboratorsPanel((prev) => !prev);
+              setShowInvitePanel(false);
+            }}
+            ref={collaboratorsButtonRef}
+          >
+            <Users size={14} />
+            Colaboradores
+            {!!members?.length && (
+              <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/60">
+                {members.length}
+              </span>
+            )}
           </GlassButton>
           {doneCount > 0 && (
             <GlassButton
@@ -168,6 +229,15 @@ export default function Board() {
       </div>
 
       {/* Board */}
+      {(showInvitePanel || showCollaboratorsPanel) && (
+        <div className="mb-6" ref={panelRef}>
+          <CollaboratorsPanel
+            boardId={profile?.active_board_id || null}
+            canManage={!!isOwner}
+            mode={showInvitePanel ? "invite" : "manage"}
+          />
+        </div>
+      )}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}

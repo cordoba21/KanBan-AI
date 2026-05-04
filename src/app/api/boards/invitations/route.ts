@@ -42,25 +42,33 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { email, role } = await request.json();
+    const { email, role, boardId } = await request.json();
     if (!email || typeof email !== "string") {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("active_board_id")
-      .eq("id", user.id)
-      .single();
+    const resolvedBoardId = typeof boardId === "string" && boardId.length > 0
+      ? boardId
+      : null;
 
-    if (!profile?.active_board_id) {
-      return NextResponse.json({ error: "No active board" }, { status: 400 });
+    let boardToInvite = resolvedBoardId;
+    if (!boardToInvite) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("active_board_id")
+        .eq("id", user.id)
+        .single();
+
+      if (!profile?.active_board_id) {
+        return NextResponse.json({ error: "No active board" }, { status: 400 });
+      }
+      boardToInvite = profile.active_board_id;
     }
 
     const { data: board } = await supabase
       .from("boards")
       .select("owner_id")
-      .eq("id", profile.active_board_id)
+      .eq("id", boardToInvite)
       .single();
 
     if (!board || board.owner_id !== user.id) {
@@ -76,7 +84,7 @@ export async function POST(request: Request) {
     const { error } = await admin
       .from("board_invitations")
       .insert({
-        board_id: profile.active_board_id,
+        board_id: boardToInvite,
         email: email.toLowerCase(),
         role: role || "VIEWER",
         token,

@@ -11,12 +11,19 @@ import DateRangeFilter, {
 import { useDashboardMetrics } from "@/hooks/useDashboardMetrics";
 import { useCategoriesQuery } from "@/hooks/useCategories";
 import GlassCard from "@/components/ui/GlassCard";
+import { useUserBoardsQuery } from "@/hooks/useBoards";
+import { useUser } from "@/lib/auth/hooks";
 
 export default function DashboardClient() {
   const [rangePreset, setRangePreset] = useState("all");
   const dateRange = useMemo(() => getDateRange(rangePreset), [rangePreset]);
-  const { data, isLoading } = useDashboardMetrics(dateRange);
-  const { data: categories } = useCategoriesQuery();
+  const { profile } = useUser();
+  const { data: userBoards = [] } = useUserBoardsQuery();
+  const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
+  const activeBoardId = selectedBoardId || profile?.active_board_id || null;
+  const { data, isLoading } = useDashboardMetrics(dateRange, activeBoardId);
+  const { data: categories } = useCategoriesQuery(activeBoardId);
+
 
   const categoryStats = useMemo(() => {
     if (!categories || !data?.tasks) return [];
@@ -56,7 +63,30 @@ export default function DashboardClient() {
             Track your team&apos;s performance
           </p>
         </div>
-        <DateRangeFilter value={rangePreset} onChange={setRangePreset} />
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative">
+            <select
+              className="glass-input appearance-none pr-8 text-sm"
+              value={selectedBoardId || profile?.active_board_id || ""}
+              onChange={(e) => setSelectedBoardId(e.target.value || null)}
+              disabled={userBoards.length === 0}
+            >
+              {userBoards.length === 0 && (
+                <option value="">No boards</option>
+              )}
+              {userBoards.map((board) => (
+                <option
+                  key={board.id}
+                  value={board.id}
+                  style={{ background: "#1a1a2e", color: "white" }}
+                >
+                  {board.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <DateRangeFilter value={rangePreset} onChange={setRangePreset} />
+        </div>
       </div>
 
       {/* Stats */}
