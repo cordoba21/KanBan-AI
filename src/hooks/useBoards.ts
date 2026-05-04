@@ -216,3 +216,25 @@ export function useUpdateBoardMutation() {
     },
   });
 }
+
+export function useDeleteBoardMutation() {
+  const supabase = createClient();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ boardId }: { boardId: string }) => {
+      const { error } = await supabase
+        .from("boards")
+        .delete()
+        .eq("id", boardId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-boards"] });
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["archives"] });
+    },
+  });
+}

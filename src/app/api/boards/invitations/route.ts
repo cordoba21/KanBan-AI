@@ -72,7 +72,17 @@ export async function POST(request: Request) {
       .single();
 
     if (!board || board.owner_id !== user.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      const { data: membership } = await supabase
+        .from("board_members")
+        .select("role, status")
+        .eq("board_id", boardToInvite)
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .single();
+
+      if (!membership || membership.role !== "OWNER") {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
     }
 
     const token = generateToken();

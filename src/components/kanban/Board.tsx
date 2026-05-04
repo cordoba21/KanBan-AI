@@ -147,7 +147,10 @@ export default function Board() {
 
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, [showInvitePanel, showCollaboratorsPanel]);
 
   if (isLoading) {
@@ -232,12 +235,27 @@ export default function Board() {
 
       {/* Board */}
       {(showInvitePanel || showCollaboratorsPanel) && (
-        <div className="mb-6" ref={panelRef}>
-          <CollaboratorsPanel
-            boardId={profile?.active_board_id || null}
-            canManage={!!isOwner}
-            mode={showInvitePanel ? "invite" : "manage"}
+        <div
+          className="fixed inset-0 z-[120] flex items-center justify-center p-4"
+        >
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => {
+              setShowInvitePanel(false);
+              setShowCollaboratorsPanel(false);
+            }}
           />
+          <div className="relative w-full max-w-lg" ref={panelRef}>
+            <CollaboratorsPanel
+              boardId={profile?.active_board_id || null}
+              canManage={!!isOwner}
+              mode={showInvitePanel ? "invite" : "manage"}
+              onClose={() => {
+                setShowInvitePanel(false);
+                setShowCollaboratorsPanel(false);
+              }}
+            />
+          </div>
         </div>
       )}
       <DndContext
