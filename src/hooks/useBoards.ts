@@ -192,6 +192,27 @@ export function useCreateBoardMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-boards"] });
       queryClient.invalidateQueries({ queryKey: ["profile"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["archives"] });
+    },
+  });
+}
+
+export function useUpdateBoardMutation() {
+  const supabase = createClient();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ boardId, name }: { boardId: string; name: string }) => {
+      const { error } = await supabase
+        .from("boards")
+        .update({ name })
+        .eq("id", boardId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-boards"] });
     },
   });
 }

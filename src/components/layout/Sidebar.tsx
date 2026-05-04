@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
+  ChevronRightIcon,
   LogOut,
   User,
   Archive,
@@ -20,12 +21,14 @@ import {
   Trash2,
   AlertTriangle,
   Users,
+  Plus,
+  Pencil,
 } from "lucide-react";
 import { useUser, useSignOut } from "@/lib/auth/hooks";
-import { useUserBoardsQuery, useSwitchBoardMutation } from "@/hooks/useBoards";
+import { useUserBoardsQuery, useSwitchBoardMutation, useCreateBoardMutation, useUpdateBoardMutation } from "@/hooks/useBoards";
 
 const navItems = [
-  { href: "/kanban", label: "Kanban Board", icon: Columns3 },
+  { href: "/kanban", label: "Kanban Board", icon: Columns3, hasDropdown: true },
   { href: "/dashboard", label: "Dashboard", icon: BarChart3 },
   { href: "/insights", label: "AI Insights", icon: Sparkles },
 ];
@@ -46,12 +49,18 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [showBoardSelector, setShowBoardSelector] = useState(false);
+  const [showCreateBoard, setShowCreateBoard] = useState(false);
+  const [newBoardName, setNewBoardName] = useState("");
+  const [editingBoardId, setEditingBoardId] = useState<string | null>(null);
+  const [editingBoardName, setEditingBoardName] = useState("");
   const pathname = usePathname();
   const router = useRouter();
   const { profile } = useUser();
   const { signOut } = useSignOut();
   const { data: userBoards } = useUserBoardsQuery();
   const switchBoard = useSwitchBoardMutation();
+  const createBoard = useCreateBoardMutation();
+  const updateBoard = useUpdateBoardMutation();
 
   async function handleDeleteAccount() {
     if (deleteConfirmation !== "Delete my account") return;
@@ -119,8 +128,198 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
       {/* Navigation */}
       <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-        {navItems.map(({ href, label, icon: Icon }) => {
+        {navItems.map(({ href, label, icon: Icon, hasDropdown }) => {
           const isActive = pathname === href;
+          const isKanban = href === "/kanban";
+          const currentBoard = userBoards?.find(b => b.id === profile?.active_board_id);
+
+          if (isKanban && hasDropdown && userBoards && userBoards.length > 0) {
+            return (
+              <div key={href}>
+                <Link href={href} onClick={onNavigate}>
+                  <motion.div
+                    className={`
+                      flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-organic-sm)]
+                      transition-colors duration-200 group relative
+                      ${isActive
+                        ? "bg-white/10 text-white"
+                        : "text-white/50 hover:text-white/80 hover:bg-white/5"
+                      }
+                    `}
+                    whileHover={{ x: 2 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {isActive && (
+                      <motion.div
+                        className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-gradient-to-b from-sky-300 to-purple-400"
+                        layoutId="activeNav"
+                        transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+                      />
+                    )}
+                    <Icon size={20} className="flex-shrink-0" />
+                    <AnimatePresence>
+                      {!collapsed && (
+                        <motion.span
+                          className="text-sm font-medium whitespace-nowrap flex-1 text-left"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15 }}
+                        >
+                          {label}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                    {userBoards.length > 1 && !collapsed && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setShowBoardSelector(!showBoardSelector);
+                        }}
+                        className="text-white/30 hover:text-white"
+                      >
+                        {showBoardSelector ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                      </button>
+                    )}
+                  </motion.div>
+                </Link>
+
+                {/* Board Dropdown Submenu */}
+                {showBoardSelector && !collapsed && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="ml-3 mt-1 space-y-1 border-l border-white/10 pl-3"
+                  >
+                    {userBoards.map((board) => {
+                      const isCurrent = board.id === profile?.active_board_id;
+                      return (
+                        <div
+                          key={board.id}
+                          className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors ${
+                            isCurrent
+                              ? "bg-sky-500/20 text-sky-300"
+                              : "text-white/50 hover:text-white hover:bg-white/5"
+                          }`}
+                        >
+                          <button
+                            onClick={async () => {
+                              if (!isCurrent) {
+                                await switchBoard.mutateAsync({ boardId: board.id });
+                              }
+                              setShowBoardSelector(false);
+                            }}
+                            className="flex-1 text-left truncate"
+                          >
+                            {board.name}
+                          </button>
+                          {board.role === "OWNER" && (
+                            <span className="text-[9px] text-white/30">{board.role}</span>
+                          )}
+                          {!isCurrent && board.role === "OWNER" && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingBoardId(board.id);
+                                setEditingBoardName(board.name);
+                              }}
+                              className="text-white/20 hover:text-white"
+                            >
+                              <Pencil size={12} />
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {/* Create new board option */}
+                    {showCreateBoard ? (
+                      <div className="flex items-center gap-1 px-2 py-1">
+                        <input
+                          className="glass-input flex-1 text-xs py-1"
+                          placeholder="Board name"
+                          value={newBoardName}
+                          onChange={(e) => setNewBoardName(e.target.value)}
+                          onKeyDown={async (e) => {
+                            if (e.key === "Enter" && newBoardName.trim()) {
+                              const board = await createBoard.mutateAsync({ name: newBoardName.trim() });
+                              await switchBoard.mutateAsync({ boardId: board.id });
+                              setNewBoardName("");
+                              setShowCreateBoard(false);
+                            }
+                            if (e.key === "Escape") {
+                              setShowCreateBoard(false);
+                              setNewBoardName("");
+                            }
+                          }}
+                          autoFocus
+                        />
+                        <button
+                          onClick={async () => {
+                            if (newBoardName.trim()) {
+                              const board = await createBoard.mutateAsync({ name: newBoardName.trim() });
+                              await switchBoard.mutateAsync({ boardId: board.id });
+                              setNewBoardName("");
+                              setShowCreateBoard(false);
+                            }
+                          }}
+                          disabled={!newBoardName.trim() || createBoard.isPending}
+                          className="text-white/40 hover:text-white"
+                        >
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setShowCreateBoard(true)}
+                        className="flex items-center gap-2 px-2 py-1.5 text-xs text-white/30 hover:text-white/60 w-full"
+                      >
+                        <Plus size={12} />
+                        Create board
+                      </button>
+                    )}
+                  </motion.div>
+                )}
+
+                {/* Inline edit for board name */}
+                {editingBoardId && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="ml-3 mt-1 px-2 py-1"
+                  >
+                    <input
+                      className="glass-input text-xs py-1 w-full"
+                      value={editingBoardName}
+                      onChange={(e) => setEditingBoardName(e.target.value)}
+                      onKeyDown={async (e) => {
+                        if (e.key === "Enter" && editingBoardName.trim()) {
+                          await updateBoard.mutateAsync({ boardId: editingBoardId, name: editingBoardName.trim() });
+                          setEditingBoardId(null);
+                          setEditingBoardName("");
+                        }
+                        if (e.key === "Escape") {
+                          setEditingBoardId(null);
+                          setEditingBoardName("");
+                        }
+                      }}
+                      onBlur={async () => {
+                        if (editingBoardName.trim()) {
+                          await updateBoard.mutateAsync({ boardId: editingBoardId, name: editingBoardName.trim() });
+                        }
+                        setEditingBoardId(null);
+                        setEditingBoardName("");
+                      }}
+                      autoFocus
+                    />
+                  </motion.div>
+                )}
+              </div>
+            );
+          }
+
           return (
             <Link key={href} href={href} onClick={onNavigate}>
               <motion.div
