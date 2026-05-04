@@ -244,7 +244,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                                   if (!isCurrent) {
                                     await switchBoard.mutateAsync({ boardId: board.id });
                                     await refreshProfile();
-                                    router.refresh();
+                                    window.location.reload();
                                   }
                                   setShowBoardSelector(false);
                                 }}

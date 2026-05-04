@@ -31,7 +31,7 @@ export default function DashboardClient() {
     if (newBoardId && newBoardId !== profile?.active_board_id) {
       await switchBoard.mutateAsync({ boardId: newBoardId });
       await refreshProfile();
-      router.refresh();
+      window.location.reload();
     }
     setSelectedBoardId(null);
   };
