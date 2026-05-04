@@ -79,6 +79,17 @@ export default function CollaboratorsPanel({
       {mode === "invite" && (
         <div className="flex flex-col gap-2 mb-4">
           <div className="flex flex-col sm:flex-row gap-2">
+            <div className="relative flex-1">
+              <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+              <input
+                className="glass-input glass-input-with-icon"
+                placeholder="correo@equipo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                type="email"
+                disabled={!canManage}
+              />
+            </div>
             <select
               className="glass-input w-full sm:w-[160px]"
               value={role}
@@ -91,17 +102,6 @@ export default function CollaboratorsPanel({
                 </option>
               ))}
             </select>
-            <div className="relative flex-1">
-              <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
-              <input
-                className="glass-input glass-input-with-icon"
-                placeholder="correo@equipo.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                type="email"
-                disabled={!canManage}
-              />
-            </div>
           </div>
           <GlassButton
             size="sm"

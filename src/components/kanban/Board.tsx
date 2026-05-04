@@ -21,7 +21,7 @@ import CollaboratorsPanel from "./CollaboratorsPanel";
 import GlassButton from "@/components/ui/GlassButton";
 import { useGroupedTasks, useMoveTask } from "@/hooks/useTasks";
 import { useArchiveTasksMutation } from "@/hooks/useArchives";
-import { useBoardMembersQuery } from "@/hooks/useBoards";
+import { useBoardMembersQuery, useUserBoardsQuery } from "@/hooks/useBoards";
 import { useUser } from "@/lib/auth/hooks";
 import { useBoardRole } from "@/lib/boards/access";
 import type { TaskStatus, TaskWithPeople } from "@/types/supabase";
@@ -41,6 +41,8 @@ export default function Board() {
   const { user, profile } = useUser();
   const { isEditor, isOwner } = useBoardRole();
   const { data: members } = useBoardMembersQuery(profile?.active_board_id || null);
+  const { data: userBoards } = useUserBoardsQuery();
+  const activeBoardName = userBoards?.find((b) => b.id === profile?.active_board_id)?.name;
 
   const [activeTask, setActiveTask] = useState<TaskWithPeople | null>(null);
   const [editingTask, setEditingTask] = useState<TaskWithPeople | null>(null);
@@ -48,9 +50,18 @@ export default function Board() {
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [showInvitePanel, setShowInvitePanel] = useState(false);
   const [showCollaboratorsPanel, setShowCollaboratorsPanel] = useState(false);
+  const prevBoardId = useRef<string | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const inviteButtonRef = useRef<HTMLButtonElement | null>(null);
   const collaboratorsButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (profile?.active_board_id && profile.active_board_id !== prevBoardId.current) {
+      prevBoardId.current = profile.active_board_id;
+      setShowInvitePanel(false);
+      setShowCollaboratorsPanel(false);
+    }
+  }, [profile?.active_board_id]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -172,6 +183,11 @@ export default function Board() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
+          {activeBoardName && (
+            <div className="inline-flex items-center gap-2 px-3 py-1 mb-2 rounded-full bg-sky-500/20 border border-sky-500/30">
+              <span className="text-xs font-medium text-sky-300">{activeBoardName}</span>
+            </div>
+          )}
           <h1 className="text-2xl font-bold text-white">Kanban Board</h1>
           <p className="text-white/40 text-sm mt-1">
             Manage your tasks in workflow stages
