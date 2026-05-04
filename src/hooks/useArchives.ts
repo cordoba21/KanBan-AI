@@ -9,11 +9,25 @@ export function useArchivedTasksQuery(month?: string) {
   const supabase = createClient();
 
   return useQuery({
-    queryKey: ["archived-tasks", month],
+    queryKey: ["archived-tasks", month, "active"],
     queryFn: async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return [] as ArchivedTask[];
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("active_board_id")
+        .eq("id", user.id)
+        .single();
+
+      if (!profile?.active_board_id) return [] as ArchivedTask[];
+
       let query = supabase
         .from("archived_tasks")
         .select("*")
+        .eq("board_id", profile.active_board_id)
         .order("archived_at", { ascending: false });
 
       if (month) {
@@ -32,11 +46,25 @@ export function useArchiveMonthsQuery() {
   const supabase = createClient();
 
   return useQuery({
-    queryKey: ["archive-months"],
+    queryKey: ["archive-months", "active"],
     queryFn: async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return [] as string[];
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("active_board_id")
+        .eq("id", user.id)
+        .single();
+
+      if (!profile?.active_board_id) return [] as string[];
+
       const { data, error } = await supabase
         .from("archived_tasks")
         .select("archive_month")
+        .eq("board_id", profile.active_board_id)
         .order("archive_month", { ascending: false });
 
       if (error) throw error;
@@ -53,6 +81,14 @@ export function useArchiveTasksMutation() {
 
   return useMutation({
     mutationFn: async ({ userId }: { userId: string }) => {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("active_board_id")
+        .eq("id", userId)
+        .single();
+
+      if (!profile?.active_board_id) throw new Error("No active board");
+
       const now = new Date();
       const archiveMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
@@ -61,7 +97,7 @@ export function useArchiveTasksMutation() {
         .from("tasks")
         .select("*, categories(name, color)")
         .eq("status", "DONE")
-        .eq("user_id", userId);
+        .eq("board_id", profile.active_board_id);
 
       if (tasksError) throw tasksError;
       if (!tasks || tasks.length === 0) {
@@ -82,6 +118,7 @@ export function useArchiveTasksMutation() {
         due_date: task.due_date,
         task_created_at: task.created_at,
         task_completed_at: task.updated_at,
+        board_id: profile.active_board_id,
         archive_month: archiveMonth,
       }));
 
@@ -104,8 +141,11 @@ export function useArchiveTasksMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", "active"] });
       queryClient.invalidateQueries({ queryKey: ["archived-tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["archived-tasks", "active"] });
       queryClient.invalidateQueries({ queryKey: ["archive-months"] });
+      queryClient.invalidateQueries({ queryKey: ["archive-months", "active"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
     },
   });
@@ -116,11 +156,25 @@ export function useArchivedReportsQuery() {
   const supabase = createClient();
 
   return useQuery({
-    queryKey: ["archived-reports"],
+    queryKey: ["archived-reports", "active"],
     queryFn: async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return [] as ArchivedReport[];
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("active_board_id")
+        .eq("id", user.id)
+        .single();
+
+      if (!profile?.active_board_id) return [] as ArchivedReport[];
+
       const { data, error } = await supabase
         .from("archived_reports")
         .select("*")
+        .eq("board_id", profile.active_board_id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -155,6 +209,14 @@ export function useArchiveReportMutation() {
       const now = new Date();
       const reportMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("active_board_id")
+        .eq("id", userId)
+        .single();
+
+      if (!profile?.active_board_id) throw new Error("No active board");
+
       const { data, error } = await supabase
         .from("archived_reports")
         .insert({
@@ -162,6 +224,7 @@ export function useArchiveReportMutation() {
           content,
           report_month: reportMonth,
           user_id: userId,
+          board_id: profile.active_board_id,
           task_count: taskCount,
           completed_count: completedCount,
           completion_rate: completionRate,
@@ -175,6 +238,7 @@ export function useArchiveReportMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["archived-reports"] });
+      queryClient.invalidateQueries({ queryKey: ["archived-reports", "active"] });
     },
   });
 }

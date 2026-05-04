@@ -9,11 +9,25 @@ export function useCategoriesQuery() {
   const supabase = createClient();
 
   return useQuery({
-    queryKey: ["categories"],
+    queryKey: ["categories", "active"],
     queryFn: async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return [] as Category[];
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("active_board_id")
+        .eq("id", user.id)
+        .single();
+
+      if (!profile?.active_board_id) return [] as Category[];
+
       const { data, error } = await supabase
         .from("categories")
         .select("*")
+        .eq("board_id", profile.active_board_id)
         .order("name", { ascending: true });
 
       if (error) throw error;
@@ -29,9 +43,22 @@ export function useCreateCategoryMutation() {
 
   return useMutation({
     mutationFn: async (category: CategoryInsert) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("Unauthorized");
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("active_board_id")
+        .eq("id", user.id)
+        .single();
+
+      if (!profile?.active_board_id) throw new Error("No active board");
+
       const { data, error } = await supabase
         .from("categories")
-        .insert(category)
+        .insert({ ...category, board_id: profile.active_board_id })
         .select()
         .single();
 

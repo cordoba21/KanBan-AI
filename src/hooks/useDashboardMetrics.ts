@@ -42,9 +42,44 @@ export function useDashboardMetrics(dateRange?: DateRange) {
   return useQuery({
     queryKey: ["dashboard-metrics", dateRange?.from?.toISOString(), dateRange?.to?.toISOString()],
     queryFn: async (): Promise<DashboardMetrics> => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        return {
+          totalTasks: 0,
+          completedTasks: 0,
+          inProgressTasks: 0,
+          completionRate: 0,
+          statusDistribution: [],
+          timeSeriesData: [],
+          tasks: [],
+        };
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("active_board_id")
+        .eq("id", user.id)
+        .single();
+
+      if (!profile?.active_board_id) {
+        return {
+          totalTasks: 0,
+          completedTasks: 0,
+          inProgressTasks: 0,
+          completionRate: 0,
+          statusDistribution: [],
+          timeSeriesData: [],
+          tasks: [],
+        };
+      }
+
       let query = supabase
         .from("tasks")
         .select("*")
+        .eq("board_id", profile.active_board_id)
         .order("created_at", { ascending: true });
 
       if (dateRange?.from) {

@@ -11,6 +11,7 @@ import {
 } from "@/hooks/useTasks";
 import { useCategoriesQuery } from "@/hooks/useCategories";
 import { useUser } from "@/lib/auth/hooks";
+import { useBoardRole } from "@/lib/boards/access";
 import type { Task, TaskStatus } from "@/types/supabase";
 
 interface TaskModalProps {
@@ -32,6 +33,7 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
   const updateMutation = useUpdateTaskMutation();
   const deleteMutation = useDeleteTaskMutation();
   const { data: categories } = useCategoriesQuery();
+  const { isEditor } = useBoardRole();
 
   const [title, setTitle] = useState(task?.title || "");
   const [description, setDescription] = useState(task?.description || "");
@@ -47,7 +49,7 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
   const isEditing = !!task;
 
   async function handleSave() {
-    if (!user || !title.trim()) return;
+    if (!user || !title.trim() || !isEditor) return;
 
     const taskData = {
       title,
@@ -62,24 +64,24 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
       updateMutation.mutate(
         {
           id: task.id,
-          updates: taskData,
+        updates: taskData,
           userId: user.id,
         },
         { onSuccess: onClose }
       );
     } else {
-      createMutation.mutate(
-        {
-          ...taskData,
-          user_id: user.id,
-        },
-        { onSuccess: onClose }
-      );
+        createMutation.mutate(
+          {
+            ...taskData,
+            user_id: user.id,
+          },
+          { onSuccess: onClose }
+        );
     }
   }
 
   async function handleDelete() {
-    if (!user || !task) return;
+    if (!user || !task || !isEditor) return;
     deleteMutation.mutate({ id: task.id, userId: user.id }, { onSuccess: onClose });
   }
 
@@ -128,13 +130,14 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
               <label className="block text-xs font-medium text-white/50 mb-2">
                 Title
               </label>
-              <input
-                className="glass-input"
-                placeholder="Task title..."
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                autoFocus
-              />
+                <input
+                  className="glass-input"
+                  placeholder="Task title..."
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  autoFocus
+                  disabled={!isEditor}
+                />
             </div>
 
             {/* Description */}
@@ -142,13 +145,14 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
               <label className="block text-xs font-medium text-white/50 mb-2">
                 Description
               </label>
-              <textarea
-                className="glass-input resize-none"
-                rows={3}
-                placeholder="Describe the task..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
+                <textarea
+                  className="glass-input resize-none"
+                  rows={3}
+                  placeholder="Describe the task..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  disabled={!isEditor}
+                />
             </div>
 
             {/* Status & Priority */}
@@ -161,6 +165,7 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
                   className="glass-input appearance-none"
                   value={status}
                   onChange={(e) => setStatus(e.target.value as TaskStatus)}
+                  disabled={!isEditor}
                 >
                   {STATUS_OPTIONS.map((opt) => (
                     <option
@@ -181,6 +186,7 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
                   className="glass-input appearance-none"
                   value={priority}
                   onChange={(e) => setPriority(Number(e.target.value))}
+                  disabled={!isEditor}
                 >
                   <option value={0} style={{ background: "#1a1a2e" }}>
                     Low
@@ -205,6 +211,7 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
                 className="glass-input appearance-none"
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
+                disabled={!isEditor}
               >
                 <option value="" style={{ background: "#1a1a2e", color: "white" }}>
                   No category
@@ -232,6 +239,7 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
                 className="glass-input"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
+                disabled={!isEditor}
               />
             </div>
 
@@ -261,6 +269,7 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
                   size="sm"
                   onClick={handleDelete}
                   loading={deleteMutation.isPending}
+                  disabled={!isEditor}
                 >
                   <Trash2 size={14} />
                   Delete
@@ -275,6 +284,7 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
                 size="sm"
                 onClick={handleSave}
                 loading={createMutation.isPending || updateMutation.isPending}
+                disabled={!isEditor}
               >
                 <Save size={14} />
                 {isEditing ? "Update" : "Create"}

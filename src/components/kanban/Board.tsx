@@ -12,15 +12,17 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { motion } from "framer-motion";
-import { Plus, Tag, Archive } from "lucide-react";
+import { Plus, Tag, Archive, Users } from "lucide-react";
 import Column from "./Column";
 import TaskCard from "./TaskCard";
 import TaskModal from "./TaskModal";
 import CategoryManager from "./CategoryManager";
+import CollaboratorsPanel from "./CollaboratorsPanel";
 import GlassButton from "@/components/ui/GlassButton";
 import { useGroupedTasks, useMoveTask } from "@/hooks/useTasks";
 import { useArchiveTasksMutation } from "@/hooks/useArchives";
 import { useUser } from "@/lib/auth/hooks";
+import { useBoardRole } from "@/lib/boards/access";
 import type { Task, TaskStatus } from "@/types/supabase";
 
 const COLUMNS: { id: TaskStatus; title: string; color: string }[] = [
@@ -35,7 +37,8 @@ export default function Board() {
   const { grouped, isLoading } = useGroupedTasks();
   const { moveTask } = useMoveTask();
   const archiveMutation = useArchiveTasksMutation();
-  const { user } = useUser();
+  const { user, profile } = useUser();
+  const { isEditor, isOwner } = useBoardRole();
 
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -106,16 +109,16 @@ export default function Board() {
   );
 
   const handleCreateTask = useCallback(() => {
-    if (!user) return;
+    if (!user || !isEditor) return;
     setShowCreateModal(true);
-  }, [user]);
+  }, [user, isEditor]);
 
   const handleArchive = useCallback(() => {
-    if (!user) return;
+    if (!user || !isEditor) return;
     if (confirm("Archive all completed tasks? They will be moved to the monthly archive.")) {
       archiveMutation.mutate({ userId: user.id });
     }
-  }, [user, archiveMutation]);
+  }, [user, isEditor, archiveMutation]);
 
   if (isLoading) {
     return (
@@ -142,7 +145,7 @@ export default function Board() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <GlassButton variant="ghost" size="sm" onClick={() => setShowCategoryManager(true)}>
+          <GlassButton variant="ghost" size="sm" onClick={() => setShowCategoryManager(true)} disabled={!isEditor}>
             <Tag size={14} />
             Categories
           </GlassButton>
@@ -152,16 +155,25 @@ export default function Board() {
               size="sm"
               onClick={handleArchive}
               loading={archiveMutation.isPending}
+              disabled={!isEditor}
             >
               <Archive size={14} />
               Archive ({doneCount})
             </GlassButton>
           )}
-          <GlassButton onClick={handleCreateTask}>
+          <GlassButton onClick={handleCreateTask} disabled={!isEditor}>
             <Plus size={16} />
             New Task
           </GlassButton>
         </div>
+      </div>
+
+      <div className="mb-6">
+        <div className="flex items-center gap-2 text-white/70 text-sm mb-3">
+          <Users size={14} />
+          Colaboracion del tablero
+        </div>
+        <CollaboratorsPanel boardId={profile?.active_board_id || null} canManage={isOwner} />
       </div>
 
       {/* Board */}

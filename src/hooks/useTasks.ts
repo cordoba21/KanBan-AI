@@ -10,11 +10,25 @@ export function useTasksQuery() {
   const supabase = createClient();
 
   return useQuery({
-    queryKey: ["tasks"],
+    queryKey: ["tasks", "active"],
     queryFn: async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return [] as Task[];
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("active_board_id")
+        .eq("id", user.id)
+        .single();
+
+      if (!profile?.active_board_id) return [] as Task[];
+
       const { data, error } = await supabase
         .from("tasks")
         .select("*")
+        .eq("board_id", profile.active_board_id)
         .order("position", { ascending: true });
 
       if (error) throw error;
@@ -55,9 +69,17 @@ export function useCreateTaskMutation() {
 
   return useMutation({
     mutationFn: async (task: TaskInsert) => {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("active_board_id")
+        .eq("id", task.user_id)
+        .single();
+
+      if (!profile?.active_board_id) throw new Error("No active board");
+
       const { data, error } = await supabase
         .from("tasks")
-        .insert(task)
+        .insert({ ...task, board_id: profile.active_board_id })
         .select()
         .single();
 
@@ -75,6 +97,7 @@ export function useCreateTaskMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", "active"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
     },
   });
@@ -137,6 +160,7 @@ export function useUpdateTaskMutation() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", "active"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
     },
   });
@@ -162,6 +186,7 @@ export function useDeleteTaskMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", "active"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
     },
   });

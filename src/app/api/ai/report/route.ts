@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import type { Database } from "@/types/supabase";
+import type { Database, Profile } from "@/types/supabase";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY!,
@@ -40,6 +40,22 @@ async function verifyAuth(): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+async function getAuthedSupabase() {
+  const cookieStore = await cookies();
+  return createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll() {},
+      },
+    }
+  );
 }
 
 // Retry with exponential backoff + fallback model
@@ -80,6 +96,10 @@ function stripEmojis(text: string) {
   return text.replace(/[\p{Extended_Pictographic}\u200d\uFE0F]/gu, "");
 }
 
+function formatUserName(profile?: Profile | null) {
+  return profile?.full_name || profile?.email || "Usuario";
+}
+
 export async function POST(request: Request) {
   try {
     // Auth check — even though middleware blocks, verify independently
@@ -91,12 +111,28 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabase = getAdminSupabase();
+    const adminSupabase = getAdminSupabase();
+    const authedSupabase = await getAuthedSupabase();
 
-    // Fetch all tasks
-    const { data: tasks, error: tasksError } = await supabase
+    const {
+      data: { user },
+    } = await authedSupabase.auth.getUser();
+
+    // Fetch all tasks for active board
+    const { data: profile } = await authedSupabase
+      .from("profiles")
+      .select("active_board_id")
+      .eq("id", user?.id || "")
+      .single();
+
+    if (!profile?.active_board_id) {
+      return NextResponse.json({ error: "No active board" }, { status: 400 });
+    }
+
+    const { data: tasks, error: tasksError } = await adminSupabase
       .from("tasks")
       .select("*")
+      .eq("board_id", profile.active_board_id)
       .order("created_at", { ascending: false });
 
     if (tasksError) throw tasksError;
@@ -105,36 +141,72 @@ export async function POST(request: Request) {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const { data: logs, error: logsError } = await supabase
+    const { data: logs, error: logsError } = await adminSupabase
       .from("activity_logs")
       .select("*")
+      .eq("board_id", profile.active_board_id)
       .gte("created_at", thirtyDaysAgo.toISOString())
       .order("created_at", { ascending: false })
       .limit(200);
 
     if (logsError) throw logsError;
 
+    const userIds = new Set<string>();
+    (tasks || []).forEach((task) => {
+      if (task.user_id) userIds.add(task.user_id);
+      if (task.assigned_to) userIds.add(task.assigned_to);
+    });
+    (logs || []).forEach((log) => {
+      if (log.user_id) userIds.add(log.user_id);
+    });
+
+    let profilesById = new Map<string, Profile>();
+    if (userIds.size > 0) {
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, full_name, email")
+        .in("id", Array.from(userIds));
+      if (profilesError) throw profilesError;
+      profilesById = new Map((profiles || []).map((profile) => [profile.id, profile as Profile]));
+    }
+
+    const sanitizedTasks = (tasks || []).map((task) => {
+      const { id, user_id, assigned_to, ...rest } = task;
+      return {
+        ...rest,
+        user_id: formatUserName(profilesById.get(user_id)),
+        assigned_to: assigned_to ? formatUserName(profilesById.get(assigned_to)) : null,
+      };
+    });
+
+    const sanitizedLogs = (logs || []).map((log) => {
+      const { task_id, user_id, ...rest } = log;
+      return {
+        ...rest,
+        user_id: user_id ? formatUserName(profilesById.get(user_id)) : null,
+      };
+    });
+
     // Build the prompt
     const prompt = `Eres un analista experto en gestión de proyectos. Analiza los siguientes datos y genera un reporte mensual completo en formato Markdown.
 
 ## Tareas Actuales (JSON):
 \`\`\`json
-${JSON.stringify(tasks, null, 2)}
+${JSON.stringify(sanitizedTasks, null, 2)}
 \`\`\`
 
 ## Registros de Actividad (Últimos 30 Días):
 \`\`\`json
-${JSON.stringify(logs, null, 2)}
+${JSON.stringify(sanitizedLogs, null, 2)}
 \`\`\`
 
 ## Requisitos del Reporte:
 1. **Resumen Ejecutivo** — Visión general del estado del proyecto
-2. **Desglose por Estado** — Conteo y porcentaje por estado (Backlog, To Do, In Progress, Review, Done)
-3. **Análisis de Productividad** — Tareas creadas vs completadas, tendencias de velocidad
-4. **Evaluación de Riesgos** — Tareas atascadas, cuellos de botella en Review, tareas vencidas
-5. **Actividad del Equipo** — Contribuyentes más activos según registros
-6. **Recomendaciones** — Acciones concretas para mejorar el flujo
-7. **Métricas Clave** — Tasa de completitud, tiempo promedio por estado, throughput
+2. **Análisis de Productividad** — Tareas creadas vs completadas, tendencias de velocidad
+3. **Evaluación de Riesgos** — Tareas atascadas, cuellos de botella en Review, tareas vencidas
+4. **Actividad del Equipo** — Contribuyentes más activos según registros
+5. **Recomendaciones** — Acciones concretas para mejorar el flujo
+6. **Métricas Clave** — Tasa de completitud, tiempo promedio por estado, throughput
 
 Formato:
 - Usa un título principal en H1 y secciones en H2.

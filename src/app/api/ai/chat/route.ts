@@ -77,6 +77,7 @@ async function generateWithRetry(prompt: string, maxRetries = 3) {
 
 export async function POST(request: Request) {
   try {
+    const cookieStore = await cookies();
     // Auth check — even though middleware blocks, verify independently
     const isAuthed = await verifyAuth();
     if (!isAuthed) {
@@ -96,10 +97,37 @@ export async function POST(request: Request) {
     }
 
     // Fetch current board state for context
-    const supabase = getAdminSupabase();
-    const { data: tasks } = await supabase
+    const adminSupabase = getAdminSupabase();
+    const authedSupabase = createServerClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll() {},
+        },
+      }
+    );
+    const {
+      data: { user },
+    } = await authedSupabase.auth.getUser();
+
+    const { data: profile } = await authedSupabase
+      .from("profiles")
+      .select("active_board_id")
+      .eq("id", user?.id || "")
+      .single();
+
+    if (!profile?.active_board_id) {
+      return NextResponse.json({ response: "No hay un tablero activo para analizar." });
+    }
+
+    const { data: tasks } = await adminSupabase
       .from("tasks")
       .select("id, title, status, priority, created_at, updated_at")
+      .eq("board_id", profile.active_board_id)
       .order("updated_at", { ascending: false })
       .limit(50);
 

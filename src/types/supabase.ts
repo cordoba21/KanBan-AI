@@ -13,6 +13,7 @@ export type Json =
 
 export type UserRole = "ADMIN" | "MANAGER" | "USER";
 export type TaskStatus = "BACKLOG" | "TODO" | "IN_PROGRESS" | "REVIEW" | "DONE";
+export type BoardRole = "OWNER" | "EDITOR" | "VIEWER";
 
 export interface Database {
   public: {
@@ -24,6 +25,7 @@ export interface Database {
           full_name: string | null;
           avatar_url: string | null;
           role: UserRole;
+          active_board_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -33,6 +35,7 @@ export interface Database {
           full_name?: string | null;
           avatar_url?: string | null;
           role?: UserRole;
+          active_board_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -42,6 +45,7 @@ export interface Database {
           full_name?: string | null;
           avatar_url?: string | null;
           role?: UserRole;
+          active_board_id?: string | null;
           updated_at?: string;
         };
         Relationships: [
@@ -49,6 +53,135 @@ export interface Database {
             foreignKeyName: "profiles_id_fkey";
             columns: ["id"];
             referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      boards: {
+        Row: {
+          id: string;
+          name: string;
+          owner_id: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          owner_id: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          owner_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "boards_owner_id_fkey";
+            columns: ["owner_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      board_members: {
+        Row: {
+          id: string;
+          board_id: string;
+          user_id: string;
+          role: BoardRole;
+          status: string;
+          invited_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          board_id: string;
+          user_id: string;
+          role?: BoardRole;
+          status?: string;
+          invited_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          board_id?: string;
+          user_id?: string;
+          role?: BoardRole;
+          status?: string;
+          invited_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "board_members_board_id_fkey";
+            columns: ["board_id"];
+            referencedRelation: "boards";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "board_members_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "board_members_invited_by_fkey";
+            columns: ["invited_by"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      board_invitations: {
+        Row: {
+          id: string;
+          board_id: string;
+          email: string;
+          role: BoardRole;
+          token: string;
+          invited_by: string | null;
+          expires_at: string;
+          created_at: string;
+          accepted_at: string | null;
+          revoked_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          board_id: string;
+          email: string;
+          role?: BoardRole;
+          token: string;
+          invited_by?: string | null;
+          expires_at: string;
+          created_at?: string;
+          accepted_at?: string | null;
+          revoked_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          board_id?: string;
+          email?: string;
+          role?: BoardRole;
+          token?: string;
+          invited_by?: string | null;
+          expires_at?: string;
+          accepted_at?: string | null;
+          revoked_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "board_invitations_board_id_fkey";
+            columns: ["board_id"];
+            referencedRelation: "boards";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "board_invitations_invited_by_fkey";
+            columns: ["invited_by"];
+            referencedRelation: "profiles";
             referencedColumns: ["id"];
           }
         ];
@@ -64,6 +197,7 @@ export interface Database {
           user_id: string;
           assigned_to: string | null;
           category_id: string | null;
+          board_id: string;
           due_date: string | null;
           created_at: string;
           updated_at: string;
@@ -78,6 +212,7 @@ export interface Database {
           user_id: string;
           assigned_to?: string | null;
           category_id?: string | null;
+          board_id?: string;
           due_date?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -92,6 +227,7 @@ export interface Database {
           user_id?: string;
           assigned_to?: string | null;
           category_id?: string | null;
+          board_id?: string;
           due_date?: string | null;
           updated_at?: string;
         };
@@ -113,6 +249,12 @@ export interface Database {
             columns: ["category_id"];
             referencedRelation: "categories";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tasks_board_id_fkey";
+            columns: ["board_id"];
+            referencedRelation: "boards";
+            referencedColumns: ["id"];
           }
         ];
       };
@@ -122,6 +264,7 @@ export interface Database {
           name: string;
           color: string;
           user_id: string;
+          board_id: string;
           created_at: string;
           updated_at: string;
         };
@@ -130,6 +273,7 @@ export interface Database {
           name: string;
           color: string;
           user_id: string;
+          board_id?: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -138,6 +282,7 @@ export interface Database {
           name?: string;
           color?: string;
           user_id?: string;
+          board_id?: string;
           updated_at?: string;
         };
         Relationships: [
@@ -145,6 +290,12 @@ export interface Database {
             foreignKeyName: "categories_user_id_fkey";
             columns: ["user_id"];
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "categories_board_id_fkey";
+            columns: ["board_id"];
+            referencedRelation: "boards";
             referencedColumns: ["id"];
           }
         ];
@@ -154,6 +305,7 @@ export interface Database {
           id: string;
           task_id: string | null;
           user_id: string | null;
+          board_id: string | null;
           action: string;
           details: Json | null;
           created_at: string;
@@ -162,6 +314,7 @@ export interface Database {
           id?: string;
           task_id?: string | null;
           user_id?: string | null;
+          board_id?: string | null;
           action: string;
           details?: Json | null;
           created_at?: string;
@@ -170,6 +323,7 @@ export interface Database {
           id?: string;
           task_id?: string | null;
           user_id?: string | null;
+          board_id?: string | null;
           action?: string;
           details?: Json | null;
         };
@@ -184,6 +338,12 @@ export interface Database {
             foreignKeyName: "activity_logs_user_id_fkey";
             columns: ["user_id"];
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "activity_logs_board_id_fkey";
+            columns: ["board_id"];
+            referencedRelation: "boards";
             referencedColumns: ["id"];
           }
         ];
@@ -200,6 +360,7 @@ export interface Database {
           category_color: string | null;
           user_id: string;
           assigned_to: string | null;
+          board_id: string;
           due_date: string | null;
           task_created_at: string | null;
           task_completed_at: string | null;
@@ -217,6 +378,7 @@ export interface Database {
           category_color?: string | null;
           user_id: string;
           assigned_to?: string | null;
+          board_id?: string;
           due_date?: string | null;
           task_created_at?: string | null;
           task_completed_at?: string | null;
@@ -234,6 +396,7 @@ export interface Database {
           category_color?: string | null;
           user_id?: string;
           assigned_to?: string | null;
+          board_id?: string;
           due_date?: string | null;
           task_created_at?: string | null;
           task_completed_at?: string | null;
@@ -245,6 +408,12 @@ export interface Database {
             columns: ["user_id"];
             referencedRelation: "profiles";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "archived_tasks_board_id_fkey";
+            columns: ["board_id"];
+            referencedRelation: "boards";
+            referencedColumns: ["id"];
           }
         ];
       };
@@ -255,6 +424,7 @@ export interface Database {
           content: string;
           report_month: string;
           user_id: string;
+          board_id: string;
           task_count: number;
           completed_count: number;
           completion_rate: number;
@@ -267,6 +437,7 @@ export interface Database {
           content: string;
           report_month: string;
           user_id: string;
+          board_id?: string;
           task_count?: number;
           completed_count?: number;
           completion_rate?: number;
@@ -279,6 +450,7 @@ export interface Database {
           content?: string;
           report_month?: string;
           user_id?: string;
+          board_id?: string;
           task_count?: number;
           completed_count?: number;
           completion_rate?: number;
@@ -289,6 +461,12 @@ export interface Database {
             foreignKeyName: "archived_reports_user_id_fkey";
             columns: ["user_id"];
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "archived_reports_board_id_fkey";
+            columns: ["board_id"];
+            referencedRelation: "boards";
             referencedColumns: ["id"];
           }
         ];
@@ -306,6 +484,7 @@ export interface Database {
     Enums: {
       user_role: UserRole;
       task_status: TaskStatus;
+      board_role: BoardRole;
     };
   };
 }
@@ -322,6 +501,18 @@ export type TaskUpdate = Database["public"]["Tables"]["tasks"]["Update"];
 export type Category = Database["public"]["Tables"]["categories"]["Row"];
 export type CategoryInsert = Database["public"]["Tables"]["categories"]["Insert"];
 export type CategoryUpdate = Database["public"]["Tables"]["categories"]["Update"];
+
+export type Board = Database["public"]["Tables"]["boards"]["Row"];
+export type BoardInsert = Database["public"]["Tables"]["boards"]["Insert"];
+export type BoardUpdate = Database["public"]["Tables"]["boards"]["Update"];
+
+export type BoardMember = Database["public"]["Tables"]["board_members"]["Row"];
+export type BoardMemberInsert = Database["public"]["Tables"]["board_members"]["Insert"];
+export type BoardMemberUpdate = Database["public"]["Tables"]["board_members"]["Update"];
+
+export type BoardInvitation = Database["public"]["Tables"]["board_invitations"]["Row"];
+export type BoardInvitationInsert = Database["public"]["Tables"]["board_invitations"]["Insert"];
+export type BoardInvitationUpdate = Database["public"]["Tables"]["board_invitations"]["Update"];
 
 export type ActivityLog = Database["public"]["Tables"]["activity_logs"]["Row"];
 export type ActivityLogInsert = Database["public"]["Tables"]["activity_logs"]["Insert"];
