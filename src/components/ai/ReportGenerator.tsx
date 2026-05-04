@@ -135,10 +135,7 @@ export default function ReportGenerator() {
           </div>
           <GlassButton onClick={generateReport} loading={loading}>
             {loading ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                Analyzing...
-              </>
+              <>Analizando...</>
             ) : (
               <>
                 <FileText size={16} />

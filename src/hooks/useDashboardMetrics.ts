@@ -42,7 +42,10 @@ export function useDashboardMetrics(dateRange?: DateRange) {
   return useQuery({
     queryKey: ["dashboard-metrics", dateRange?.from?.toISOString(), dateRange?.to?.toISOString()],
     queryFn: async (): Promise<DashboardMetrics> => {
-      let query = supabase.from("tasks").select("*");
+      let query = supabase
+        .from("tasks")
+        .select("*")
+        .order("created_at", { ascending: true });
 
       if (dateRange?.from) {
         query = query.gte("created_at", dateRange.from.toISOString());
@@ -51,7 +54,7 @@ export function useDashboardMetrics(dateRange?: DateRange) {
         query = query.lte("created_at", dateRange.to.toISOString());
       }
 
-      const { data: tasks, error } = await query.order("created_at", { ascending: true });
+      const { data: tasks, error } = await query;
 
       if (error) throw error;
 
@@ -86,10 +89,12 @@ export function useDashboardMetrics(dateRange?: DateRange) {
         if (t.status === "DONE") dayMap[day].completed++;
       });
 
-      const timeSeriesData = Object.entries(dayMap).map(([date, data]) => ({
-        date,
-        ...data,
-      }));
+      const timeSeriesData = Object.entries(dayMap)
+        .map(([date, data]) => ({
+          date,
+          ...data,
+        }))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
       return {
         totalTasks,

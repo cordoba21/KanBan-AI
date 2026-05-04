@@ -129,16 +129,44 @@ export async function exportToPDF(data: ReportData, chartElement?: HTMLElement |
     .replace(/[\p{Extended_Pictographic}\u200d\uFE0F]/gu, "")
     .replace(/[#*`]/g, "")
     .replace(/\n{3,}/g, "\n\n");
-  const lines = doc.splitTextToSize(cleanContent, pageWidth - 28);
-
-  for (const line of lines) {
-    if (y > doc.internal.pageSize.getHeight() - 15) {
-      doc.addPage();
-      y = 20;
-    }
-    doc.text(line, 14, y);
-    y += 4.5;
-  }
+  const textLines = cleanContent.split("\n").map((line) => line.trim()).filter(Boolean);
+  const maxWidth = pageWidth - 28;
+  const lineHeight = 4.5;
+  textLines.forEach((line) => {
+    const wrapped = doc.splitTextToSize(line, maxWidth);
+    wrapped.forEach((wrappedLine: string, index: number) => {
+      if (y > doc.internal.pageSize.getHeight() - 15) {
+        doc.addPage();
+        y = 20;
+      }
+      const lineWidth = doc.getTextWidth(wrappedLine);
+      if (index === wrapped.length - 1) {
+        const gap = Math.max(0, maxWidth - lineWidth);
+        const wordCount = wrappedLine.trim().split(/\s+/).length;
+        if (gap > 2 && wordCount > 2) {
+          const spacing = Math.min(0.8, gap / Math.max(1, wordCount - 1));
+          doc.setCharSpace(spacing);
+          doc.text(wrappedLine, 14, y);
+          doc.setCharSpace(0);
+        } else {
+          doc.text(wrappedLine, 14, y);
+        }
+      } else {
+        const gap = Math.max(0, maxWidth - lineWidth);
+        const wordCount = wrappedLine.trim().split(/\s+/).length;
+        if (gap > 2 && wordCount > 2) {
+          const spacing = Math.min(0.8, gap / Math.max(1, wordCount - 1));
+          doc.setCharSpace(spacing);
+          doc.text(wrappedLine, 14, y);
+          doc.setCharSpace(0);
+        } else {
+          doc.text(wrappedLine, 14, y);
+        }
+      }
+      y += lineHeight;
+    });
+    y += 1.5;
+  });
 
   doc.save(`reporte-ejecutivo-${new Date().toISOString().slice(0, 7)}.pdf`);
 }
@@ -383,7 +411,8 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
     const isHeading = line.startsWith("#");
     children.push(
       new Paragraph({
-        spacing: { after: isHeading ? 150 : 100 },
+        spacing: { after: isHeading ? 150 : 120, line: 360 },
+        alignment: isHeading ? AlignmentType.LEFT : AlignmentType.JUSTIFIED,
         children: [
           new TextRun({
             text: clean,
