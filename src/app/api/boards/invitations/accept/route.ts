@@ -95,13 +95,10 @@ export async function POST(request: Request) {
       profileData = profile;
     }
 
-    // Set active_board_id if not set
-    if (!profileData?.active_board_id) {
-      await admin
-        .from("profiles")
-        .update({ active_board_id: invite.board_id })
-        .eq("id", user.id);
-    }
+    await admin
+      .from("profiles")
+      .update({ active_board_id: invite.board_id })
+      .eq("id", user.id);
 
     const { error: memberError } = await admin
       .from("board_members")

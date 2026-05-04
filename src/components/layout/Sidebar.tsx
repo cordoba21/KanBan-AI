@@ -11,6 +11,7 @@ import {
   Sparkles,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   LogOut,
   User,
   Archive,
@@ -21,6 +22,7 @@ import {
   Users,
 } from "lucide-react";
 import { useUser, useSignOut } from "@/lib/auth/hooks";
+import { useUserBoardsQuery, useSwitchBoardMutation } from "@/hooks/useBoards";
 
 const navItems = [
   { href: "/kanban", label: "Kanban Board", icon: Columns3 },
@@ -43,10 +45,13 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [showBoardSelector, setShowBoardSelector] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { profile } = useUser();
   const { signOut } = useSignOut();
+  const { data: userBoards } = useUserBoardsQuery();
+  const switchBoard = useSwitchBoardMutation();
 
   async function handleDeleteAccount() {
     if (deleteConfirmation !== "Delete my account") return;
@@ -300,9 +305,17 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
               >
-                <p className="text-xs font-medium text-white/80 truncate">
-                  {profile?.full_name || profile?.email || "User"}
-                </p>
+                <button
+                  onClick={() => setShowBoardSelector(!showBoardSelector)}
+                  className="flex items-center gap-1 w-full text-left"
+                >
+                  <p className="text-xs font-medium text-white/80 truncate">
+                    {profile?.full_name || profile?.email || "User"}
+                  </p>
+                  {userBoards && userBoards.length > 1 && (
+                    <ChevronDown size={12} className="text-white/40" />
+                  )}
+                </button>
                 {profile?.role && (
                   <span
                     className={`badge ${roleBadge[profile.role]} mt-0.5`}
@@ -315,6 +328,36 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             )}
           </AnimatePresence>
         </div>
+
+        {/* Board selector dropdown */}
+        {showBoardSelector && userBoards && userBoards.length > 1 && (
+          <div className="mx-3 mb-2 p-2 bg-white/5 rounded-lg border border-white/10">
+            <p className="text-[10px] font-medium text-white/40 uppercase tracking-wider mb-2 px-1">
+              Switch Board
+            </p>
+            {userBoards.map((board) => (
+              <button
+                key={board.id}
+                onClick={async () => {
+                  if (board.id !== profile?.active_board_id) {
+                    await switchBoard.mutateAsync({ boardId: board.id });
+                  }
+                  setShowBoardSelector(false);
+                }}
+                className={`flex items-center justify-between w-full px-2 py-1.5 rounded text-xs transition-colors ${
+                  board.id === profile?.active_board_id
+                    ? "bg-sky-500/20 text-sky-300"
+                    : "text-white/60 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <span className="truncate">{board.name}</span>
+                <span className={`badge ${board.role === "OWNER" ? "badge-owner" : "badge-viewer"}`}>
+                  {board.role}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Sign out */}
         <button

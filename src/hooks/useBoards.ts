@@ -113,3 +113,51 @@ export function useRemoveMemberMutation() {
     },
   });
 }
+
+export function useUserBoardsQuery() {
+  const supabase = createClient();
+  const { user } = useUser();
+
+  return useQuery({
+    queryKey: ["user-boards", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from("board_members")
+        .select("board_id, role, status, boards!board_members_board_id_fkey(id, name, created_at)")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return (data || []).map((item) => ({
+        id: (item.boards as unknown as Board)?.id,
+        name: (item.boards as unknown as Board)?.name,
+        role: item.role,
+        status: item.status,
+      }));
+    },
+  });
+}
+
+export function useSwitchBoardMutation() {
+  const supabase = createClient();
+  const queryClient = useQueryClient();
+  const { user } = useUser();
+
+  return useMutation({
+    mutationFn: async ({ boardId }: { boardId: string }) => {
+      if (!user?.id) throw new Error("Not authenticated");
+      const { error } = await supabase
+        .from("profiles")
+        .update({ active_board_id: boardId })
+        .eq("id", user.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["archives"] });
+    },
+  });
+}
