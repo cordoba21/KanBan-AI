@@ -2,11 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Shield, UserPlus, Trash2, Plus } from "lucide-react";
+import { Mail, Shield, UserPlus, Trash2 } from "lucide-react";
 import GlassCard from "@/components/ui/GlassCard";
 import GlassButton from "@/components/ui/GlassButton";
 import { useBoardMembersQuery, useUpdateMemberRoleMutation, useRemoveMemberMutation, type BoardMemberView } from "@/hooks/useBoards";
-import { useCreateBoardMutation, useSwitchBoardMutation } from "@/hooks/useBoards";
 import { useCreateInvitation } from "@/hooks/useInvitations";
 import { useUser } from "@/lib/auth/hooks";
 
@@ -28,14 +27,10 @@ export default function CollaborationPage() {
   const createInvite = useCreateInvitation();
   const updateRole = useUpdateMemberRoleMutation();
   const removeMember = useRemoveMemberMutation();
-  const createBoard = useCreateBoardMutation();
-  const switchBoard = useSwitchBoardMutation();
 
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"EDITOR" | "VIEWER">("EDITOR");
   const [inviteLink, setInviteLink] = useState<string | null>(null);
-  const [newBoardName, setNewBoardName] = useState("");
-  const [showCreateBoard, setShowCreateBoard] = useState(false);
 
   const currentMember = useMemo(() => {
     return (members || []).find((m: BoardMemberView) => m.user_id === user?.id);
@@ -60,18 +55,6 @@ export default function CollaborationPage() {
     }
   }
 
-  async function handleCreateBoard() {
-    if (!newBoardName.trim()) return;
-    try {
-      const board = await createBoard.mutateAsync({ name: newBoardName.trim() });
-      await switchBoard.mutateAsync({ boardId: board.id });
-      setNewBoardName("");
-      setShowCreateBoard(false);
-    } catch {
-      // error shown in UI
-    }
-  }
-
   return (
     <div>
       <div className="mb-6">
@@ -83,35 +66,6 @@ export default function CollaborationPage() {
           Invite team members and manage access
         </p>
       </div>
-
-      <GlassCard padding="md" hover={false} className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-white/80">Your Boards</h3>
-        </div>
-
-        {showCreateBoard ? (
-          <div className="flex gap-2">
-            <input
-              className="glass-input flex-1"
-              placeholder="Board name"
-              value={newBoardName}
-              onChange={(e) => setNewBoardName(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleCreateBoard()}
-            />
-            <GlassButton onClick={handleCreateBoard} disabled={!newBoardName.trim()} loading={createBoard.isPending}>
-              Create
-            </GlassButton>
-            <GlassButton variant="ghost" onClick={() => setShowCreateBoard(false)}>
-              Cancel
-            </GlassButton>
-          </div>
-        ) : (
-          <GlassButton onClick={() => setShowCreateBoard(true)}>
-            <Plus size={14} />
-            Create New Board
-          </GlassButton>
-        )}
-      </GlassCard>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <GlassCard padding="md" hover={false}>

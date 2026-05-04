@@ -49,6 +49,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [showBoardSelector, setShowBoardSelector] = useState(false);
+  const [showUserBoardSelector, setShowUserBoardSelector] = useState(false);
   const [showCreateBoard, setShowCreateBoard] = useState(false);
   const [newBoardName, setNewBoardName] = useState("");
   const [editingBoardId, setEditingBoardId] = useState<string | null>(null);
@@ -175,7 +176,8 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          setShowBoardSelector(!showBoardSelector);
+                          setShowBoardSelector((prev) => !prev);
+                          setShowUserBoardSelector(false);
                         }}
                         className="text-white/30 hover:text-white"
                       >
@@ -186,102 +188,105 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                 </Link>
 
                 {/* Board Dropdown Submenu */}
-                {showBoardSelector && !collapsed && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="ml-3 mt-1 space-y-1 border-l border-white/10 pl-3"
-                  >
-                    {userBoards.map((board) => {
-                      const isCurrent = board.id === profile?.active_board_id;
-                      return (
-                        <div
-                          key={board.id}
-                          className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors ${
-                            isCurrent
-                              ? "bg-sky-500/20 text-sky-300"
-                              : "text-white/50 hover:text-white hover:bg-white/5"
-                          }`}
-                        >
+                <AnimatePresence>
+                  {showBoardSelector && !collapsed && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="ml-3 mt-1 space-y-1 border-l border-white/10 pl-3"
+                    >
+                      {userBoards.map((board) => {
+                        const isCurrent = board.id === profile?.active_board_id;
+                        return (
+                          <div
+                            key={board.id}
+                            className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors ${
+                              isCurrent
+                                ? "bg-sky-500/20 text-sky-300"
+                                : "text-white/50 hover:text-white hover:bg-white/5"
+                            }`}
+                          >
+                            <button
+                              onClick={async () => {
+                                if (!isCurrent) {
+                                  await switchBoard.mutateAsync({ boardId: board.id });
+                                }
+                                setShowBoardSelector(false);
+                              }}
+                              className="flex-1 text-left truncate"
+                            >
+                              {board.name}
+                            </button>
+                            {board.role === "OWNER" && (
+                              <span className="text-[9px] text-white/30">{board.role}</span>
+                            )}
+                            {!isCurrent && board.role === "OWNER" && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingBoardId(board.id);
+                                  setEditingBoardName(board.name);
+                                }}
+                                className="text-white/20 hover:text-white"
+                              >
+                                <Pencil size={12} />
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+
+                      {/* Create new board option */}
+                      {showCreateBoard ? (
+                        <div className="flex items-center gap-1 px-2 py-1">
+                          <input
+                            className="glass-input flex-1 text-xs py-1"
+                            placeholder="Board name"
+                            value={newBoardName}
+                            onChange={(e) => setNewBoardName(e.target.value)}
+                            onKeyDown={async (e) => {
+                              if (e.key === "Enter" && newBoardName.trim()) {
+                                const board = await createBoard.mutateAsync({ name: newBoardName.trim() });
+                                await switchBoard.mutateAsync({ boardId: board.id });
+                                setNewBoardName("");
+                                setShowCreateBoard(false);
+                              }
+                              if (e.key === "Escape") {
+                                setShowCreateBoard(false);
+                                setNewBoardName("");
+                              }
+                            }}
+                            autoFocus
+                          />
                           <button
                             onClick={async () => {
-                              if (!isCurrent) {
+                              if (newBoardName.trim()) {
+                                const board = await createBoard.mutateAsync({ name: newBoardName.trim() });
                                 await switchBoard.mutateAsync({ boardId: board.id });
+                                setNewBoardName("");
+                                setShowCreateBoard(false);
                               }
-                              setShowBoardSelector(false);
                             }}
-                            className="flex-1 text-left truncate"
+                            disabled={!newBoardName.trim() || createBoard.isPending}
+                            className="text-white/40 hover:text-white"
                           >
-                            {board.name}
+                            <Plus size={14} />
                           </button>
-                          {board.role === "OWNER" && (
-                            <span className="text-[9px] text-white/30">{board.role}</span>
-                          )}
-                          {!isCurrent && board.role === "OWNER" && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditingBoardId(board.id);
-                                setEditingBoardName(board.name);
-                              }}
-                              className="text-white/20 hover:text-white"
-                            >
-                              <Pencil size={12} />
-                            </button>
-                          )}
                         </div>
-                      );
-                    })}
-
-                    {/* Create new board option */}
-                    {showCreateBoard ? (
-                      <div className="flex items-center gap-1 px-2 py-1">
-                        <input
-                          className="glass-input flex-1 text-xs py-1"
-                          placeholder="Board name"
-                          value={newBoardName}
-                          onChange={(e) => setNewBoardName(e.target.value)}
-                          onKeyDown={async (e) => {
-                            if (e.key === "Enter" && newBoardName.trim()) {
-                              const board = await createBoard.mutateAsync({ name: newBoardName.trim() });
-                              await switchBoard.mutateAsync({ boardId: board.id });
-                              setNewBoardName("");
-                              setShowCreateBoard(false);
-                            }
-                            if (e.key === "Escape") {
-                              setShowCreateBoard(false);
-                              setNewBoardName("");
-                            }
-                          }}
-                          autoFocus
-                        />
+                      ) : (
                         <button
-                          onClick={async () => {
-                            if (newBoardName.trim()) {
-                              const board = await createBoard.mutateAsync({ name: newBoardName.trim() });
-                              await switchBoard.mutateAsync({ boardId: board.id });
-                              setNewBoardName("");
-                              setShowCreateBoard(false);
-                            }
-                          }}
-                          disabled={!newBoardName.trim() || createBoard.isPending}
-                          className="text-white/40 hover:text-white"
+                          onClick={() => setShowCreateBoard(true)}
+                          className="flex items-center gap-2 px-2 py-1.5 text-xs text-white/30 hover:text-white/60 w-full"
                         >
-                          <Plus size={14} />
+                          <Plus size={12} />
+                          Create board
                         </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => setShowCreateBoard(true)}
-                        className="flex items-center gap-2 px-2 py-1.5 text-xs text-white/30 hover:text-white/60 w-full"
-                      >
-                        <Plus size={12} />
-                        Create board
-                      </button>
-                    )}
-                  </motion.div>
-                )}
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* Inline edit for board name */}
                 {editingBoardId && (
@@ -490,7 +495,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       </nav>
 
       {/* User section */}
-      <div className="p-3 border-t border-white/5">
+      <div className="p-3 border-t border-white/5 relative">
         <div className="flex items-center gap-3 px-3 py-2">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-sky-300/30 to-purple-400/30 flex items-center justify-center flex-shrink-0 border border-white/10">
             <User size={14} className="text-white/70" />
@@ -505,7 +510,10 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                 transition={{ duration: 0.15 }}
               >
                 <button
-                  onClick={() => setShowBoardSelector(!showBoardSelector)}
+                  onClick={() => {
+                    setShowUserBoardSelector((prev) => !prev);
+                    setShowBoardSelector(false);
+                  }}
                   className="flex items-center gap-1 w-full text-left"
                 >
                   <p className="text-xs font-medium text-white/80 truncate">
@@ -529,34 +537,42 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         </div>
 
         {/* Board selector dropdown */}
-        {showBoardSelector && userBoards && userBoards.length > 1 && (
-          <div className="mx-3 mb-2 p-2 bg-white/5 rounded-lg border border-white/10">
-            <p className="text-[10px] font-medium text-white/40 uppercase tracking-wider mb-2 px-1">
-              Switch Board
-            </p>
-            {userBoards.map((board) => (
-              <button
-                key={board.id}
-                onClick={async () => {
-                  if (board.id !== profile?.active_board_id) {
-                    await switchBoard.mutateAsync({ boardId: board.id });
-                  }
-                  setShowBoardSelector(false);
-                }}
-                className={`flex items-center justify-between w-full px-2 py-1.5 rounded text-xs transition-colors ${
-                  board.id === profile?.active_board_id
-                    ? "bg-sky-500/20 text-sky-300"
-                    : "text-white/60 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <span className="truncate">{board.name}</span>
-                <span className={`badge ${board.role === "OWNER" ? "badge-owner" : "badge-viewer"}`}>
-                  {board.role}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
+        <AnimatePresence>
+          {showUserBoardSelector && !collapsed && userBoards && userBoards.length > 1 && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 6 }}
+              transition={{ duration: 0.2 }}
+              className="mx-3 mb-2 p-2 bg-white/5 rounded-lg border border-white/10"
+            >
+              <p className="text-[10px] font-medium text-white/40 uppercase tracking-wider mb-2 px-1">
+                Switch Board
+              </p>
+              {userBoards.map((board) => (
+                <button
+                  key={board.id}
+                  onClick={async () => {
+                    if (board.id !== profile?.active_board_id) {
+                      await switchBoard.mutateAsync({ boardId: board.id });
+                    }
+                    setShowUserBoardSelector(false);
+                  }}
+                  className={`flex items-center justify-between w-full px-2 py-1.5 rounded text-xs transition-colors ${
+                    board.id === profile?.active_board_id
+                      ? "bg-sky-500/20 text-sky-300"
+                      : "text-white/60 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <span className="truncate">{board.name}</span>
+                  <span className={`badge ${board.role === "OWNER" ? "badge-owner" : "badge-viewer"}`}>
+                    {board.role}
+                  </span>
+                </button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Sign out */}
         <button
