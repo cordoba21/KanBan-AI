@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import StatsGrid from "@/components/dashboard/StatsGrid";
 import TasksChart from "@/components/dashboard/TasksChart";
@@ -11,18 +12,29 @@ import DateRangeFilter, {
 import { useDashboardMetrics } from "@/hooks/useDashboardMetrics";
 import { useCategoriesQuery } from "@/hooks/useCategories";
 import GlassCard from "@/components/ui/GlassCard";
-import { useUserBoardsQuery } from "@/hooks/useBoards";
+import { useUserBoardsQuery, useSwitchBoardMutation } from "@/hooks/useBoards";
 import { useUser } from "@/lib/auth/hooks";
 
 export default function DashboardClient() {
+  const router = useRouter();
   const [rangePreset, setRangePreset] = useState("all");
   const dateRange = useMemo(() => getDateRange(rangePreset), [rangePreset]);
-  const { profile } = useUser();
+  const { profile, refreshProfile } = useUser();
   const { data: userBoards = [] } = useUserBoardsQuery();
+  const switchBoard = useSwitchBoardMutation();
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
   const activeBoardId = selectedBoardId || profile?.active_board_id || null;
   const { data, isLoading } = useDashboardMetrics(dateRange, activeBoardId);
   const { data: categories } = useCategoriesQuery(activeBoardId);
+
+  const handleBoardChange = async (newBoardId: string) => {
+    if (newBoardId && newBoardId !== profile?.active_board_id) {
+      await switchBoard.mutateAsync({ boardId: newBoardId });
+      await refreshProfile();
+      router.refresh();
+    }
+    setSelectedBoardId(null);
+  };
 
 
   const categoryStats = useMemo(() => {
@@ -68,7 +80,7 @@ export default function DashboardClient() {
             <select
               className="glass-input appearance-none pr-8 text-sm"
               value={selectedBoardId || profile?.active_board_id || ""}
-              onChange={(e) => setSelectedBoardId(e.target.value || null)}
+              onChange={(e) => handleBoardChange(e.target.value)}
               disabled={userBoards.length === 0}
             >
               {userBoards.length === 0 && (
