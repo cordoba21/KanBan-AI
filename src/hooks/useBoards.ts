@@ -161,3 +161,37 @@ export function useSwitchBoardMutation() {
     },
   });
 }
+
+export function useCreateBoardMutation() {
+  const supabase = createClient();
+  const queryClient = useQueryClient();
+  const { user } = useUser();
+
+  return useMutation({
+    mutationFn: async ({ name }: { name: string }) => {
+      if (!user?.id) throw new Error("Not authenticated");
+      const { data: board, error: boardError } = await supabase
+        .from("boards")
+        .insert({ name, owner_id: user.id })
+        .select()
+        .single();
+      if (boardError) throw boardError;
+
+      const { error: memberError } = await supabase
+        .from("board_members")
+        .insert({
+          board_id: board.id,
+          user_id: user.id,
+          role: "OWNER",
+          status: "active",
+        });
+      if (memberError) throw memberError;
+
+      return board as Board;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-boards"] });
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+    },
+  });
+}
