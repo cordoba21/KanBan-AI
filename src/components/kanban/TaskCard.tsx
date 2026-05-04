@@ -23,8 +23,8 @@ const priorityConfig = [
   { label: "High", color: "#f87171", icon: AlertCircle },
 ];
 
-function CategoryBadge({ categoryId }: { categoryId: string | null }) {
-  const { data: categories } = useCategoriesQuery(task.board_id);
+function CategoryBadge({ categoryId, boardId }: { categoryId: string | null; boardId: string }) {
+  const { data: categories } = useCategoriesQuery(boardId);
   if (!categoryId || !categories) return null;
 
   const cat = categories.find((c) => c.id === categoryId);
@@ -146,7 +146,7 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
           </div>
           {task.category_id && (
             <div className="mb-2">
-              <CategoryBadge categoryId={task.category_id} />
+              <CategoryBadge categoryId={task.category_id} boardId={task.board_id} />
             </div>
           )}
           <h4 className="text-sm font-medium text-white/90 mb-1 line-clamp-2">
@@ -243,7 +243,7 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
         {/* Category Badge */}
         {task.category_id && (
           <div className="mb-2">
-            <CategoryBadge categoryId={task.category_id} />
+            <CategoryBadge categoryId={task.category_id} boardId={task.board_id} />
           </div>
         )}
 
