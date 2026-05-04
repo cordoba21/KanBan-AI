@@ -11,9 +11,9 @@ import GlassButton from "@/components/ui/GlassButton";
 import { useArchivedTasksQuery, useArchiveMonthsQuery } from "@/hooks/useArchives";
 
 const priorityConfig = [
-  { label: "Baja", color: "#4ade80", icon: CheckCircle2 },
-  { label: "Media", color: "#fbbf24", icon: Clock },
-  { label: "Alta", color: "#f87171", icon: AlertCircle },
+  { label: "Low", color: "#4ade80", icon: CheckCircle2 },
+  { label: "Medium", color: "#fbbf24", icon: Clock },
+  { label: "High", color: "#f87171", icon: AlertCircle },
 ];
 
 export default function ArchivedTasksPage() {
@@ -26,7 +26,7 @@ export default function ArchivedTasksPage() {
   function formatMonth(m: string) {
     const [year, month] = m.split("-");
     const date = new Date(parseInt(year), parseInt(month) - 1);
-    return date.toLocaleDateString("es-MX", { year: "numeric", month: "long" });
+    return date.toLocaleDateString("en-US", { year: "numeric", month: "long" });
   }
 
   return (
@@ -36,10 +36,10 @@ export default function ArchivedTasksPage() {
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-3">
             <Archive size={24} className="text-sky-300" />
-            Archivo de Tareas
+            Task Archive
           </h1>
           <p className="text-white/40 text-sm mt-1">
-            Tareas completadas archivadas por mes
+            Completed tasks archived by month
           </p>
         </div>
       </div>
@@ -57,7 +57,7 @@ export default function ArchivedTasksPage() {
             size="sm"
             onClick={() => setSelectedMonth(undefined)}
           >
-            Todos
+            All
           </GlassButton>
           {months.map((m) => (
             <GlassButton
@@ -142,13 +142,13 @@ export default function ArchivedTasksPage() {
                           {task.task_created_at && (
                             <span className="text-[10px] text-white/25 flex items-center gap-1">
                               <Calendar size={9} />
-                              Creada: {new Date(task.task_created_at).toLocaleDateString("es-MX", { month: "short", day: "numeric" })}
+                              Created: {new Date(task.task_created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                             </span>
                           )}
                           {task.task_completed_at && (
                             <span className="text-[10px] text-green-400/50 flex items-center gap-1">
                               <CheckCircle2 size={9} />
-                              Completada: {new Date(task.task_completed_at).toLocaleDateString("es-MX", { month: "short", day: "numeric" })}
+                              Completed: {new Date(task.task_completed_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                             </span>
                           )}
                         </div>
@@ -175,9 +175,9 @@ export default function ArchivedTasksPage() {
           <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-4 border border-white/10">
             <CheckSquare size={28} className="text-white/15" />
           </div>
-          <p className="text-white/30 text-sm">No hay tareas archivadas</p>
+          <p className="text-white/30 text-sm">No archived tasks</p>
           <p className="text-white/20 text-xs mt-1">
-            Las tareas completadas se archivarán aquí
+            Completed tasks will be archived here
           </p>
         </motion.div>
       )}

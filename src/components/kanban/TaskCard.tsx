@@ -169,10 +169,20 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
       style={{
         ...style,
         borderRadius: "var(--radius-organic-sm)",
+        border: isDragging ? "1px dashed rgba(255,255,255,0.1)" : "1px solid rgba(255,255,255,0.08)",
+        background: isDragging
+          ? "rgba(255,255,255,0.02)"
+          : "rgba(255,255,255,0.04)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        boxShadow: isDragging
+          ? "none"
+          : "0 2px 8px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.05)",
       }}
       className={`
-        glass-hover cursor-pointer group relative
-        ${isDragging ? "z-50 shadow-none border-dashed border-white/10 bg-white/[0.02]" : ""}
+        cursor-pointer group relative transition-colors duration-200
+        hover:bg-white/[0.07] hover:border-white/12
+        ${isDragging ? "z-50" : ""}
       `}
       whileHover={{
         scale: 1.015,

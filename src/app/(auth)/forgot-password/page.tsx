@@ -156,7 +156,7 @@ export default function ForgotPasswordPage() {
     }
   }
 
-  // ── Step 3: Set New Password (user already verified via OTP) ─
+  // ── Step 3: Set New Password (session established by OTP verification) ─
   async function handleSetPassword(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -174,14 +174,10 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/verify-otp", {
+      const res = await fetch("/api/auth/update-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          otp: otp.join(""),
-          newPassword,
-        }),
+        body: JSON.stringify({ newPassword }),
       });
 
       const data = await res.json();

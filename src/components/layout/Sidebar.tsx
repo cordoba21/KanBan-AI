@@ -32,7 +32,7 @@ const archiveItems = [
   { href: "/archives/reports", label: "Report Archive", icon: FileText },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [collapsed, setCollapsed] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
@@ -112,7 +112,7 @@ export default function Sidebar() {
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href;
           return (
-            <Link key={href} href={href}>
+            <Link key={href} href={href} onClick={onNavigate}>
               <motion.div
                 className={`
                   flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-organic-sm)]

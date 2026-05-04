@@ -25,17 +25,20 @@ export async function exportToPDF(data: ReportData, chartElement?: HTMLElement |
   let y = 20;
 
   // Title
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
   doc.setTextColor(30, 30, 60);
   doc.text("Reporte Ejecutivo Mensual", pageWidth / 2, y, { align: "center" });
   y += 10;
 
+  doc.setFont("times", "italic");
   doc.setFontSize(10);
   doc.setTextColor(120, 120, 150);
   doc.text(`KanBan AI — Generado: ${new Date(data.generatedAt).toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" })}`, pageWidth / 2, y, { align: "center" });
   y += 15;
 
   // Stats table
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
   doc.setTextColor(30, 30, 60);
   doc.text("Resumen de Métricas", 14, y);
@@ -59,6 +62,7 @@ export async function exportToPDF(data: ReportData, chartElement?: HTMLElement |
   y = (doc as any).lastAutoTable.finalY + 12;
 
   // Status distribution table
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
   doc.setTextColor(30, 30, 60);
   doc.text("Distribución por Estado", 14, y);
@@ -94,6 +98,7 @@ export async function exportToPDF(data: ReportData, chartElement?: HTMLElement |
         y = 20;
       }
 
+      doc.setFont("helvetica", "bold");
       doc.setFontSize(14);
       doc.setTextColor(30, 30, 60);
       doc.text("Gráficas", 14, y);
@@ -111,14 +116,19 @@ export async function exportToPDF(data: ReportData, chartElement?: HTMLElement |
     y = 20;
   }
 
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
   doc.setTextColor(30, 30, 60);
   doc.text("Análisis Detallado", 14, y);
   y += 8;
 
+  doc.setFont("times", "normal");
   doc.setFontSize(9);
   doc.setTextColor(60, 60, 80);
-  const cleanContent = data.content.replace(/[#*`]/g, "").replace(/\n{3,}/g, "\n\n");
+  const cleanContent = data.content
+    .replace(/[\p{Extended_Pictographic}\u200d\uFE0F]/gu, "")
+    .replace(/[#*`]/g, "")
+    .replace(/\n{3,}/g, "\n\n");
   const lines = doc.splitTextToSize(cleanContent, pageWidth - 28);
 
   for (const line of lines) {
@@ -150,7 +160,7 @@ export async function exportToExcel(data: ReportData) {
     { header: "Valor", key: "value", width: 20 },
   ];
 
-  summary.getRow(1).font = { bold: true, size: 12, color: { argb: "FFFFFFFF" } };
+  summary.getRow(1).font = { name: "Calibri", bold: true, size: 12, color: { argb: "FFFFFFFF" } };
   summary.getRow(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF7DD3FC" } };
 
   summary.addRow({ metric: "Total de Tareas", value: data.stats.totalTasks });
@@ -170,7 +180,7 @@ export async function exportToExcel(data: ReportData) {
     { header: "Porcentaje", key: "pct", width: 15 },
   ];
 
-  statusSheet.getRow(1).font = { bold: true, size: 12, color: { argb: "FFFFFFFF" } };
+  statusSheet.getRow(1).font = { name: "Calibri", bold: true, size: 12, color: { argb: "FFFFFFFF" } };
   statusSheet.getRow(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFC084FC" } };
 
   data.stats.statusDistribution.forEach((s) => {
@@ -187,10 +197,14 @@ export async function exportToExcel(data: ReportData) {
   });
 
   reportSheet.columns = [{ header: "Análisis del Reporte", key: "content", width: 120 }];
-  reportSheet.getRow(1).font = { bold: true, size: 12, color: { argb: "FFFFFFFF" } };
+  reportSheet.getRow(1).font = { name: "Calibri", bold: true, size: 12, color: { argb: "FFFFFFFF" } };
   reportSheet.getRow(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF4ADE80" } };
 
-  const contentLines = data.content.replace(/[#*`]/g, "").split("\n").filter(Boolean);
+  const contentLines = data.content
+    .replace(/[\p{Extended_Pictographic}\u200d\uFE0F]/gu, "")
+    .replace(/[#*`]/g, "")
+    .split("\n")
+    .filter(Boolean);
   contentLines.forEach((line) => {
     reportSheet.addRow({ content: line });
   });
@@ -213,7 +227,7 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
       alignment: AlignmentType.CENTER,
       spacing: { after: 200 },
       children: [
-        new TextRun({ text: "Reporte Ejecutivo Mensual", bold: true, size: 36, color: "1E1E3C" }),
+        new TextRun({ text: "Reporte Ejecutivo Mensual", bold: true, size: 36, color: "1E1E3C", font: "Cambria" }),
       ],
     })
   );
@@ -225,7 +239,7 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
       children: [
         new TextRun({
           text: `KanBan AI — ${new Date(data.generatedAt).toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" })}`,
-          size: 20, color: "787896", italics: true,
+          size: 20, color: "787896", italics: true, font: "Georgia",
         }),
       ],
     })
@@ -236,7 +250,7 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
     new Paragraph({
       heading: HeadingLevel.HEADING_2,
       spacing: { before: 300, after: 200 },
-      children: [new TextRun({ text: "📊 Resumen de Métricas", bold: true, size: 28, color: "1E1E3C" })],
+      children: [new TextRun({ text: "Resumen de Métricas", bold: true, size: 28, color: "1E1E3C", font: "Cambria" })],
     })
   );
 
@@ -258,7 +272,7 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
           children: ["Métrica", "Valor"].map(
             (text) =>
               new TableCell({
-                children: [new Paragraph({ children: [new TextRun({ text, bold: true, size: 22, color: "FFFFFF" })] })],
+                children: [new Paragraph({ children: [new TextRun({ text, bold: true, size: 22, color: "FFFFFF", font: "Cambria" })] })],
                 shading: { fill: "7DD3FC" },
                 borders,
                 width: { size: 50, type: WidthType.PERCENTAGE },
@@ -269,8 +283,8 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
           ([m, v]) =>
             new TableRow({
               children: [
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: m, size: 20 })] })], borders }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: v, size: 20, bold: true })] })], borders }),
+                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: m, size: 20, font: "Georgia" })] })], borders }),
+                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: v, size: 20, bold: true, font: "Georgia" })] })], borders }),
               ],
             })
         ),
@@ -290,9 +304,9 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
         new Paragraph({
           heading: HeadingLevel.HEADING_2,
           spacing: { before: 400, after: 200 },
-          children: [new TextRun({ text: "📈 Gráficas", bold: true, size: 28, color: "1E1E3C" })],
-        })
-      );
+        children: [new TextRun({ text: "Gráficas", bold: true, size: 28, color: "1E1E3C", font: "Cambria" })],
+      })
+    );
 
       children.push(
         new Paragraph({
@@ -316,7 +330,7 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
     new Paragraph({
       heading: HeadingLevel.HEADING_2,
       spacing: { before: 400, after: 200 },
-      children: [new TextRun({ text: "📋 Distribución por Estado", bold: true, size: 28, color: "1E1E3C" })],
+      children: [new TextRun({ text: "Distribución por Estado", bold: true, size: 28, color: "1E1E3C", font: "Cambria" })],
     })
   );
 
@@ -328,7 +342,7 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
           children: ["Estado", "Cantidad", "Porcentaje"].map(
             (text) =>
               new TableCell({
-                children: [new Paragraph({ children: [new TextRun({ text, bold: true, size: 22, color: "FFFFFF" })] })],
+                children: [new Paragraph({ children: [new TextRun({ text, bold: true, size: 22, color: "FFFFFF", font: "Cambria" })] })],
                 shading: { fill: "C084FC" },
                 borders,
               })
@@ -338,10 +352,10 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
           (s) =>
             new TableRow({
               children: [
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: s.name, size: 20 })] })], borders }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: String(s.value), size: 20 })] })], borders }),
+                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: s.name, size: 20, font: "Georgia" })] })], borders }),
+                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: String(s.value), size: 20, font: "Georgia" })] })], borders }),
                 new TableCell({
-                  children: [new Paragraph({ children: [new TextRun({ text: data.stats.totalTasks > 0 ? `${Math.round((s.value / data.stats.totalTasks) * 100)}%` : "0%", size: 20 })] })],
+                  children: [new Paragraph({ children: [new TextRun({ text: data.stats.totalTasks > 0 ? `${Math.round((s.value / data.stats.totalTasks) * 100)}%` : "0%", size: 20, font: "Georgia" })] })],
                   borders,
                 }),
               ],
@@ -356,11 +370,14 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
     new Paragraph({
       heading: HeadingLevel.HEADING_2,
       spacing: { before: 400, after: 200 },
-      children: [new TextRun({ text: "🤖 Análisis Detallado", bold: true, size: 28, color: "1E1E3C" })],
+      children: [new TextRun({ text: "Análisis Detallado", bold: true, size: 28, color: "1E1E3C", font: "Cambria" })],
     })
   );
 
-  const contentLines = data.content.split("\n").filter(Boolean);
+  const contentLines = data.content
+    .replace(/[\p{Extended_Pictographic}\u200d\uFE0F]/gu, "")
+    .split("\n")
+    .filter(Boolean);
   contentLines.forEach((line) => {
     const clean = line.replace(/^#+\s*/, "").replace(/\*\*/g, "").replace(/`/g, "");
     const isHeading = line.startsWith("#");
@@ -373,6 +390,7 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
             bold: isHeading,
             size: isHeading ? 24 : 20,
             color: isHeading ? "1E1E3C" : "3C3C5A",
+            font: isHeading ? "Cambria" : "Georgia",
           }),
         ],
       })

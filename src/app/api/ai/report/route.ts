@@ -76,6 +76,10 @@ async function generateWithRetry(prompt: string, maxRetries = 3) {
   throw new Error("All AI models are currently unavailable. Please try again later.");
 }
 
+function stripEmojis(text: string) {
+  return text.replace(/[\p{Extended_Pictographic}\u200d\uFE0F]/gu, "");
+}
+
 export async function POST(request: Request) {
   try {
     // Auth check — even though middleware blocks, verify independently
@@ -111,34 +115,39 @@ export async function POST(request: Request) {
     if (logsError) throw logsError;
 
     // Build the prompt
-    const prompt = `You are an expert project management analyst. Analyze the following project data and generate a comprehensive monthly report in Markdown format.
+    const prompt = `Eres un analista experto en gestión de proyectos. Analiza los siguientes datos y genera un reporte mensual completo en formato Markdown.
 
-## Current Tasks (JSON):
+## Tareas Actuales (JSON):
 \`\`\`json
 ${JSON.stringify(tasks, null, 2)}
 \`\`\`
 
-## Activity Logs (Last 30 Days):
+## Registros de Actividad (Últimos 30 Días):
 \`\`\`json
 ${JSON.stringify(logs, null, 2)}
 \`\`\`
 
-## Report Requirements:
-1. **Executive Summary** — High-level overview of project health
-2. **Task Status Breakdown** — Count and percentage by status (Backlog, To Do, In Progress, Review, Done)
-3. **Productivity Analysis** — Tasks created vs completed, velocity trends
-4. **Risk Assessment** — Tasks stuck too long, bottlenecks in Review, overdue items
-5. **Team Activity** — Most active contributors based on logs
-6. **Recommendations** — Actionable suggestions to improve workflow
-7. **Key Metrics** — Completion rate, average time in each status, throughput
+## Requisitos del Reporte:
+1. **Resumen Ejecutivo** — Visión general del estado del proyecto
+2. **Desglose por Estado** — Conteo y porcentaje por estado (Backlog, To Do, In Progress, Review, Done)
+3. **Análisis de Productividad** — Tareas creadas vs completadas, tendencias de velocidad
+4. **Evaluación de Riesgos** — Tareas atascadas, cuellos de botella en Review, tareas vencidas
+5. **Actividad del Equipo** — Contribuyentes más activos según registros
+6. **Recomendaciones** — Acciones concretas para mejorar el flujo
+7. **Métricas Clave** — Tasa de completitud, tiempo promedio por estado, throughput
 
-Format the report with clear headings, bullet points, and use emojis for visual appeal.
-Generate the report in English. Be specific with numbers from the actual data.`;
+Formato:
+- Usa un título principal en H1 y secciones en H2.
+- Usa H3 para subsecciones cuando aplique.
+- Usa listas con viñetas para puntos clave.
+- No uses emojis.
+- Redacta en español neutro y con cifras específicas basadas en los datos.`;
 
     const reportText = await generateWithRetry(prompt);
+    const cleanedReport = stripEmojis(reportText || "").trim();
 
     return NextResponse.json({
-      report: reportText,
+      report: cleanedReport,
       generatedAt: new Date().toISOString(),
       taskCount: tasks?.length || 0,
       logCount: logs?.length || 0,

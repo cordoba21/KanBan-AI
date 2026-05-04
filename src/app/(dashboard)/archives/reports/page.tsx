@@ -17,7 +17,7 @@ export default function ArchivedReportsPage() {
   function formatMonth(m: string) {
     const [year, month] = m.split("-");
     const date = new Date(parseInt(year), parseInt(month) - 1);
-    return date.toLocaleDateString("es-MX", { year: "numeric", month: "long" });
+    return date.toLocaleDateString("en-US", { year: "numeric", month: "long" });
   }
 
   return (
@@ -26,10 +26,10 @@ export default function ArchivedReportsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white flex items-center gap-3">
           <Archive size={24} className="text-purple-400" />
-          Archivo de Reportes
+          Report Archive
         </h1>
         <p className="text-white/40 text-sm mt-1">
-          Reportes ejecutivos mensuales archivados
+          Archived monthly executive reports
         </p>
       </div>
 
@@ -78,11 +78,11 @@ export default function ArchivedReportsPage() {
                           </span>
                           <span className="text-[10px] text-white/30 flex items-center gap-1">
                             <BarChart3 size={9} />
-                            {report.task_count} tareas
+                            {report.task_count} tasks
                           </span>
                           <span className="text-[10px] text-white/30 flex items-center gap-1">
                             <TrendingUp size={9} />
-                            {report.completion_rate}% completado
+                            {report.completion_rate}% completed
                           </span>
                         </div>
                       </div>
@@ -92,7 +92,7 @@ export default function ArchivedReportsPage() {
                       {/* Stats badges */}
                       <div className="hidden sm:flex items-center gap-2">
                         <span className="badge badge-green" style={{ fontSize: "9px", padding: "1px 8px" }}>
-                          {report.completed_count} completadas
+                          {report.completed_count} completed
                         </span>
                         <span className="badge badge-sky" style={{ fontSize: "9px", padding: "1px 8px" }}>
                           {report.completion_rate}%
@@ -146,7 +146,7 @@ export default function ArchivedReportsPage() {
 
                           <div className="mt-4 pt-3 border-t border-white/5">
                             <span className="text-[10px] text-white/20">
-                              Generado: {new Date(report.created_at).toLocaleString("es-MX")}
+                              Generated: {new Date(report.created_at).toLocaleString("en-US")}
                             </span>
                           </div>
                         </div>
@@ -170,9 +170,9 @@ export default function ArchivedReportsPage() {
           <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-4 border border-white/10">
             <FileText size={28} className="text-white/15" />
           </div>
-          <p className="text-white/30 text-sm">No hay reportes archivados</p>
+          <p className="text-white/30 text-sm">No archived reports</p>
           <p className="text-white/20 text-xs mt-1">
-            Genera y archiva reportes desde AI Insights
+            Generate and archive reports from AI Insights
           </p>
         </motion.div>
       )}

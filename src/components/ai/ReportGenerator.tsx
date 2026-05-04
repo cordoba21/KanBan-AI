@@ -52,7 +52,7 @@ export default function ReportGenerator() {
         logCount: data.logCount,
       });
     } catch (err: any) {
-      setError(err.message || "Error al generar el reporte");
+      setError(err.message || "Error generating report");
     } finally {
       setLoading(false);
     }
@@ -84,7 +84,7 @@ export default function ReportGenerator() {
       else await exportToExcel(data);
     } catch (err: any) {
       console.error("Export error:", err);
-      setError(`Error al exportar como ${format.toUpperCase()}: ${err.message}`);
+      setError(`Error exporting as ${format.toUpperCase()}: ${err.message}`);
     } finally {
       setExporting(null);
     }
@@ -104,15 +104,15 @@ export default function ReportGenerator() {
       });
       setArchived(true);
     } catch (err: any) {
-      setError("Error al archivar el reporte: " + err.message);
+      setError("Error archiving report: " + err.message);
     }
   }
 
   const statusDistribution = metrics?.statusDistribution || [];
   const barData = [
     { name: "Total", value: metrics?.totalTasks || 0, fill: "#7dd3fc" },
-    { name: "Completadas", value: metrics?.completedTasks || 0, fill: "#4ade80" },
-    { name: "En Progreso", value: metrics?.inProgressTasks || 0, fill: "#c084fc" },
+    { name: "Completed", value: metrics?.completedTasks || 0, fill: "#4ade80" },
+    { name: "In Progress", value: metrics?.inProgressTasks || 0, fill: "#c084fc" },
   ];
 
   return (
@@ -126,10 +126,10 @@ export default function ReportGenerator() {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-white">
-                Reporte Ejecutivo Mensual
+                Monthly Executive Report
               </h3>
               <p className="text-xs text-white/40 mt-0.5">
-                Powered by Gemini — analiza todas las tareas y actividad
+                Powered by Gemini — analyzes all tasks and activity
               </p>
             </div>
           </div>
@@ -137,12 +137,12 @@ export default function ReportGenerator() {
             {loading ? (
               <>
                 <Loader2 size={16} className="animate-spin" />
-                Analizando...
+                Analyzing...
               </>
             ) : (
               <>
                 <FileText size={16} />
-                Generar Reporte
+                Generate Report
               </>
             )}
           </GlassButton>
@@ -151,13 +151,13 @@ export default function ReportGenerator() {
         {meta && (
           <div className="flex gap-4 mt-4 pt-4 border-t border-white/5 flex-wrap">
             <span className="text-[10px] text-white/30">
-              Generado: {new Date(meta.generatedAt).toLocaleString("es-MX")}
+              Generated: {new Date(meta.generatedAt).toLocaleString("en-US")}
             </span>
             <span className="text-[10px] text-white/30">
-              Tareas analizadas: {meta.taskCount}
+              Tasks analyzed: {meta.taskCount}
             </span>
             <span className="text-[10px] text-white/30">
-              Logs de actividad: {meta.logCount}
+              Activity logs: {meta.logCount}
             </span>
           </div>
         )}
@@ -204,7 +204,7 @@ export default function ReportGenerator() {
             <div className="flex items-center justify-between flex-wrap gap-3">
               <h3 className="text-sm font-semibold text-white/70 flex items-center gap-2">
                 <Download size={16} />
-                Descargar Reporte
+                Download Report
               </h3>
               <div className="flex gap-2 flex-wrap">
                 <GlassButton
@@ -240,7 +240,7 @@ export default function ReportGenerator() {
                   disabled={archived}
                 >
                   <Archive size={14} />
-                  {archived ? "Archivado ✓" : "Archivar"}
+                  {archived ? "Archived ✓" : "Archive"}
                 </GlassButton>
               </div>
             </div>
@@ -251,7 +251,7 @@ export default function ReportGenerator() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <GlassCard padding="md" hover={false}>
                 <h3 className="text-sm font-semibold text-white/70 mb-4">
-                  Distribución por Estado
+                  Status Distribution
                 </h3>
                 <div className="h-[260px]">
                   <ResponsiveContainer width="100%" height="100%">
@@ -286,7 +286,7 @@ export default function ReportGenerator() {
 
               <GlassCard padding="md" hover={false}>
                 <h3 className="text-sm font-semibold text-white/70 mb-4">
-                  Resumen de Tareas
+                  Task Summary
                 </h3>
                 <div className="h-[260px]">
                   <ResponsiveContainer width="100%" height="100%">
