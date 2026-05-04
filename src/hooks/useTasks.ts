@@ -6,29 +6,33 @@ import { createClient } from "@/lib/supabase/client";
 import type { TaskInsert, TaskUpdate, TaskStatus, TaskWithPeople } from "@/types/supabase";
 
 /* ─── Fetch all tasks ─────────────────────────────────────── */
-export function useTasksQuery() {
+export function useTasksQuery(boardId?: string | null) {
   const supabase = createClient();
 
   return useQuery({
-    queryKey: ["tasks", "active"],
+    queryKey: ["tasks", boardId || "active"],
     queryFn: async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return [] as TaskWithPeople[];
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("active_board_id")
-        .eq("id", user.id)
-        .single();
+      let resolvedBoardId = boardId || null;
+      if (!resolvedBoardId) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("active_board_id")
+          .eq("id", user.id)
+          .single();
+        resolvedBoardId = profile?.active_board_id || null;
+      }
 
-      if (!profile?.active_board_id) return [] as TaskWithPeople[];
+      if (!resolvedBoardId) return [] as TaskWithPeople[];
 
       const { data, error } = await supabase
         .from("tasks")
         .select("*, creator:profiles!tasks_user_id_fkey(id, full_name, email, avatar_url), task_assignees(user_id, profiles(id, full_name, email, avatar_url))")
-        .eq("board_id", profile.active_board_id)
+        .eq("board_id", resolvedBoardId)
         .order("position", { ascending: true });
 
       if (error) throw error;
@@ -38,8 +42,8 @@ export function useTasksQuery() {
 }
 
 /* ─── Tasks grouped by status ─────────────────────────────── */
-export function useGroupedTasks() {
-  const { data: tasks, ...rest } = useTasksQuery();
+export function useGroupedTasks(boardId?: string | null) {
+  const { data: tasks, ...rest } = useTasksQuery(boardId);
 
   const grouped = useMemo(() => {
     const columns: Record<TaskStatus, TaskWithPeople[]> = {

@@ -35,10 +35,10 @@ const COLUMNS: { id: TaskStatus; title: string; color: string }[] = [
 ];
 
 export default function Board() {
-  const { grouped, isLoading } = useGroupedTasks();
+  const { user, profile } = useUser();
+  const { grouped, isLoading } = useGroupedTasks(profile?.active_board_id || null);
   const { moveTask } = useMoveTask();
   const archiveMutation = useArchiveTasksMutation();
-  const { user, profile } = useUser();
   const { isEditor, isOwner } = useBoardRole();
   const { data: members } = useBoardMembersQuery(profile?.active_board_id || null);
   const { data: userBoards } = useUserBoardsQuery();

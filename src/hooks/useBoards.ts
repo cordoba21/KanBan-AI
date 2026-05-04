@@ -158,6 +158,8 @@ export function useSwitchBoardMutation() {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       queryClient.invalidateQueries({ queryKey: ["archives"] });
+      queryClient.invalidateQueries({ queryKey: ["board-members"] });
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
     },
   });
 }
