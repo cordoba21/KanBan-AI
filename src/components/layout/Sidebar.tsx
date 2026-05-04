@@ -18,6 +18,7 @@ import {
   CheckSquare,
   Trash2,
   AlertTriangle,
+  Users,
 } from "lucide-react";
 import { useUser, useSignOut } from "@/lib/auth/hooks";
 
@@ -30,6 +31,10 @@ const navItems = [
 const archiveItems = [
   { href: "/archives/tasks", label: "Task Archive", icon: CheckSquare },
   { href: "/archives/reports", label: "Report Archive", icon: FileText },
+];
+
+const collabItems = [
+  { href: "/collab", label: "Collaboration", icon: Users },
 ];
 
 export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
@@ -174,6 +179,70 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         </div>
 
         {archiveItems.map(({ href, label, icon: Icon }) => {
+          const isActive = pathname === href;
+          return (
+            <Link key={href} href={href}>
+              <motion.div
+                className={`
+                  flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-organic-sm)]
+                  transition-colors duration-200 group relative
+                  ${isActive
+                    ? "bg-white/10 text-white"
+                    : "text-white/50 hover:text-white/80 hover:bg-white/5"
+                  }
+                `}
+                whileHover={{ x: 2 }}
+                transition={{ duration: 0.2 }}
+              >
+                {isActive && (
+                  <motion.div
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-gradient-to-b from-sky-300 to-purple-400"
+                    layoutId="activeNav"
+                    transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+                  />
+                )}
+                <Icon size={20} className="flex-shrink-0" />
+                <AnimatePresence>
+                  {!collapsed && (
+                    <motion.span
+                      className="text-sm font-medium whitespace-nowrap"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      {label}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            </Link>
+          );
+        })}
+
+        {/* Collaboration Section Divider */}
+        <div className="pt-4 pb-2">
+          <AnimatePresence>
+            {!collapsed ? (
+              <motion.div
+                className="flex items-center gap-2 px-3"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <Users size={12} className="text-white/20" />
+                <span className="text-[10px] uppercase tracking-widest text-white/20 font-semibold">
+                  Collaboration
+                </span>
+                <div className="flex-1 h-px bg-white/5" />
+              </motion.div>
+            ) : (
+              <div className="mx-auto w-6 h-px bg-white/10" />
+            )}
+          </AnimatePresence>
+        </div>
+
+        {collabItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href;
           return (
             <Link key={href} href={href}>

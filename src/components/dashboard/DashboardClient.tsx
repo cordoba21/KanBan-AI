@@ -90,43 +90,52 @@ export default function DashboardClient() {
 
       {/* Categories */}
       <div className="mt-6">
-        <GlassCard padding="md" hover={false}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-white/70">
-              Categorias de Tareas
-            </h3>
-            <span className="text-[10px] text-white/30">
-              {categoryStats.length} categorias
-            </span>
-          </div>
-          {categoryStats.length === 0 ? (
-            <p className="text-xs text-white/40">
-              No hay categorias creadas aun.
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {categoryStats.map((cat) => (
-                <div
-                  key={cat.id}
-                  className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 px-3 py-2"
-                >
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="h-2.5 w-2.5 rounded-full"
-                      style={{ backgroundColor: cat.color }}
-                    />
-                    <span className="text-xs text-white/70">
-                      {cat.name}
-                    </span>
-                  </div>
-                  <span className="text-xs font-semibold text-white/80">
-                    {cat.count}
-                  </span>
-                </div>
-              ))}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <GlassCard padding="md" hover={false}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-white/70">
+                Task Categories
+              </h3>
+              <span className="text-[10px] text-white/30">
+                {categoryStats.length} categories
+              </span>
             </div>
-          )}
-        </GlassCard>
+            {categoryStats.length === 0 ? (
+              <p className="text-xs text-white/40">
+                No categories created yet.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {categoryStats.map((cat, index) => (
+                  <motion.div
+                    key={cat.id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.1 * index }}
+                    className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 px-3 py-2"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: cat.color }}
+                      />
+                      <span className="text-xs text-white/70">
+                        {cat.name}
+                      </span>
+                    </div>
+                    <span className="text-xs font-semibold text-white/80">
+                      {cat.count}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </GlassCard>
+        </motion.div>
       </div>
     </div>
   );

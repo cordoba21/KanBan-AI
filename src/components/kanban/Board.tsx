@@ -12,12 +12,11 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { motion } from "framer-motion";
-import { Plus, Tag, Archive, Users } from "lucide-react";
+import { Plus, Tag, Archive } from "lucide-react";
 import Column from "./Column";
 import TaskCard from "./TaskCard";
 import TaskModal from "./TaskModal";
 import CategoryManager from "./CategoryManager";
-import CollaboratorsPanel from "./CollaboratorsPanel";
 import GlassButton from "@/components/ui/GlassButton";
 import { useGroupedTasks, useMoveTask } from "@/hooks/useTasks";
 import { useArchiveTasksMutation } from "@/hooks/useArchives";
@@ -166,14 +165,6 @@ export default function Board() {
             New Task
           </GlassButton>
         </div>
-      </div>
-
-      <div className="mb-6">
-        <div className="flex items-center gap-2 text-white/70 text-sm mb-3">
-          <Users size={14} />
-          Colaboracion del tablero
-        </div>
-        <CollaboratorsPanel boardId={profile?.active_board_id || null} canManage={isOwner} />
       </div>
 
       {/* Board */}
