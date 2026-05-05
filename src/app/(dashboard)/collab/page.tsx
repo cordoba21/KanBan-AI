@@ -136,7 +136,7 @@ export default function CollaborationPage() {
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <motion.div
-                className="w-8 h-8 rounded-full border-2 border-transparent border-t-[#A78BFA] border-r-[#2DD4BF] animate-spin"
+                className="text-[#00FF41] font-mono animate-terminal-blink"
               />
             </div>
           ) : (
@@ -149,7 +149,7 @@ export default function CollaborationPage() {
                   className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 px-3 py-2"
                 >
                   <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#A78BFA]/20 to-[#2DD4BF]/20 flex items-center justify-center text-xs text-white/70">
+                    <div className="h-8 w-8 rounded bg-[#00FF41]/10 border border-[#00FF41]/15 flex items-center justify-center text-xs text-[#c8c8c8]/70">
                       {(member.profiles?.full_name || member.profiles?.email || "?").slice(0, 1).toUpperCase()}
                     </div>
                     <div>
@@ -162,7 +162,7 @@ export default function CollaborationPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     {member.role === "OWNER" ? (
-                      <span className="text-[10px] text-[#5EEAD4] bg-[#2DD4BF]/10 px-2 py-1 rounded-full">
+                      <span className="text-[10px] text-[#FFB800] bg-[#FFB800]/10 px-2 py-1 rounded">
                         {ROLE_LABELS[member.role]}
                       </span>
                     ) : isOwner ? (

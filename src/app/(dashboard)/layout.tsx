@@ -48,9 +48,9 @@ export default function DashboardLayout({
   // Show loading spinner while checking auth
   if (isChecking || !isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#050510]">
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
         <MeshBackground />
-        <div className="w-10 h-10 rounded-full border-2 border-transparent border-t-[#A78BFA] border-r-[#2DD4BF] animate-spin" />
+        <div className="text-[#00FF41] font-mono text-lg animate-terminal-blink">█</div>
       </div>
     );
   }

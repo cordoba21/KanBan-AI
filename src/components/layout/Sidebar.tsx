@@ -133,13 +133,13 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       style={{
         borderRadius: 0,
-        borderRight: "1px solid rgba(255,255,255,0.08)",
+        borderRight: "1px solid rgba(0, 255, 65, 0.1)",
       }}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 p-5 border-b border-white/5">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#A78BFA] to-[#2DD4BF] flex items-center justify-center flex-shrink-0">
-          <LayoutDashboard size={18} className="text-white" />
+      <div className="flex items-center gap-3 p-5 border-b border-[#00FF41]/10">
+        <div className="w-9 h-9 rounded bg-[#00FF41]/10 border border-[#00FF41]/20 flex items-center justify-center flex-shrink-0">
+          <LayoutDashboard size={18} className="text-[#00FF41]" />
         </div>
         <AnimatePresence>
           {!collapsed && (
@@ -181,7 +181,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                   >
                     {isActive && (
                       <motion.div
-                        className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-gradient-to-b from-[#A78BFA] to-[#2DD4BF]"
+                        className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-4 bg-[#00FF41]"
                         layoutId="activeNav"
                         transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
                       />
@@ -233,8 +233,8 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                               key={board.id}
                               className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors ${
                                 isCurrent
-                                  ? "bg-[#8B5CF6]/20 text-[#A78BFA]"
-                                  : "text-white/50 hover:text-white hover:bg-white/5"
+                                  ? "bg-[#00FF41]/10 text-[#00FF41]"
+                                  : "text-[#c8c8c8]/50 hover:text-[#00FF41]/70 hover:bg-[#00FF41]/5"
                               }`}
                             >
                               <button
@@ -399,7 +399,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
               >
                 {isActive && (
                   <motion.div
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-gradient-to-b from-[#A78BFA] to-[#2DD4BF]"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-4 bg-[#00FF41]"
                     layoutId="activeNav"
                     transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
                   />
@@ -463,7 +463,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
               >
                 {isActive && (
                   <motion.div
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-gradient-to-b from-[#A78BFA] to-[#2DD4BF]"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-4 bg-[#00FF41]"
                     layoutId="activeNav"
                     transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
                   />
@@ -492,7 +492,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       {/* User section */}
       <div className="p-3 border-t border-white/5 relative">
         <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#A78BFA]/30 to-[#2DD4BF]/30 flex items-center justify-center flex-shrink-0 border border-white/10">
+          <div className="w-8 h-8 rounded bg-[#00FF41]/10 border border-[#00FF41]/15 flex items-center justify-center flex-shrink-0">
             <User size={14} className="text-white/70" />
           </div>
           <AnimatePresence>
@@ -855,7 +855,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                 <button
                   onClick={handleUpdateFullName}
                   disabled={!fullNameInput.trim() || updateNameLoading}
-                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-[#8B5CF6]/80 hover:bg-[#8B5CF6] disabled:opacity-30 disabled:cursor-not-allowed rounded-[var(--radius-organic-sm)] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2.5 text-xs font-semibold text-[#00FF41] bg-[#00FF41]/10 hover:bg-[#00FF41]/20 disabled:opacity-30 disabled:cursor-not-allowed rounded-[var(--radius-organic-sm)] transition-all duration-150 cursor-pointer flex items-center justify-center gap-2 uppercase tracking-wider border border-[#00FF41]/20 hover:border-[#00FF41]/40"
                 >
                   {updateNameLoading ? (
                     <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">

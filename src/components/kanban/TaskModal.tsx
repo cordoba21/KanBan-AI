@@ -270,13 +270,13 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
                       key={member.user_id}
                       className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs cursor-pointer transition-colors ${
                         isChecked
-                          ? "bg-[#8B5CF6]/10 border-[#8B5CF6]/30 text-white"
-                          : "bg-white/5 border-white/10 text-white/60 hover:text-white"
+                          ? "bg-[#00FF41]/10 border-[#00FF41]/30 text-[#c8c8c8]"
+                          : "bg-white/5 border-white/10 text-[#c8c8c8]/60 hover:text-[#c8c8c8]"
                       }`}
                     >
                       <input
                         type="checkbox"
-                        className="accent-[#8B5CF6]"
+                        className="accent-[#00FF41]"
                         checked={isChecked}
                         onChange={(e) => {
                           if (!isEditor) return;

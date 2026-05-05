@@ -40,7 +40,7 @@ export default function ArchivedReportsPage() {
       {isLoading && (
         <div className="flex items-center justify-center h-[40vh]">
           <motion.div
-            className="w-12 h-12 rounded-full border-2 border-transparent border-t-[#A78BFA] border-r-[#2DD4BF]"
+            className="text-[#00FF41] font-mono animate-terminal-blink"
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           />
@@ -67,7 +67,7 @@ export default function ArchivedReportsPage() {
                     onClick={() => setExpandedId(isExpanded ? null : report.id)}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#A78BFA]/20 to-[#2DD4BF]/20 flex items-center justify-center border border-white/10 flex-shrink-0">
+                      <div className="w-10 h-10 rounded bg-[#00FF41]/10 border border-[#00FF41]/20 flex items-center justify-center flex-shrink-0">
                         <FileText size={18} className="text-purple-400" />
                       </div>
                       <div>

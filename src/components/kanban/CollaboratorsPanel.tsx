@@ -9,14 +9,14 @@ import { useCreateInvitation } from "@/hooks/useInvitations";
 import { useUser } from "@/lib/auth/hooks";
 
 const ROLE_LABELS: Record<string, string> = {
-  OWNER: "Owner",
-  EDITOR: "Editor",
-  VIEWER: "Viewer",
+  OWNER: "root",
+  EDITOR: "editor",
+  VIEWER: "viewer",
 };
 
 const ROLE_OPTIONS: Array<{ value: "EDITOR" | "VIEWER"; label: string }> = [
-  { value: "EDITOR", label: "Editor" },
-  { value: "VIEWER", label: "Viewer" },
+  { value: "EDITOR", label: "editor" },
+  { value: "VIEWER", label: "viewer" },
 ];
 
 export default function CollaboratorsPanel({
@@ -58,18 +58,19 @@ export default function CollaboratorsPanel({
 
   return (
     <GlassCard padding="md" hover={false} className="glass-strong">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-white/80 flex items-center gap-2">
-          <Shield size={14} />
-          {mode === "invite" ? "Invite collaborators" : "Collaborators"}
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#00FF41]/10">
+        <h3 className="text-xs font-semibold text-[#00FF41] flex items-center gap-2 uppercase tracking-wider">
+          <Shield size={12} />
+          {mode === "invite" ? "$ invite --user" : "$ users --list"}
         </h3>
         <div className="flex items-center gap-3">
           {mode === "manage" && (
-            <span className="text-[10px] text-white/30">{visibleMembers.length} activos</span>
+            <span className="text-[10px] text-[#00FF41]/40 font-mono">[{visibleMembers.length} active]</span>
           )}
           <button
             onClick={onClose}
-            className="text-white/30 hover:text-white/70"
+            className="text-[#00FF41]/30 hover:text-[#FF3B3B] transition-colors"
           >
             <X size={14} />
           </button>
@@ -78,9 +79,9 @@ export default function CollaboratorsPanel({
 
       {mode === "invite" && (
         <div className="flex flex-col gap-2 mb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_120px] gap-2 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_100px] gap-2 w-full">
             <div className="relative min-w-0">
-              <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+              <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#00FF41]/30" />
               <input
                 className="glass-input glass-input-with-icon w-full"
                 placeholder="email@team.com"
@@ -90,29 +91,18 @@ export default function CollaboratorsPanel({
                 disabled={!canManage}
               />
             </div>
-            <div className="relative w-full">
-              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-white/40">
-                <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-                  <path
-                    fillRule="evenodd"
-                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <select
-                className="glass-input w-full appearance-none pr-9"
-                value={role}
-                onChange={(e) => setRole(e.target.value as "EDITOR" | "VIEWER")}
-                disabled={!canManage}
-              >
-                {ROLE_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value} style={{ background: "#0A0A1A", color: "white" }}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <select
+              className="glass-input w-full appearance-none text-center"
+              value={role}
+              onChange={(e) => setRole(e.target.value as "EDITOR" | "VIEWER")}
+              disabled={!canManage}
+            >
+              {ROLE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
           <GlassButton
             size="sm"
@@ -121,84 +111,94 @@ export default function CollaboratorsPanel({
             loading={createInvite.isPending}
           >
             <UserPlus size={14} />
-            Invite
+            send invite
           </GlassButton>
         </div>
       )}
 
       {mode === "invite" && !canManage && (
-        <p className="text-xs text-white/40 mb-4">
-          Only the board owner can invite collaborators.
+        <p className="text-[10px] text-[#FFB800]/60 mb-4 font-mono">
+          [ERR] Permission denied. Only root can invite.
         </p>
       )}
 
       {mode === "invite" && inviteLink && (
-        <div className="mb-4 text-[11px] text-white/40">
-          Invite link generated (copied): <span className="text-white/70">{inviteLink}</span>
+        <div className="mb-4 text-[10px] text-[#00FF41]/50 font-mono break-all">
+          <span className="text-[#00FF41]/80">LINK:</span> {inviteLink}
         </div>
       )}
 
       {mode === "manage" && (
         <>
           {isLoading ? (
-            <div className="text-xs text-white/40">Loading collaborators...</div>
+            <div className="text-xs text-[#00FF41]/40 font-mono">loading processes...</div>
           ) : (
-            <div className="space-y-2">
-              {visibleMembers.map((member) => (
-                <div
-                  key={member.id}
-                  className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/5 px-3 py-2.5 overflow-hidden"
-                >
-                  {/* Avatar */}
-                  <div className="h-7 w-7 rounded-full bg-gradient-to-br from-purple-400/20 to-teal-400/20 border border-white/10 flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs text-white/70">
-                      {(member.profiles?.full_name || member.profiles?.email || "?").slice(0, 1).toUpperCase()}
-                    </span>
-                  </div>
+            <div className="space-y-1">
+              {visibleMembers.map((member) => {
+                const isOwner = member.role === "OWNER";
+                const isYou = member.user_id === user?.id;
+                const name = member.profiles?.full_name || member.profiles?.email || "unknown";
+                const emailStr = member.profiles?.email || "";
 
-                  {/* Name + email */}
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs text-white/80 truncate">
-                      {member.profiles?.full_name || member.profiles?.email || "User"}
-                      {member.user_id === user?.id && <span className="text-white/30"> (you)</span>}
+                return (
+                  <div
+                    key={member.id}
+                    className="border border-[#00FF41]/10 bg-[#00FF41]/[0.02] p-3"
+                    style={{ borderRadius: "var(--radius-organic-sm)" }}
+                  >
+                    {/* Row 1: Name + Role on same line */}
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <span className="text-[#00FF41]/30 text-xs flex-shrink-0">›</span>
+                        <span className="text-xs text-[#c8c8c8] truncate">
+                          {name}
+                          {isYou && <span className="text-[#00FF41]/40"> (you)</span>}
+                        </span>
+                      </div>
+                      <span
+                        className={`text-[10px] font-bold uppercase tracking-widest flex-shrink-0 px-2 py-0.5 ${
+                          isOwner
+                            ? "text-[#FFB800] bg-[#FFB800]/10 border border-[#FFB800]/20"
+                            : "text-[#00D4FF] bg-[#00D4FF]/10 border border-[#00D4FF]/20"
+                        }`}
+                        style={{ borderRadius: "2px" }}
+                      >
+                        {ROLE_LABELS[member.role]}
+                      </span>
                     </div>
-                    <div className="text-[10px] text-white/30 truncate">{member.profiles?.email || ""}</div>
-                  </div>
 
-                  {/* Role badge + controls — always inside the row */}
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <span className="text-[10px] text-white/70 bg-white/10 px-2 py-0.5 rounded-full whitespace-nowrap">
-                      {ROLE_LABELS[member.role]}
-                    </span>
-                    {member.role !== "OWNER" && canManage && (
-                      <select
-                        className="glass-input h-7 text-[10px] w-[80px] py-0 px-2"
-                        style={{ minWidth: "auto" }}
-                        value={member.role}
-                        onChange={(e) => updateRole.mutate({ memberId: member.id, role: e.target.value as "EDITOR" | "VIEWER" })}
-                      >
-                        {ROLE_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value} style={{ background: "#0A0A1A", color: "white" }}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    )}
+                    {/* Row 2: Email + Controls */}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] text-[#c8c8c8]/30 truncate flex-1 pl-4">{emailStr}</span>
 
-                    {canManage && member.role !== "OWNER" && (
-                      <button
-                        onClick={() => removeMember.mutate({ memberId: member.id })}
-                        className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0"
-                        title="Revoke"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    )}
+                      {!isOwner && canManage && (
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <select
+                            className="bg-transparent border border-[#00FF41]/10 text-[10px] text-[#00FF41]/70 h-6 px-1.5 rounded-sm appearance-none cursor-pointer hover:border-[#00FF41]/30 transition-colors"
+                            value={member.role}
+                            onChange={(e) => updateRole.mutate({ memberId: member.id, role: e.target.value as "EDITOR" | "VIEWER" })}
+                          >
+                            {ROLE_OPTIONS.map((opt) => (
+                              <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            onClick={() => removeMember.mutate({ memberId: member.id })}
+                            className="text-[#c8c8c8]/20 hover:text-[#FF3B3B] transition-colors p-1"
+                            title="kill -9"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
               {visibleMembers.length === 0 && (
-                <div className="text-xs text-white/40">No active collaborators.</div>
+                <div className="text-[10px] text-[#00FF41]/30 font-mono">no active processes.</div>
               )}
             </div>
           )}

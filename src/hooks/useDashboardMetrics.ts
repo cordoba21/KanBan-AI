@@ -21,11 +21,11 @@ interface DashboardMetrics {
 }
 
 const STATUS_COLORS: Record<TaskStatus, string> = {
-  BACKLOG: "rgba(255,255,255,0.3)",
-  TODO: "#5EEAD4",
-  IN_PROGRESS: "#A78BFA",
-  REVIEW: "#fbbf24",
-  DONE: "#4ade80",
+  BACKLOG: "rgba(200,200,200,0.3)",
+  TODO: "#00D4FF",
+  IN_PROGRESS: "#FFB800",
+  REVIEW: "#FF8C00",
+  DONE: "#00FF41",
 };
 
 const STATUS_LABELS: Record<TaskStatus, string> = {

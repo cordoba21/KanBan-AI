@@ -30,11 +30,11 @@ import { useBoardRole } from "@/lib/boards/access";
 import type { TaskStatus, TaskWithPeople } from "@/types/supabase";
 
 const COLUMNS: { id: TaskStatus; title: string; color: string }[] = [
-  { id: "BACKLOG", title: "Backlog", color: "rgba(255,255,255,0.4)" },
-  { id: "TODO", title: "To Do", color: "#5EEAD4" },
-  { id: "IN_PROGRESS", title: "In Progress", color: "#A78BFA" },
-  { id: "REVIEW", title: "Review", color: "#fbbf24" },
-  { id: "DONE", title: "Done", color: "#4ade80" },
+  { id: "BACKLOG", title: "Backlog", color: "rgba(200,200,200,0.4)" },
+  { id: "TODO", title: "To Do", color: "#00D4FF" },
+  { id: "IN_PROGRESS", title: "In Progress", color: "#FFB800" },
+  { id: "REVIEW", title: "Review", color: "#FF8C00" },
+  { id: "DONE", title: "Done", color: "#00FF41" },
 ];
 
 export default function Board() {
@@ -185,7 +185,8 @@ export default function Board() {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <motion.div
-          className="w-12 h-12 rounded-full border-2 border-transparent border-t-[#A78BFA] border-r-[#2DD4BF]"
+          className="w-12 h-12 rounded border border-[#00FF41]/20 flex items-center justify-center"
+          style={{ color: '#00FF41' }}
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
         />
@@ -201,8 +202,8 @@ export default function Board() {
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
           {activeBoardName && (
-            <div className="inline-flex items-center gap-2 px-3 py-1 mb-2 rounded-full bg-[#8B5CF6]/20 border border-[#8B5CF6]/30">
-              <span className="text-xs font-medium text-[#A78BFA]">{activeBoardName}</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 mb-2 rounded bg-[#00FF41]/10 border border-[#00FF41]/20">
+              <span className="text-xs font-semibold text-[#00FF41] font-mono">{activeBoardName}</span>
             </div>
           )}
           <h1 className="text-2xl font-bold text-white">Kanban Board</h1>
@@ -398,7 +399,7 @@ export default function Board() {
                     archiveMutation.mutate({ userId: user.id });
                   }}
                   disabled={archiveMutation.isPending}
-                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-[#8B5CF6]/80 hover:bg-[#8B5CF6] disabled:opacity-30 disabled:cursor-not-allowed rounded-[var(--radius-organic-sm)] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2.5 text-xs font-semibold text-[#00FF41] bg-[#00FF41]/10 hover:bg-[#00FF41]/20 disabled:opacity-30 disabled:cursor-not-allowed rounded-[var(--radius-organic-sm)] transition-all duration-150 cursor-pointer flex items-center justify-center gap-2 uppercase tracking-wider border border-[#00FF41]/20 hover:border-[#00FF41]/40"
                 >
                   {archiveMutation.isPending ? (
                     <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">

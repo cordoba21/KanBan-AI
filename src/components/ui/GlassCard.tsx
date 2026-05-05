@@ -13,8 +13,8 @@ interface GlassCardProps extends HTMLMotionProps<"div"> {
 const paddingMap = {
   none: "",
   sm: "p-3",
-  md: "p-5",
-  lg: "p-7",
+  md: "p-4",
+  lg: "p-6",
 };
 
 const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
@@ -52,9 +52,8 @@ const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
         whileHover={
           hover
             ? {
-                scale: 1.005,
-                y: -1,
-                transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
+                borderColor: "rgba(0, 255, 65, 0.25)",
+                transition: { duration: 0.15 },
               }
             : undefined
         }

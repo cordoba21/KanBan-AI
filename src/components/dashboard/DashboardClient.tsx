@@ -48,7 +48,7 @@ export default function DashboardClient() {
     return categories.map((cat) => ({
       id: cat.id,
       name: cat.name,
-      color: cat.color || "#5EEAD4",
+      color: cat.color || "#00D4FF",
       count: counts.get(cat.id) || 0,
     }));
   }, [categories, data?.tasks]);
@@ -57,7 +57,7 @@ export default function DashboardClient() {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <motion.div
-          className="w-12 h-12 rounded-full border-2 border-transparent border-t-[#A78BFA] border-r-[#2DD4BF]"
+          className="text-[#00FF41] font-mono text-lg animate-terminal-blink"
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
         />

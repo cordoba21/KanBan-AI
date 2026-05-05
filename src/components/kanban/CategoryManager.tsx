@@ -13,9 +13,9 @@ import {
 import { useUser } from "@/lib/auth/hooks";
 
 const PRESET_COLORS = [
-  "#A78BFA", "#2DD4BF", "#4ade80", "#fbbf24", "#f87171",
-  "#fb923c", "#34d399", "#8B5CF6", "#F0ABFC", "#5EEAD4",
-  "#D8B4FE", "#14B8A6",
+  "#00FF41", "#00D4FF", "#FFB800", "#FF8C00", "#FF3B3B",
+  "#FF6B6B", "#39FF6E", "#40E0FF", "#FFD54F", "#c8c8c8",
+  "#00cc33", "#14B8A6",
 ];
 
 interface CategoryManagerProps {
@@ -101,8 +101,8 @@ export default function CategoryManager({ onClose }: CategoryManagerProps) {
           {/* Header */}
           <div className="flex items-center justify-between p-6 pb-4 border-b border-white/5">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#A78BFA]/20 to-[#2DD4BF]/20 flex items-center justify-center border border-white/10">
-                <Tag size={16} className="text-[#A78BFA]" />
+              <div className="w-9 h-9 rounded bg-[#00FF41]/10 border border-[#00FF41]/20 flex items-center justify-center">
+                <Tag size={16} className="text-[#00FF41]" />
               </div>
               <h2 className="text-lg font-semibold text-white">Categories</h2>
             </div>
@@ -158,7 +158,7 @@ export default function CategoryManager({ onClose }: CategoryManagerProps) {
           <div className="p-6 max-h-[400px] overflow-y-auto">
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
-                <div className="w-8 h-8 rounded-full border-2 border-transparent border-t-[#A78BFA] border-r-[#2DD4BF] animate-spin" />
+                <div className="text-[#00FF41] font-mono animate-terminal-blink">█</div>
               </div>
             ) : categories && categories.length > 0 ? (
               <div className="space-y-2">
@@ -250,7 +250,7 @@ export default function CategoryManager({ onClose }: CategoryManagerProps) {
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => startEditing(cat)}
-                            className="p-1.5 text-white/20 hover:text-[#5EEAD4] transition-colors rounded-md hover:bg-[#2DD4BF]/10 cursor-pointer"
+                            className="p-1.5 text-[#c8c8c8]/20 hover:text-[#00D4FF] transition-colors rounded-md hover:bg-[#00D4FF]/10 cursor-pointer"
                             title="Edit category"
                           >
                             <Pencil size={13} />

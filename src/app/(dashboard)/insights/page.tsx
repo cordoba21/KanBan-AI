@@ -8,7 +8,7 @@ const ReportGenerator = dynamic(
     ssr: false,
     loading: () => (
       <div className="flex items-center justify-center h-[40vh]">
-        <div className="w-12 h-12 rounded-full border-2 border-transparent border-t-[#A78BFA] border-r-[#2DD4BF] animate-spin" />
+        <div className="text-[#00FF41] font-mono text-lg animate-terminal-blink">█</div>
       </div>
     ),
   }

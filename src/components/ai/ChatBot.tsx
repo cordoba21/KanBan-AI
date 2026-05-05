@@ -104,14 +104,14 @@ export default function ChatBot() {
     <>
       {/* Toggle Button */}
       <motion.button
-        className="fixed bottom-6 right-6 z-[90] w-14 h-14 rounded-full bg-gradient-to-br from-[#A78BFA] to-[#2DD4BF] flex items-center justify-center shadow-lg cursor-pointer"
+        className="fixed bottom-6 right-6 z-[90] w-14 h-14 rounded bg-[#00FF41]/10 border border-[#00FF41]/30 flex items-center justify-center shadow-lg cursor-pointer"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
         ref={buttonRef}
         style={{
           boxShadow:
-            "0 0 30px rgba(139,92,246,0.3), 0 0 60px rgba(45,212,191,0.15)",
+            "0 0 20px rgba(0, 255, 65, 0.2), 0 0 40px rgba(0, 255, 65, 0.05)",
         }}
       >
         <AnimatePresence mode="wait">
@@ -123,7 +123,7 @@ export default function ChatBot() {
               exit={{ rotate: 90, opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <X size={22} className="text-white" />
+              <X size={22} className="text-[#00FF41]" />
             </motion.div>
           ) : (
             <motion.div
@@ -133,7 +133,7 @@ export default function ChatBot() {
               exit={{ rotate: -90, opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <MessageCircle size={22} className="text-white" />
+              <MessageCircle size={22} className="text-[#00FF41]" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -153,8 +153,8 @@ export default function ChatBot() {
           >
             {/* Header */}
             <div className="flex items-center gap-3 p-4 border-b border-white/5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#A78BFA]/30 to-[#2DD4BF]/30 flex items-center justify-center">
-                <Bot size={16} className="text-[#A78BFA]" />
+              <div className="w-8 h-8 rounded bg-[#00FF41]/10 border border-[#00FF41]/20 flex items-center justify-center">
+                <Bot size={16} className="text-[#00FF41]" />
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-white">
@@ -190,7 +190,7 @@ export default function ChatBot() {
                   <div
                     className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${
                       msg.role === "user"
-                        ? "bg-gradient-to-br from-[#A78BFA]/20 to-[#2DD4BF]/20 text-white/90 border border-white/10"
+                        ? "bg-[#00FF41]/10 text-[#00FF41]/90 border border-[#00FF41]/20"
                         : "bg-white/5 text-white/70 border border-white/5"
                     }`}
                   >
@@ -202,7 +202,7 @@ export default function ChatBot() {
                             <strong className="text-white/90">{children}</strong>
                           ),
                           code: ({ children }) => (
-                            <code className="text-[#5EEAD4] text-[10px]">{children}</code>
+                            <code className="text-[#FFB800] text-[10px]">{children}</code>
                           ),
                           li: ({ children }) => (
                             <li className="ml-3 mb-0.5">{children}</li>
@@ -216,8 +216,8 @@ export default function ChatBot() {
                     )}
                   </div>
                   {msg.role === "user" && (
-                    <div className="w-6 h-6 rounded-lg bg-[#2DD4BF]/15 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <User size={12} className="text-[#5EEAD4]" />
+                    <div className="w-6 h-6 rounded bg-[#00D4FF]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <User size={12} className="text-[#00D4FF]" />
                     </div>
                   )}
                 </motion.div>
@@ -264,7 +264,7 @@ export default function ChatBot() {
                   disabled={loading}
                 />
                 <motion.button
-                  className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#A78BFA]/20 to-[#2DD4BF]/20 flex items-center justify-center border border-white/10 text-white/60 hover:text-white transition-colors cursor-pointer disabled:opacity-30"
+                  className="w-9 h-9 rounded bg-[#00FF41]/10 border border-[#00FF41]/20 flex items-center justify-center text-[#00FF41]/60 hover:text-[#00FF41] transition-colors cursor-pointer disabled:opacity-30"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleSend}

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Mail, Lock, User, ArrowRight, Sparkles } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Terminal } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import MeshBackground from "@/components/layout/MeshBackground";
 import GlassButton from "@/components/ui/GlassButton";
@@ -47,39 +47,39 @@ export default function RegisterPage() {
 
       <motion.div
         className="w-full max-w-md mx-4"
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+        transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
       >
         {/* Header */}
         <div className="text-center mb-8">
           <motion.div
-            className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-[#A78BFA] to-[#2DD4BF] flex items-center justify-center"
-            initial={{ scale: 0, rotate: 180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ type: "spring", bounce: 0.4, duration: 0.8 }}
+            className="w-14 h-14 mx-auto mb-5 rounded bg-[#00FF41]/10 border border-[#00FF41]/30 flex items-center justify-center"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", bounce: 0.3, duration: 0.6 }}
           >
-            <Sparkles size={28} className="text-white" />
+            <Terminal size={24} className="text-[#00FF41]" />
           </motion.div>
-          <h1 className="text-3xl font-bold gradient-text mb-2">
-            Create Account
+          <h1 className="text-2xl font-bold gradient-text mb-2 font-mono">
+            $ useradd --create
           </h1>
-          <p className="text-white/40 text-sm">
-            Join the KanBan AI workspace
+          <p className="text-[#c8c8c8]/40 text-xs font-mono">
+            register new kanban-ai session
           </p>
         </div>
 
         {/* Form */}
-        <div className="glass-strong p-8" style={{ borderRadius: "var(--radius-organic-lg)" }}>
-          <form onSubmit={handleRegister} className="space-y-5">
+        <div className="glass-strong p-7" style={{ borderRadius: "var(--radius-organic-lg)" }}>
+          <form onSubmit={handleRegister} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-white/50 mb-2 ml-1">
-                Full Name
+              <label className="block text-[10px] font-semibold text-[#00FF41]/40 mb-2 uppercase tracking-wider">
+                full_name
               </label>
               <div className="relative">
                 <User
-                  size={16}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 glass-input-icon"
+                  size={14}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#00FF41]/30 glass-input-icon"
                 />
                 <input
                   id="register-name"
@@ -94,19 +94,19 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-white/50 mb-2 ml-1">
-                Email Address
+              <label className="block text-[10px] font-semibold text-[#00FF41]/40 mb-2 uppercase tracking-wider">
+                email
               </label>
               <div className="relative">
                 <Mail
-                  size={16}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 glass-input-icon"
+                  size={14}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#00FF41]/30 glass-input-icon"
                 />
                 <input
                   id="register-email"
                   type="email"
                   className="glass-input glass-input-with-icon"
-                  placeholder="you@company.com"
+                  placeholder="user@domain.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -115,19 +115,19 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-white/50 mb-2 ml-1">
-                Password
+              <label className="block text-[10px] font-semibold text-[#00FF41]/40 mb-2 uppercase tracking-wider">
+                password
               </label>
               <div className="relative">
                 <Lock
-                  size={16}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 glass-input-icon"
+                  size={14}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#00FF41]/30 glass-input-icon"
                 />
                 <input
                   id="register-password"
                   type="password"
                   className="glass-input glass-input-with-icon"
-                  placeholder="Minimum 6 characters"
+                  placeholder="min 6 chars"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -138,11 +138,12 @@ export default function RegisterPage() {
 
             {error && (
               <motion.div
-                className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-xl p-3"
+                className="text-[#FF3B3B] text-[11px] bg-[#FF3B3B]/10 border border-[#FF3B3B]/20 p-3 font-mono"
+                style={{ borderRadius: "var(--radius-organic-sm)" }}
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                {error}
+                <span className="text-[#FF3B3B]/60">[ERR]</span> {error}
               </motion.div>
             )}
 
@@ -152,19 +153,19 @@ export default function RegisterPage() {
               loading={loading}
               className="w-full"
             >
-              Create Account
-              <ArrowRight size={16} />
+              create account
+              <ArrowRight size={14} />
             </GlassButton>
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-white/30 text-xs">
-              Already have an account?{" "}
+            <p className="text-[#c8c8c8]/30 text-[11px] font-mono">
+              existing user?{" "}
               <Link
                 href="/login"
-                className="text-[#A78BFA] hover:text-[#D8B4FE] transition-colors font-medium"
+                className="text-[#00FF41]/70 hover:text-[#00FF41] transition-colors font-semibold"
               >
-                Sign in
+                ssh login
               </Link>
             </p>
           </div>
