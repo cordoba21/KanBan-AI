@@ -11,7 +11,7 @@ import {
   type DragStartEvent,
   type DragEndEvent,
 } from "@dnd-kit/core";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Tag, Archive, UserPlus, Users } from "lucide-react";
 import Column from "./Column";
 import TaskCard from "./TaskCard";
