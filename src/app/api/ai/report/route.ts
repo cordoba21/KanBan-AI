@@ -219,11 +219,11 @@ ${JSON.stringify(sanitizedTasks, null, 2)}
 ${JSON.stringify(sanitizedLogs, null, 2)}
 \`\`\`
 
-## Requisitos del Reporte:
+## Report Requirements:
 1. **Resumen Ejecutivo** — Visión general del estado del proyecto
 2. **Análisis de Productividad** — Tareas creadas vs completadas, tendencias de velocidad
 3. **Evaluación de Riesgos** — Tareas atascadas, cuellos de botella en Review, tareas vencidas
-4. **Actividad del Equipo** — Contribuyentes más activos según registros
+4. **Team Activity** — Most active contributors according to records
 5. **Recomendaciones** — Acciones concretas para mejorar el flujo
 6. **Métricas Clave** — Tasa de completitud, tiempo promedio por estado, throughput
 

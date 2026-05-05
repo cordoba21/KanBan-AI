@@ -14,10 +14,10 @@ export default function InvitationPage() {
   const acceptInvite = useAcceptInvitation();
 
   const status = acceptInvite.isSuccess
-    ? "Invitacion aceptada"
+    ? "Invitation accepted"
     : acceptInvite.isError
-      ? "No se pudo aceptar la invitacion"
-      : "Confirmar invitacion";
+      ? "Could not accept the invitation"
+      : "Confirm invitation";
 
   async function handleAccept() {
     try {
@@ -41,14 +41,14 @@ export default function InvitationPage() {
         >
           <h1 className="text-xl font-semibold text-white">{status}</h1>
           <p className="text-sm text-white/60">
-            Usa este boton para unirte al tablero compartido.
+            Use this button to join the shared board.
           </p>
           <GlassButton
             onClick={handleAccept}
             loading={acceptInvite.isPending}
             disabled={!token}
           >
-            Aceptar invitacion
+            Accept invitation
           </GlassButton>
           {acceptInvite.isError && (
             <p className="text-xs text-red-300">

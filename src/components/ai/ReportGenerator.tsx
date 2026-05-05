@@ -42,7 +42,7 @@ export default function ReportGenerator() {
 
   async function generateReport() {
     if (!activeBoardId) {
-      setError("Selecciona un tablero para generar el reporte.");
+      setError("Select a board to generate the report.");
       return;
     }
     setLoading(true);
@@ -73,7 +73,7 @@ export default function ReportGenerator() {
 
   function getReportData() {
     return {
-      title: "Reporte Ejecutivo Mensual",
+      title: "Monthly Executive Report",
       content: report || "",
       stats: {
         totalTasks: metrics?.totalTasks || 0,
@@ -107,7 +107,7 @@ export default function ReportGenerator() {
     if (!report || !user || !metrics || !activeBoardId) return;
     try {
       await archiveReport.mutateAsync({
-        title: `Reporte Ejecutivo — ${new Date().toLocaleDateString("es-MX", { year: "numeric", month: "long" })}`,
+        title: `Executive Report — ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" })}`,
         content: report,
         userId: user.id,
         taskCount: metrics.totalTasks,
@@ -176,7 +176,7 @@ export default function ReportGenerator() {
             </select>
             <GlassButton onClick={generateReport} loading={loading}>
             {loading ? (
-              <>Analizando...</>
+              <>Analyzing...</>
             ) : (
               <>
                 <FileText size={16} />

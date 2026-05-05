@@ -9,14 +9,14 @@ import { useCreateInvitation } from "@/hooks/useInvitations";
 import { useUser } from "@/lib/auth/hooks";
 
 const ROLE_LABELS: Record<string, string> = {
-  OWNER: "Administrador",
+  OWNER: "Owner",
   EDITOR: "Editor",
-  VIEWER: "Lector",
+  VIEWER: "Viewer",
 };
 
 const ROLE_OPTIONS: Array<{ value: "EDITOR" | "VIEWER"; label: string }> = [
   { value: "EDITOR", label: "Editor" },
-  { value: "VIEWER", label: "Lector" },
+  { value: "VIEWER", label: "Viewer" },
 ];
 
 export default function CollaboratorsPanel({
@@ -61,7 +61,7 @@ export default function CollaboratorsPanel({
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold text-white/80 flex items-center gap-2">
           <Shield size={14} />
-          {mode === "invite" ? "Invitar colaboradores" : "Colaboradores"}
+          {mode === "invite" ? "Invite collaborators" : "Collaborators"}
         </h3>
         <div className="flex items-center gap-3">
           {mode === "manage" && (
@@ -83,7 +83,7 @@ export default function CollaboratorsPanel({
               <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
               <input
                 className="glass-input glass-input-with-icon w-full"
-                placeholder="correo@equipo.com"
+                placeholder="email@team.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 type="email"
@@ -121,27 +121,27 @@ export default function CollaboratorsPanel({
             loading={createInvite.isPending}
           >
             <UserPlus size={14} />
-            Invitar
+            Invite
           </GlassButton>
         </div>
       )}
 
       {mode === "invite" && !canManage && (
         <p className="text-xs text-white/40 mb-4">
-          Solo el propietario del tablero puede invitar colaboradores.
+          Only the board owner can invite collaborators.
         </p>
       )}
 
       {mode === "invite" && inviteLink && (
         <div className="mb-4 text-[11px] text-white/40">
-          Enlace generado (copiado): <span className="text-white/70">{inviteLink}</span>
+          Invite link generated (copied): <span className="text-white/70">{inviteLink}</span>
         </div>
       )}
 
       {mode === "manage" && (
         <>
           {isLoading ? (
-            <div className="text-xs text-white/40">Cargando colaboradores...</div>
+            <div className="text-xs text-white/40">Loading collaborators...</div>
           ) : (
             <div className="space-y-2">
               {visibleMembers.map((member) => (
@@ -152,8 +152,8 @@ export default function CollaboratorsPanel({
                     </div>
                     <div>
                       <div className="text-xs text-white/80">
-                        {member.profiles?.full_name || member.profiles?.email || "Usuario"}
-                        {member.user_id === user?.id && <span className="text-white/30"> (tu)</span>}
+                        {member.profiles?.full_name || member.profiles?.email || "User"}
+                        {member.user_id === user?.id && <span className="text-white/30"> (you)</span>}
                       </div>
                       <div className="text-[10px] text-white/30">{member.profiles?.email || ""}</div>
                     </div>
@@ -180,7 +180,7 @@ export default function CollaboratorsPanel({
                       <button
                         onClick={() => removeMember.mutate({ memberId: member.id })}
                         className="text-white/30 hover:text-red-400 transition-colors"
-                        title="Revocar"
+                        title="Revoke"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -189,7 +189,7 @@ export default function CollaboratorsPanel({
                 </div>
               ))}
               {visibleMembers.length === 0 && (
-                <div className="text-xs text-white/40">No hay colaboradores activos.</div>
+                <div className="text-xs text-white/40">No active collaborators.</div>
               )}
             </div>
           )}

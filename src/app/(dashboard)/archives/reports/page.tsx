@@ -234,14 +234,14 @@ export default function ArchivedReportsPage() {
                   <Trash2 size={18} className="text-red-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">Eliminar reporte</h3>
-                  <p className="text-xs text-white/40">Esta accion se puede revertir mas tarde</p>
+                  <h3 className="text-lg font-semibold text-white">Delete report</h3>
+                  <p className="text-xs text-white/40">This action can be reversed later</p>
                 </div>
               </div>
 
               <div className="bg-red-500/5 border border-red-500/15 rounded-xl p-3 mb-4">
                 <p className="text-xs text-red-300/80 leading-relaxed">
-                  Se ocultara este reporte del archivo, pero podras restaurarlo si lo necesitas.
+                  This will hide the report from the archive, but you can restore it later if needed.
                 </p>
               </div>
 
@@ -250,7 +250,7 @@ export default function ArchivedReportsPage() {
                   onClick={() => setDeleteTarget(null)}
                   className="flex-1 px-4 py-2.5 text-sm font-medium text-white/60 hover:text-white bg-white/5 hover:bg-white/10 rounded-[var(--radius-organic-sm)] transition-all duration-200 cursor-pointer"
                 >
-                  Cancelar
+                  Cancel
                 </button>
                 <button
                   onClick={async () => {
@@ -275,7 +275,7 @@ export default function ArchivedReportsPage() {
                   ) : (
                     <Trash2 size={14} />
                   )}
-                  Eliminar
+                  Delete
                 </button>
               </div>
             </motion.div>

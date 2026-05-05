@@ -28,30 +28,30 @@ export async function exportToPDF(data: ReportData, chartElement?: HTMLElement |
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
   doc.setTextColor(30, 30, 60);
-  doc.text("Reporte Ejecutivo Mensual", pageWidth / 2, y, { align: "center" });
+  doc.text("Monthly Executive Report", pageWidth / 2, y, { align: "center" });
   y += 10;
 
   doc.setFont("times", "italic");
   doc.setFontSize(10);
   doc.setTextColor(120, 120, 150);
-  doc.text(`KanBan AI — Generado: ${new Date(data.generatedAt).toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" })}`, pageWidth / 2, y, { align: "center" });
+  doc.text(`KanBan AI — Generated: ${new Date(data.generatedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`, pageWidth / 2, y, { align: "center" });
   y += 15;
 
   // Stats table
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
   doc.setTextColor(30, 30, 60);
-  doc.text("Resumen de Métricas", 14, y);
+  doc.text("Metrics Summary", 14, y);
   y += 8;
 
   autoTable(doc, {
     startY: y,
-    head: [["Métrica", "Valor"]],
+    head: [["Metric", "Value"]],
     body: [
-      ["Total de Tareas", String(data.stats.totalTasks)],
-      ["Tareas Completadas", String(data.stats.completedTasks)],
-      ["En Progreso", String(data.stats.inProgressTasks)],
-      ["Tasa de Completitud", `${data.stats.completionRate}%`],
+      ["Total Tasks", String(data.stats.totalTasks)],
+      ["Completed Tasks", String(data.stats.completedTasks)],
+      ["In Progress", String(data.stats.inProgressTasks)],
+      ["Completion Rate", `${data.stats.completionRate}%`],
     ],
     theme: "grid",
     headStyles: { fillColor: [125, 211, 252], textColor: [0, 0, 0], fontStyle: "bold" },
@@ -65,12 +65,12 @@ export async function exportToPDF(data: ReportData, chartElement?: HTMLElement |
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
   doc.setTextColor(30, 30, 60);
-  doc.text("Distribución por Estado", 14, y);
+  doc.text("Status Distribution", 14, y);
   y += 8;
 
   autoTable(doc, {
     startY: y,
-    head: [["Estado", "Cantidad", "Porcentaje"]],
+    head: [["Status", "Count", "Percentage"]],
     body: data.stats.statusDistribution.map((s) => [
       s.name,
       String(s.value),
@@ -101,7 +101,7 @@ export async function exportToPDF(data: ReportData, chartElement?: HTMLElement |
       doc.setFont("helvetica", "bold");
       doc.setFontSize(14);
       doc.setTextColor(30, 30, 60);
-      doc.text("Gráficas", 14, y);
+      doc.text("Charts", 14, y);
       y += 8;
       doc.addImage(imgData, "PNG", 14, y, imgWidth, imgHeight);
       y += imgHeight + 12;
@@ -119,7 +119,7 @@ export async function exportToPDF(data: ReportData, chartElement?: HTMLElement |
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
   doc.setTextColor(30, 30, 60);
-  doc.text("Análisis Detallado", 14, y);
+  doc.text("Detailed Analysis", 14, y);
   y += 8;
 
   doc.setFont("times", "normal");
@@ -168,7 +168,7 @@ export async function exportToPDF(data: ReportData, chartElement?: HTMLElement |
     y += 1.5;
   });
 
-  doc.save(`reporte-ejecutivo-${new Date().toISOString().slice(0, 7)}.pdf`);
+  doc.save(`executive-report-${new Date().toISOString().slice(0, 7)}.pdf`);
 }
 
 /* ─── Export as Excel ────────────────────────────────────── */
@@ -179,33 +179,33 @@ export async function exportToExcel(data: ReportData) {
   workbook.created = new Date();
 
   // Summary sheet
-  const summary = workbook.addWorksheet("Resumen", {
+  const summary = workbook.addWorksheet("Summary", {
     properties: { tabColor: { argb: "FF7DD3FC" } },
   });
 
   summary.columns = [
-    { header: "Métrica", key: "metric", width: 30 },
-    { header: "Valor", key: "value", width: 20 },
+    { header: "Metric", key: "metric", width: 30 },
+    { header: "Value", key: "value", width: 20 },
   ];
 
   summary.getRow(1).font = { name: "Calibri", bold: true, size: 12, color: { argb: "FFFFFFFF" } };
   summary.getRow(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF7DD3FC" } };
 
-  summary.addRow({ metric: "Total de Tareas", value: data.stats.totalTasks });
-  summary.addRow({ metric: "Tareas Completadas", value: data.stats.completedTasks });
-  summary.addRow({ metric: "En Progreso", value: data.stats.inProgressTasks });
-  summary.addRow({ metric: "Tasa de Completitud", value: `${data.stats.completionRate}%` });
-  summary.addRow({ metric: "Fecha de Generación", value: new Date(data.generatedAt).toLocaleDateString("es-MX") });
+  summary.addRow({ metric: "Total Tasks", value: data.stats.totalTasks });
+  summary.addRow({ metric: "Completed Tasks", value: data.stats.completedTasks });
+  summary.addRow({ metric: "In Progress", value: data.stats.inProgressTasks });
+  summary.addRow({ metric: "Completion Rate", value: `${data.stats.completionRate}%` });
+  summary.addRow({ metric: "Generation Date", value: new Date(data.generatedAt).toLocaleDateString("en-US") });
 
   // Status distribution sheet
-  const statusSheet = workbook.addWorksheet("Distribución", {
+  const statusSheet = workbook.addWorksheet("Status", {
     properties: { tabColor: { argb: "FFC084FC" } },
   });
 
   statusSheet.columns = [
-    { header: "Estado", key: "name", width: 20 },
-    { header: "Cantidad", key: "value", width: 15 },
-    { header: "Porcentaje", key: "pct", width: 15 },
+    { header: "Status", key: "name", width: 20 },
+    { header: "Count", key: "value", width: 15 },
+    { header: "Percentage", key: "pct", width: 15 },
   ];
 
   statusSheet.getRow(1).font = { name: "Calibri", bold: true, size: 12, color: { argb: "FFFFFFFF" } };
@@ -220,11 +220,11 @@ export async function exportToExcel(data: ReportData) {
   });
 
   // Report sheet
-  const reportSheet = workbook.addWorksheet("Reporte AI", {
+  const reportSheet = workbook.addWorksheet("Report", {
     properties: { tabColor: { argb: "FF4ADE80" } },
   });
 
-  reportSheet.columns = [{ header: "Análisis del Reporte", key: "content", width: 120 }];
+  reportSheet.columns = [{ header: "Report Analysis", key: "content", width: 120 }];
   reportSheet.getRow(1).font = { name: "Calibri", bold: true, size: 12, color: { argb: "FFFFFFFF" } };
   reportSheet.getRow(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF4ADE80" } };
 
@@ -239,7 +239,7 @@ export async function exportToExcel(data: ReportData) {
 
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-  saveAs(blob, `reporte-ejecutivo-${new Date().toISOString().slice(0, 7)}.xlsx`);
+  saveAs(blob, `executive-report-${new Date().toISOString().slice(0, 7)}.xlsx`);
 }
 
 /* ─── Export as Word ─────────────────────────────────────── */
@@ -255,7 +255,7 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
       alignment: AlignmentType.CENTER,
       spacing: { after: 200 },
       children: [
-        new TextRun({ text: "Reporte Ejecutivo Mensual", bold: true, size: 36, color: "1E1E3C", font: "Cambria" }),
+        new TextRun({ text: "Monthly Executive Report", bold: true, size: 36, color: "1E1E3C", font: "Cambria" }),
       ],
     })
   );
@@ -266,7 +266,7 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
       spacing: { after: 400 },
       children: [
         new TextRun({
-          text: `KanBan AI — ${new Date(data.generatedAt).toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" })}`,
+          text: `KanBan AI — ${new Date(data.generatedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`,
           size: 20, color: "787896", italics: true, font: "Georgia",
         }),
       ],
@@ -278,7 +278,7 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
     new Paragraph({
       heading: HeadingLevel.HEADING_2,
       spacing: { before: 300, after: 200 },
-      children: [new TextRun({ text: "Resumen de Métricas", bold: true, size: 28, color: "1E1E3C", font: "Cambria" })],
+      children: [new TextRun({ text: "Metrics Summary", bold: true, size: 28, color: "1E1E3C", font: "Cambria" })],
     })
   );
 
@@ -286,10 +286,10 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
   const borders = { top: borderStyle, bottom: borderStyle, left: borderStyle, right: borderStyle };
 
   const metricsData = [
-    ["Total de Tareas", String(data.stats.totalTasks)],
-    ["Completadas", String(data.stats.completedTasks)],
-    ["En Progreso", String(data.stats.inProgressTasks)],
-    ["Tasa de Completitud", `${data.stats.completionRate}%`],
+    ["Total Tasks", String(data.stats.totalTasks)],
+    ["Completed", String(data.stats.completedTasks)],
+    ["In Progress", String(data.stats.inProgressTasks)],
+    ["Completion Rate", `${data.stats.completionRate}%`],
   ];
 
   children.push(
@@ -297,7 +297,7 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
       width: { size: 100, type: WidthType.PERCENTAGE },
       rows: [
         new TableRow({
-          children: ["Métrica", "Valor"].map(
+          children: ["Metric", "Value"].map(
             (text) =>
               new TableCell({
                 children: [new Paragraph({ children: [new TextRun({ text, bold: true, size: 22, color: "FFFFFF", font: "Cambria" })] })],
@@ -332,7 +332,7 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
         new Paragraph({
           heading: HeadingLevel.HEADING_2,
           spacing: { before: 400, after: 200 },
-        children: [new TextRun({ text: "Gráficas", bold: true, size: 28, color: "1E1E3C", font: "Cambria" })],
+        children: [new TextRun({ text: "Charts", bold: true, size: 28, color: "1E1E3C", font: "Cambria" })],
       })
     );
 
@@ -358,7 +358,7 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
     new Paragraph({
       heading: HeadingLevel.HEADING_2,
       spacing: { before: 400, after: 200 },
-      children: [new TextRun({ text: "Distribución por Estado", bold: true, size: 28, color: "1E1E3C", font: "Cambria" })],
+      children: [new TextRun({ text: "Status Distribution", bold: true, size: 28, color: "1E1E3C", font: "Cambria" })],
     })
   );
 
@@ -367,7 +367,7 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
       width: { size: 100, type: WidthType.PERCENTAGE },
       rows: [
         new TableRow({
-          children: ["Estado", "Cantidad", "Porcentaje"].map(
+          children: ["Status", "Count", "Percentage"].map(
             (text) =>
               new TableCell({
                 children: [new Paragraph({ children: [new TextRun({ text, bold: true, size: 22, color: "FFFFFF", font: "Cambria" })] })],
@@ -398,7 +398,7 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
     new Paragraph({
       heading: HeadingLevel.HEADING_2,
       spacing: { before: 400, after: 200 },
-      children: [new TextRun({ text: "Análisis Detallado", bold: true, size: 28, color: "1E1E3C", font: "Cambria" })],
+      children: [new TextRun({ text: "Detailed Analysis", bold: true, size: 28, color: "1E1E3C", font: "Cambria" })],
     })
   );
 
@@ -429,9 +429,9 @@ export async function exportToWord(data: ReportData, chartElement?: HTMLElement 
   const doc = new Document({
     sections: [{ children }],
     creator: "KanBan AI",
-    title: "Reporte Ejecutivo Mensual",
+    title: "Monthly Executive Report",
   });
 
   const buffer = await Packer.toBlob(doc);
-  saveAs(buffer, `reporte-ejecutivo-${new Date().toISOString().slice(0, 7)}.docx`);
+  saveAs(buffer, `executive-report-${new Date().toISOString().slice(0, 7)}.docx`);
 }

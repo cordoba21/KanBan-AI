@@ -379,14 +379,14 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
                   <Trash2 size={18} className="text-red-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">Eliminar tarea</h3>
-                  <p className="text-xs text-white/40">Esta accion no se puede deshacer</p>
+                  <h3 className="text-lg font-semibold text-white">Delete task</h3>
+                  <p className="text-xs text-white/40">This action cannot be undone</p>
                 </div>
               </div>
 
               <div className="bg-red-500/5 border border-red-500/15 rounded-xl p-3 mb-4">
                 <p className="text-xs text-red-300/80 leading-relaxed">
-                  Se eliminara esta tarea y su historial asociado.
+                  This will delete the task and its related history.
                 </p>
               </div>
 
@@ -395,7 +395,7 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
                   onClick={() => setShowDeleteConfirm(false)}
                   className="flex-1 px-4 py-2.5 text-sm font-medium text-white/60 hover:text-white bg-white/5 hover:bg-white/10 rounded-[var(--radius-organic-sm)] transition-all duration-200 cursor-pointer"
                 >
-                  Cancelar
+                  Cancel
                 </button>
                 <button
                   onClick={() => {
@@ -413,7 +413,7 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
                   ) : (
                     <Trash2 size={14} />
                   )}
-                  Eliminar
+                  Delete
                 </button>
               </div>
             </motion.div>

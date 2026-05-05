@@ -222,7 +222,7 @@ export default function Board() {
               disabled={!isOwner}
             >
               <UserPlus size={14} />
-              Invitar
+              Invite
             </GlassButton>
           </span>
           <span ref={collaboratorsButtonRef}>
@@ -235,7 +235,7 @@ export default function Board() {
               }}
             >
               <Users size={14} />
-              Colaboradores
+              Collaborators
               {!!members?.length && (
                 <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/60">
                   {members.length}
@@ -367,14 +367,14 @@ export default function Board() {
                   <Archive size={18} className="text-white/70" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">Archivar completadas</h3>
-                  <p className="text-xs text-white/40">Se moveran al archivo mensual</p>
+                  <h3 className="text-lg font-semibold text-white">Archive completed</h3>
+                  <p className="text-xs text-white/40">They will be moved to the monthly archive</p>
                 </div>
               </div>
 
               <div className="bg-white/5 border border-white/10 rounded-xl p-3 mb-4">
                 <p className="text-xs text-white/60 leading-relaxed">
-                  Se archivaran todas las tareas en estado Done del tablero actual.
+                  All Done tasks in the current board will be archived.
                 </p>
               </div>
 
@@ -383,7 +383,7 @@ export default function Board() {
                   onClick={() => setShowArchiveConfirm(false)}
                   className="flex-1 px-4 py-2.5 text-sm font-medium text-white/60 hover:text-white bg-white/5 hover:bg-white/10 rounded-[var(--radius-organic-sm)] transition-all duration-200 cursor-pointer"
                 >
-                  Cancelar
+                  Cancel
                 </button>
                 <button
                   onClick={() => {
@@ -402,7 +402,7 @@ export default function Board() {
                   ) : (
                     <Archive size={14} />
                   )}
-                  Archivar
+                  Archive
                 </button>
               </div>
             </motion.div>
