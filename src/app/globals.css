@@ -420,6 +420,17 @@ html.light .kanban-col-title { color: #1a1a2e; }
 html.light .kanban-col-empty { border-color: rgba(0, 0, 0, 0.08); }
 html.light .kanban-col-empty-text { color: rgba(26, 26, 46, 0.25); }
 
+/* ─── Chart ───────────────────────────────────────────────── */
+.chart-legend-text { color: rgba(255, 255, 255, 0.5); }
+html.light .chart-legend-text { color: rgba(26, 26, 46, 0.6); }
+
+/* Recharts legend text override for light mode */
+html.light .recharts-legend-item-text {
+  color: rgba(26, 26, 46, 0.6) !important;
+}
+html.light .recharts-text {
+  fill: rgba(26, 26, 46, 0.5) !important;
+}
 
 /* ─── Animations ──────────────────────────────────────────── */
 @keyframes fade-in {

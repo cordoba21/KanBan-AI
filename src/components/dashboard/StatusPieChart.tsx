@@ -9,6 +9,7 @@ import {
   Legend,
 } from "recharts";
 import GlassCard from "@/components/ui/GlassCard";
+import { useTheme } from "@/lib/theme/ThemeContext";
 
 interface StatusPieChartProps {
   data: { name: string; value: number; color: string }[];
@@ -38,7 +39,7 @@ function CustomLegend({ payload }: any) {
             className="w-2.5 h-2.5 rounded-full"
             style={{ backgroundColor: entry.color }}
           />
-          <span className="text-xs text-white/50">{entry.value}</span>
+          <span className="text-xs chart-legend-text">{entry.value}</span>
         </div>
       ))}
     </div>

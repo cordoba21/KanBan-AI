@@ -11,6 +11,7 @@ import {
   Legend,
 } from "recharts";
 import GlassCard from "@/components/ui/GlassCard";
+import { useTheme } from "@/lib/theme/ThemeContext";
 
 interface TasksChartProps {
   data: { date: string; created: number; completed: number }[];
@@ -40,6 +41,14 @@ function CustomTooltip({ active, payload, label }: any) {
 }
 
 export default function TasksChart({ data }: TasksChartProps) {
+  const { theme } = useTheme();
+  const isLight = theme === "light";
+
+  const axisColor = isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255,255,255,0.2)";
+  const gridColor = isLight ? "rgba(0, 0, 0, 0.06)" : "rgba(255,255,255,0.05)";
+  const legendColor = isLight ? "rgba(0, 0, 0, 0.55)" : "rgba(255,255,255,0.5)";
+  const tickColor = isLight ? "#1a1a2e" : "rgba(255,255,255,0.5)";
+
   return (
     <GlassCard padding="md" hover={false}>
       <h3 className="text-sm font-semibold text-white/70 mb-4">
@@ -60,23 +69,25 @@ export default function TasksChart({ data }: TasksChartProps) {
             </defs>
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="rgba(255,255,255,0.05)"
+              stroke={gridColor}
             />
             <XAxis
               dataKey="date"
-              stroke="rgba(255,255,255,0.2)"
+              stroke={axisColor}
               fontSize={11}
               tickLine={false}
+              tick={{ fill: tickColor }}
             />
             <YAxis
-              stroke="rgba(255,255,255,0.2)"
+              stroke={axisColor}
               fontSize={11}
               tickLine={false}
               axisLine={false}
+              tick={{ fill: tickColor }}
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend
-              wrapperStyle={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}
+              wrapperStyle={{ fontSize: "12px", color: legendColor }}
             />
             <Area
               type="monotone"

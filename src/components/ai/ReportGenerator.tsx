@@ -18,6 +18,7 @@ import { useArchiveReportMutation } from "@/hooks/useArchives";
 import { useUser } from "@/lib/auth/hooks";
 import { useUserBoardsQuery } from "@/hooks/useBoards";
 import { exportToPDF, exportToExcel, exportToWord } from "@/lib/exportReport";
+import { useTheme } from "@/lib/theme/ThemeContext";
 
 export default function ReportGenerator() {
   const { user, profile } = useUser();
@@ -27,6 +28,12 @@ export default function ReportGenerator() {
   const activeBoard = userBoards.find((board) => board.id === activeBoardId) || null;
   const { data: metrics } = useDashboardMetrics(undefined, activeBoardId);
   const archiveReport = useArchiveReportMutation();
+  const { theme } = useTheme();
+  const isLight = theme === "light";
+  const axisColor = isLight ? "rgba(0, 0, 0, 0.4)" : "rgba(255,255,255,0.2)";
+  const gridColor = isLight ? "rgba(0, 0, 0, 0.06)" : "rgba(255,255,255,0.05)";
+  const legendColor = isLight ? "rgba(0, 0, 0, 0.55)" : "rgba(255,255,255,0.5)";
+  const tickColor = isLight ? "#1a1a2e" : "rgba(255,255,255,0.5)";
 
   const [report, setReport] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -307,15 +314,15 @@ export default function ReportGenerator() {
                       </Pie>
                       <Tooltip
                         contentStyle={{
-                          background: "rgba(10,10,26,0.95)",
-                          border: "1px solid rgba(255,255,255,0.1)",
+                          background: isLight ? "rgba(255,255,255,0.95)" : "rgba(10,10,26,0.95)",
+                          border: isLight ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.1)",
                           borderRadius: "12px",
-                          color: "white",
+                          color: isLight ? "#1a1a2e" : "white",
                           fontSize: "12px",
                         }}
                       />
                       <Legend
-                        wrapperStyle={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}
+                        wrapperStyle={{ fontSize: "11px", color: legendColor }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
@@ -329,15 +336,15 @@ export default function ReportGenerator() {
                 <div className="h-[260px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={barData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                      <XAxis dataKey="name" stroke="rgba(255,255,255,0.2)" fontSize={11} />
-                      <YAxis stroke="rgba(255,255,255,0.2)" fontSize={11} />
+                      <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                      <XAxis dataKey="name" stroke={axisColor} fontSize={11} tick={{ fill: tickColor }} />
+                      <YAxis stroke={axisColor} fontSize={11} tick={{ fill: tickColor }} />
                       <Tooltip
                         contentStyle={{
-                          background: "rgba(10,10,26,0.95)",
-                          border: "1px solid rgba(255,255,255,0.1)",
+                          background: isLight ? "rgba(255,255,255,0.95)" : "rgba(10,10,26,0.95)",
+                          border: isLight ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.1)",
                           borderRadius: "12px",
-                          color: "white",
+                          color: isLight ? "#1a1a2e" : "white",
                           fontSize: "12px",
                         }}
                       />
