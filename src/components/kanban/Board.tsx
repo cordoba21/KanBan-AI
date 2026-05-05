@@ -6,6 +6,7 @@ import {
   DragOverlay,
   closestCorners,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   type DragStartEvent,
@@ -30,8 +31,8 @@ import type { TaskStatus, TaskWithPeople } from "@/types/supabase";
 
 const COLUMNS: { id: TaskStatus; title: string; color: string }[] = [
   { id: "BACKLOG", title: "Backlog", color: "rgba(255,255,255,0.4)" },
-  { id: "TODO", title: "To Do", color: "#7dd3fc" },
-  { id: "IN_PROGRESS", title: "In Progress", color: "#c084fc" },
+  { id: "TODO", title: "To Do", color: "#5EEAD4" },
+  { id: "IN_PROGRESS", title: "In Progress", color: "#A78BFA" },
   { id: "REVIEW", title: "Review", color: "#fbbf24" },
   { id: "DONE", title: "Done", color: "#4ade80" },
 ];
@@ -69,6 +70,9 @@ export default function Board() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 5 },
     })
   );
 
@@ -181,7 +185,7 @@ export default function Board() {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <motion.div
-          className="w-12 h-12 rounded-full border-2 border-transparent border-t-sky-300 border-r-purple-400"
+          className="w-12 h-12 rounded-full border-2 border-transparent border-t-[#A78BFA] border-r-[#2DD4BF]"
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
         />
@@ -197,8 +201,8 @@ export default function Board() {
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
           {activeBoardName && (
-            <div className="inline-flex items-center gap-2 px-3 py-1 mb-2 rounded-full bg-sky-500/20 border border-sky-500/30">
-              <span className="text-xs font-medium text-sky-300">{activeBoardName}</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 mb-2 rounded-full bg-[#8B5CF6]/20 border border-[#8B5CF6]/30">
+              <span className="text-xs font-medium text-[#A78BFA]">{activeBoardName}</span>
             </div>
           )}
           <h1 className="text-2xl font-bold text-white">Kanban Board</h1>
@@ -209,7 +213,7 @@ export default function Board() {
         <div className="flex items-center gap-2 flex-wrap">
           <GlassButton variant="ghost" size="sm" onClick={() => setShowCategoryManager(true)} disabled={!isEditor}>
             <Tag size={14} />
-            Categories
+            <span className="hidden sm:inline">Categories</span>
           </GlassButton>
           <span ref={inviteButtonRef}>
             <GlassButton
@@ -222,7 +226,7 @@ export default function Board() {
               disabled={!isOwner}
             >
               <UserPlus size={14} />
-              Invite
+              <span className="hidden sm:inline">Invite</span>
             </GlassButton>
           </span>
           <span ref={collaboratorsButtonRef}>
@@ -235,7 +239,7 @@ export default function Board() {
               }}
             >
               <Users size={14} />
-              Collaborators
+              <span className="hidden sm:inline">Collaborators</span>
               {!!members?.length && (
                 <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/60">
                   {members.length}
@@ -252,12 +256,14 @@ export default function Board() {
               disabled={!isEditor}
             >
               <Archive size={14} />
-              Archive ({doneCount})
+              <span className="hidden sm:inline">Archive</span>
+              <span className="sm:hidden">({doneCount})</span>
+              <span className="hidden sm:inline"> ({doneCount})</span>
             </GlassButton>
           )}
           <GlassButton onClick={handleCreateTask} disabled={!isEditor}>
             <Plus size={16} />
-            New Task
+            <span className="hidden sm:inline">New Task</span>
           </GlassButton>
         </div>
       </div>
@@ -293,11 +299,11 @@ export default function Board() {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-4 overflow-x-auto pb-4 min-h-[calc(100vh-200px)]">
+        <div className="kanban-columns">
           {COLUMNS.map((column, index) => (
             <motion.div
               key={column.id}
-              className="flex-shrink-0 w-[280px]"
+              className="kanban-column"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.08, duration: 0.4 }}
@@ -392,7 +398,7 @@ export default function Board() {
                     archiveMutation.mutate({ userId: user.id });
                   }}
                   disabled={archiveMutation.isPending}
-                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-sky-500/80 hover:bg-sky-500 disabled:opacity-30 disabled:cursor-not-allowed rounded-[var(--radius-organic-sm)] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-[#8B5CF6]/80 hover:bg-[#8B5CF6] disabled:opacity-30 disabled:cursor-not-allowed rounded-[var(--radius-organic-sm)] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2"
                 >
                   {archiveMutation.isPending ? (
                     <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">

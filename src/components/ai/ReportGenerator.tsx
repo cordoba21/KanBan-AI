@@ -125,9 +125,9 @@ export default function ReportGenerator() {
 
   const statusDistribution = metrics?.statusDistribution || [];
   const barData = [
-    { name: "Total", value: metrics?.totalTasks || 0, fill: "#7dd3fc" },
+    { name: "Total", value: metrics?.totalTasks || 0, fill: "#5EEAD4" },
     { name: "Completed", value: metrics?.completedTasks || 0, fill: "#4ade80" },
-    { name: "In Progress", value: metrics?.inProgressTasks || 0, fill: "#c084fc" },
+    { name: "In Progress", value: metrics?.inProgressTasks || 0, fill: "#A78BFA" },
   ];
 
   return (
@@ -136,8 +136,8 @@ export default function ReportGenerator() {
       <GlassCard padding="lg" glow="gradient" hover={false}>
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-300/20 to-purple-400/20 flex items-center justify-center border border-white/10">
-              <Sparkles size={22} className="text-purple-400" />
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#A78BFA]/20 to-[#2DD4BF]/20 flex items-center justify-center border border-white/10">
+              <Sparkles size={22} className="text-[#A78BFA]" />
             </div>
             <div>
               <h3 className="text-lg font-semibold text-white">
@@ -168,7 +168,7 @@ export default function ReportGenerator() {
                 <option
                   key={board.id}
                   value={board.id}
-                  style={{ background: "#1a1a2e", color: "white" }}
+                  style={{ background: "#0A0A1A", color: "white" }}
                 >
                   {board.name}
                 </option>
@@ -388,7 +388,7 @@ export default function ReportGenerator() {
                     </strong>
                   ),
                   code: ({ children }) => (
-                    <code className="text-sky-300 bg-sky-300/10 px-1.5 py-0.5 rounded text-xs">
+                    <code className="text-[#5EEAD4] bg-[#2DD4BF]/10 px-1.5 py-0.5 rounded text-xs">
                       {children}
                     </code>
                   ),

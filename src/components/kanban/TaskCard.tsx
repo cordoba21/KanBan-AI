@@ -1,8 +1,7 @@
 "use client";
 
-import { useSortable, defaultAnimateLayoutChanges } from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { motion } from "framer-motion";
 import { GripVertical, AlertCircle, Clock, CheckCircle2, Tag, Calendar, ChevronLeft, ChevronRight, User } from "lucide-react";
 import { useCategoriesQuery } from "@/hooks/useCategories";
 import type { TaskWithPeople } from "@/types/supabase";
@@ -56,7 +55,7 @@ function DueDateBadge({ dueDate }: { dueDate: string | null }) {
   tomorrow.setDate(tomorrow.getDate() + 1);
   const isTomorrow = due.toDateString() === tomorrow.toDateString();
 
-  let color = "#7dd3fc";
+  let color = "#5EEAD4";
   let label = due.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
   if (isOverdue) {
@@ -91,14 +90,12 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
     isDragging,
   } = useSortable({
     id: task.id,
-    animateLayoutChanges: (args) => defaultAnimateLayoutChanges({ ...args, wasDragging: true }),
   });
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition: transition || "transform 250ms cubic-bezier(0.22, 1, 0.36, 1)",
+    transition: transition || undefined,
     opacity: isDragging ? 0.3 : 1,
-    scale: isDragging ? 0.95 : 1,
   };
 
   const priority = priorityConfig[Math.min(task.priority, 2)] || priorityConfig[0];
@@ -117,22 +114,17 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
   // Drag overlay — the card that follows the cursor
   if (isDragOverlay) {
     return (
-      <motion.div
+      <div
         className="glass-strong cursor-grabbing"
         style={{
           borderRadius: "var(--radius-organic-sm)",
           boxShadow: `
             0 25px 60px rgba(0, 0, 0, 0.5),
-            0 0 40px rgba(125, 211, 252, 0.15),
-            0 0 80px rgba(192, 132, 252, 0.08)
+            0 0 40px rgba(139, 92, 246, 0.15),
+            0 0 80px rgba(45, 212, 191, 0.08)
           `,
           border: "1px solid rgba(255,255,255,0.2)",
-        }}
-        initial={{ scale: 1, rotate: 0 }}
-        animate={{
-          scale: 1.05,
-          rotate: 1.5,
-          transition: { type: "spring", stiffness: 300, damping: 20 },
+          transform: "scale(1.04) rotate(1.5deg)",
         }}
       >
         <div className="p-3.5">
@@ -171,7 +163,7 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
                 assignees.slice(0, 3).map((assignee) => (
                   <div
                     key={assignee.user_id}
-                    className="w-4 h-4 rounded-full bg-gradient-to-br from-sky-300/20 to-purple-400/20 border border-white/10 flex items-center justify-center"
+                    className="w-4 h-4 rounded-full bg-gradient-to-br from-purple-400/20 to-teal-400/20 border border-white/10 flex items-center justify-center"
                     title={assignee.profiles?.full_name || assignee.profiles?.email || "User"}
                   >
                     <span className="text-[8px] text-white/70">
@@ -188,12 +180,12 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <motion.div
+    <div
       ref={setNodeRef}
       style={{
         ...style,
@@ -209,20 +201,10 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
           : "0 2px 8px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.05)",
       }}
       className={`
-        cursor-pointer group relative transition-colors duration-200
-        hover:bg-white/[0.07] hover:border-white/12
+        cursor-pointer group relative transition-all duration-200
+        hover:bg-white/[0.07] hover:border-white/12 hover:scale-[1.015] hover:-translate-y-[2px]
         ${isDragging ? "z-50" : ""}
       `}
-      whileHover={{
-        scale: 1.015,
-        y: -2,
-        transition: { duration: 0.2, ease: "easeOut" },
-      }}
-      layout
-      layoutId={task.id}
-      transition={{
-        layout: { duration: 0.25, ease: [0.22, 1, 0.36, 1] },
-      }}
       onClick={onClick}
     >
       <div className="p-3.5">
@@ -277,7 +259,7 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
                 assignees.slice(0, 3).map((assignee) => (
                   <div
                     key={assignee.user_id}
-                    className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-300/20 to-purple-400/20 border border-white/10 flex items-center justify-center"
+                    className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-400/20 to-teal-400/20 border border-white/10 flex items-center justify-center"
                     title={assignee.profiles?.full_name || assignee.profiles?.email || "User"}
                   >
                     <span className="text-[9px] text-white/70">
@@ -307,7 +289,7 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
                 onMoveLeft?.();
               }}
               disabled={!canMoveLeft}
-              className="flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-white/30 hover:text-sky-300 hover:bg-sky-300/10 disabled:opacity-0 disabled:pointer-events-none transition-all duration-200 cursor-pointer"
+              className="flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-white/30 hover:text-[#5EEAD4] hover:bg-[#2DD4BF]/10 disabled:opacity-0 disabled:pointer-events-none transition-all duration-200 cursor-pointer"
               title="Move to previous stage"
             >
               <ChevronLeft size={12} />
@@ -319,7 +301,7 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
                 onMoveRight?.();
               }}
               disabled={!canMoveRight}
-              className="flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-white/30 hover:text-purple-300 hover:bg-purple-300/10 disabled:opacity-0 disabled:pointer-events-none transition-all duration-200 cursor-pointer"
+              className="flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-white/30 hover:text-[#A78BFA] hover:bg-[#8B5CF6]/10 disabled:opacity-0 disabled:pointer-events-none transition-all duration-200 cursor-pointer"
               title="Move to next stage"
             >
               <span className="text-[9px] font-medium">Next</span>
@@ -328,6 +310,6 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }

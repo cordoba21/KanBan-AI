@@ -35,7 +35,7 @@ export default function ArchivedTasksPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-            <Archive size={24} className="text-sky-300" />
+            <Archive size={24} className="text-[#5EEAD4]" />
             Task Archive
           </h1>
           <p className="text-white/40 text-sm mt-1">
@@ -76,7 +76,7 @@ export default function ArchivedTasksPage() {
       {isLoading && (
         <div className="flex items-center justify-center h-[40vh]">
           <motion.div
-            className="w-12 h-12 rounded-full border-2 border-transparent border-t-sky-300 border-r-purple-400"
+            className="w-12 h-12 rounded-full border-2 border-transparent border-t-[#A78BFA] border-r-[#2DD4BF]"
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           />
@@ -113,9 +113,9 @@ export default function ArchivedTasksPage() {
                           <span
                             className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider"
                             style={{
-                              backgroundColor: `${task.category_color || "#7dd3fc"}20`,
-                              color: task.category_color || "#7dd3fc",
-                              border: `1px solid ${task.category_color || "#7dd3fc"}30`,
+                              backgroundColor: `${task.category_color || "#5EEAD4"}20`,
+                              color: task.category_color || "#5EEAD4",
+                              border: `1px solid ${task.category_color || "#5EEAD4"}30`,
                             }}
                           >
                             <Tag size={8} />

@@ -107,7 +107,7 @@ export default function CollaboratorsPanel({
                 disabled={!canManage}
               >
                 {ROLE_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value} style={{ background: "#1a1a2e", color: "white" }}>
+                  <option key={opt.value} value={opt.value} style={{ background: "#0A0A1A", color: "white" }}>
                     {opt.label}
                   </option>
                 ))}
@@ -145,31 +145,40 @@ export default function CollaboratorsPanel({
           ) : (
             <div className="space-y-2">
               {visibleMembers.map((member) => (
-                <div key={member.id} className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 px-3 py-2">
-                  <div className="flex items-center gap-2">
-                    <div className="h-7 w-7 rounded-full bg-white/10 flex items-center justify-center text-xs text-white/70">
+                <div
+                  key={member.id}
+                  className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/5 px-3 py-2.5 overflow-hidden"
+                >
+                  {/* Avatar */}
+                  <div className="h-7 w-7 rounded-full bg-gradient-to-br from-purple-400/20 to-teal-400/20 border border-white/10 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs text-white/70">
                       {(member.profiles?.full_name || member.profiles?.email || "?").slice(0, 1).toUpperCase()}
-                    </div>
-                    <div>
-                      <div className="text-xs text-white/80">
-                        {member.profiles?.full_name || member.profiles?.email || "User"}
-                        {member.user_id === user?.id && <span className="text-white/30"> (you)</span>}
-                      </div>
-                      <div className="text-[10px] text-white/30">{member.profiles?.email || ""}</div>
-                    </div>
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-white/70 bg-white/10 px-2 py-0.5 rounded-full">
+
+                  {/* Name + email */}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs text-white/80 truncate">
+                      {member.profiles?.full_name || member.profiles?.email || "User"}
+                      {member.user_id === user?.id && <span className="text-white/30"> (you)</span>}
+                    </div>
+                    <div className="text-[10px] text-white/30 truncate">{member.profiles?.email || ""}</div>
+                  </div>
+
+                  {/* Role badge + controls — always inside the row */}
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <span className="text-[10px] text-white/70 bg-white/10 px-2 py-0.5 rounded-full whitespace-nowrap">
                       {ROLE_LABELS[member.role]}
                     </span>
                     {member.role !== "OWNER" && canManage && (
                       <select
-                        className="glass-input h-8 text-xs"
+                        className="glass-input h-7 text-[10px] w-[80px] py-0 px-2"
+                        style={{ minWidth: "auto" }}
                         value={member.role}
                         onChange={(e) => updateRole.mutate({ memberId: member.id, role: e.target.value as "EDITOR" | "VIEWER" })}
                       >
                         {ROLE_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value} style={{ background: "#1a1a2e", color: "white" }}>
+                          <option key={opt.value} value={opt.value} style={{ background: "#0A0A1A", color: "white" }}>
                             {opt.label}
                           </option>
                         ))}
@@ -179,7 +188,7 @@ export default function CollaboratorsPanel({
                     {canManage && member.role !== "OWNER" && (
                       <button
                         onClick={() => removeMember.mutate({ memberId: member.id })}
-                        className="text-white/30 hover:text-red-400 transition-colors"
+                        className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0"
                         title="Revoke"
                       >
                         <Trash2 size={14} />

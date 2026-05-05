@@ -231,7 +231,7 @@ export default function ForgotPasswordPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <motion.div
-            className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-sky-300 to-purple-400 flex items-center justify-center"
+            className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-[#A78BFA] to-[#2DD4BF] flex items-center justify-center"
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: "spring", bounce: 0.4, duration: 0.8 }}
@@ -261,7 +261,7 @@ export default function ForgotPasswordPage() {
                 <motion.div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300 ${
                     i <= currentStepIndex
-                      ? "bg-gradient-to-br from-sky-300 to-purple-400 text-white"
+                      ? "bg-gradient-to-br from-[#A78BFA] to-[#2DD4BF] text-white"
                       : "bg-white/5 text-white/30 border border-white/10"
                   }`}
                   animate={{
@@ -279,7 +279,7 @@ export default function ForgotPasswordPage() {
                   <div
                     className={`w-8 h-0.5 rounded-full transition-all duration-500 ${
                       i < currentStepIndex
-                        ? "bg-gradient-to-r from-sky-300 to-purple-400"
+                        ? "bg-gradient-to-r from-[#A78BFA] to-[#2DD4BF]"
                         : "bg-white/10"
                     }`}
                   />
@@ -388,7 +388,7 @@ export default function ForgotPasswordPage() {
                         style={{
                           paddingLeft: 0,
                           paddingRight: 0,
-                          caretColor: "#7dd3fc",
+                          caretColor: "#A78BFA",
                         }}
                         value={digit}
                         onChange={(e) => handleOtpChange(i, e.target.value)}
@@ -406,7 +406,7 @@ export default function ForgotPasswordPage() {
                 <div className="text-center">
                   <p className="text-white/30 text-xs">
                     Code sent to{" "}
-                    <span className="text-sky-300 font-medium">{email}</span>
+                    <span className="text-[#A78BFA] font-medium">{email}</span>
                   </p>
                 </div>
 
@@ -415,7 +415,7 @@ export default function ForgotPasswordPage() {
                   {countdown > 0 ? (
                     <p className="text-white/25 text-xs">
                       Resend code in{" "}
-                      <span className="text-purple-400 font-semibold">
+                      <span className="text-[#2DD4BF] font-semibold">
                         {countdown}s
                       </span>
                     </p>
@@ -424,7 +424,7 @@ export default function ForgotPasswordPage() {
                       type="button"
                       onClick={handleResend}
                       disabled={loading}
-                      className="text-sky-300 hover:text-sky-200 text-xs font-medium transition-colors cursor-pointer disabled:opacity-50"
+                      className="text-[#A78BFA] hover:text-[#D8B4FE] text-xs font-medium transition-colors cursor-pointer disabled:opacity-50"
                     >
                       Resend code
                     </button>
@@ -648,7 +648,7 @@ export default function ForgotPasswordPage() {
                 Remember your password?{" "}
                 <Link
                   href="/login"
-                  className="text-sky-300 hover:text-sky-200 transition-colors font-medium"
+                  className="text-[#A78BFA] hover:text-[#D8B4FE] transition-colors font-medium"
                 >
                   Sign in
                 </Link>

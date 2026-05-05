@@ -54,7 +54,7 @@ export default function RegisterPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <motion.div
-            className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-purple-400 to-sky-300 flex items-center justify-center"
+            className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-[#A78BFA] to-[#2DD4BF] flex items-center justify-center"
             initial={{ scale: 0, rotate: 180 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: "spring", bounce: 0.4, duration: 0.8 }}
@@ -162,7 +162,7 @@ export default function RegisterPage() {
               Already have an account?{" "}
               <Link
                 href="/login"
-                className="text-purple-400 hover:text-purple-300 transition-colors font-medium"
+                className="text-[#A78BFA] hover:text-[#D8B4FE] transition-colors font-medium"
               >
                 Sign in
               </Link>

@@ -138,7 +138,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
     >
       {/* Logo */}
       <div className="flex items-center gap-3 p-5 border-b border-white/5">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-300 to-purple-400 flex items-center justify-center flex-shrink-0">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#A78BFA] to-[#2DD4BF] flex items-center justify-center flex-shrink-0">
           <LayoutDashboard size={18} className="text-white" />
         </div>
         <AnimatePresence>
@@ -181,7 +181,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                   >
                     {isActive && (
                       <motion.div
-                        className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-gradient-to-b from-sky-300 to-purple-400"
+                        className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-gradient-to-b from-[#A78BFA] to-[#2DD4BF]"
                         layoutId="activeNav"
                         transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
                       />
@@ -233,7 +233,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                               key={board.id}
                               className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors ${
                                 isCurrent
-                                  ? "bg-sky-500/20 text-sky-300"
+                                  ? "bg-[#8B5CF6]/20 text-[#A78BFA]"
                                   : "text-white/50 hover:text-white hover:bg-white/5"
                               }`}
                             >
@@ -399,7 +399,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
               >
                 {isActive && (
                   <motion.div
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-gradient-to-b from-sky-300 to-purple-400"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-gradient-to-b from-[#A78BFA] to-[#2DD4BF]"
                     layoutId="activeNav"
                     transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
                   />
@@ -463,7 +463,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
               >
                 {isActive && (
                   <motion.div
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-gradient-to-b from-sky-300 to-purple-400"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-gradient-to-b from-[#A78BFA] to-[#2DD4BF]"
                     layoutId="activeNav"
                     transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
                   />
@@ -492,7 +492,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       {/* User section */}
       <div className="p-3 border-t border-white/5 relative">
         <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-sky-300/30 to-purple-400/30 flex items-center justify-center flex-shrink-0 border border-white/10">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#A78BFA]/30 to-[#2DD4BF]/30 flex items-center justify-center flex-shrink-0 border border-white/10">
             <User size={14} className="text-white/70" />
           </div>
           <AnimatePresence>
@@ -855,7 +855,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                 <button
                   onClick={handleUpdateFullName}
                   disabled={!fullNameInput.trim() || updateNameLoading}
-                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-sky-500/80 hover:bg-sky-500 disabled:opacity-30 disabled:cursor-not-allowed rounded-[var(--radius-organic-sm)] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-[#8B5CF6]/80 hover:bg-[#8B5CF6] disabled:opacity-30 disabled:cursor-not-allowed rounded-[var(--radius-organic-sm)] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2"
                 >
                   {updateNameLoading ? (
                     <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">

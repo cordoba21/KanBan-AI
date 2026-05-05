@@ -5,7 +5,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import TaskCard from "./TaskCard";
 import type { TaskStatus, TaskWithPeople } from "@/types/supabase";
 
@@ -26,7 +26,7 @@ export default function Column({ id, title, color, tasks, onTaskClick, onMoveTas
   return (
     <motion.div
       ref={setNodeRef}
-      className="glass flex flex-col h-full min-h-[400px]"
+      className="glass flex flex-col h-full min-h-[400px] sm:min-h-[400px]"
       style={{
         borderRadius: "var(--radius-organic)",
         borderTop: `2px solid ${color}`,
@@ -68,19 +68,17 @@ export default function Column({ id, title, color, tasks, onTaskClick, onMoveTas
           items={tasks.map((t) => t.id)}
           strategy={verticalListSortingStrategy}
         >
-          <AnimatePresence mode="popLayout">
-            {tasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onClick={() => onTaskClick(task)}
-                canMoveLeft={columnIndex > 0}
-                canMoveRight={columnIndex < totalColumns - 1}
-                onMoveLeft={() => onMoveTask?.(task.id, "left")}
-                onMoveRight={() => onMoveTask?.(task.id, "right")}
-              />
-            ))}
-          </AnimatePresence>
+          {tasks.map((task) => (
+            <TaskCard
+              key={task.id}
+              task={task}
+              onClick={() => onTaskClick(task)}
+              canMoveLeft={columnIndex > 0}
+              canMoveRight={columnIndex < totalColumns - 1}
+              onMoveLeft={() => onMoveTask?.(task.id, "left")}
+              onMoveRight={() => onMoveTask?.(task.id, "right")}
+            />
+          ))}
         </SortableContext>
 
         {tasks.length === 0 && (

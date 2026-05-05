@@ -48,7 +48,7 @@ export default function DashboardClient() {
     return categories.map((cat) => ({
       id: cat.id,
       name: cat.name,
-      color: cat.color || "#7dd3fc",
+      color: cat.color || "#5EEAD4",
       count: counts.get(cat.id) || 0,
     }));
   }, [categories, data?.tasks]);
@@ -57,7 +57,7 @@ export default function DashboardClient() {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <motion.div
-          className="w-12 h-12 rounded-full border-2 border-transparent border-t-sky-300 border-r-purple-400"
+          className="w-12 h-12 rounded-full border-2 border-transparent border-t-[#A78BFA] border-r-[#2DD4BF]"
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
         />
@@ -90,7 +90,7 @@ export default function DashboardClient() {
                 <option
                   key={board.id}
                   value={board.id}
-                  style={{ background: "#1a1a2e", color: "white" }}
+                  style={{ background: "#0A0A1A", color: "white" }}
                 >
                   {board.name}
                 </option>

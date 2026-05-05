@@ -3,34 +3,52 @@
 
 /* ──────────────────────────────────────────────────────────────
    LIQUID GLASS DESIGN SYSTEM
-   Color palette: Sky-300 (#7dd3fc), Purple-400 (#c084fc), Pure whites
-   Inspired by Apple/Stripe glassmorphism
+   Color palette: Purple (#8B5CF6), Teal (#2DD4BF), Lavender (#D8B4FE)
+   Inspired by Apple/Stripe glassmorphism with soft pastel accents
    ────────────────────────────────────────────────────────────── */
 
 @theme inline {
-  --color-background: #050510;
+  --color-background: #0A0A1A;
   --color-foreground: #f0f0f5;
 
-  /* Brand palette */
-  --color-sky-300: #7dd3fc;
-  --color-sky-400: #38bdf8;
-  --color-sky-500: #0ea5e9;
-  --color-purple-300: #d8b4fe;
-  --color-purple-400: #c084fc;
-  --color-purple-500: #a855f7;
+  /* Brand palette — Purple / Teal / Lavender */
+  --color-primary: #8B5CF6;
+  --color-primary-light: #A78BFA;
+  --color-primary-dark: #7C3AED;
+
+  --color-accent: #2DD4BF;
+  --color-accent-light: #5EEAD4;
+  --color-accent-dark: #14B8A6;
+
+  --color-lavender: #D8B4FE;
+  --color-lavender-light: #E9D5FF;
+  --color-lavender-dark: #C084FC;
+
+  --color-rose: #F0ABFC;
+  --color-rose-light: #F5D0FE;
+
+  /* Legacy compat aliases */
+  --color-sky-300: #5EEAD4;
+  --color-sky-400: #2DD4BF;
+  --color-sky-500: #14B8A6;
+  --color-purple-300: #D8B4FE;
+  --color-purple-400: #A78BFA;
+  --color-purple-500: #8B5CF6;
 
   /* Glass tokens */
   --color-glass-bg: rgba(255, 255, 255, 0.06);
   --color-glass-bg-hover: rgba(255, 255, 255, 0.1);
-  --color-glass-bg-strong: rgba(255, 255, 255, 0.12);
+  --color-glass-bg-strong: rgba(255, 255, 255, 0.10);
   --color-glass-border: rgba(255, 255, 255, 0.12);
   --color-glass-border-hover: rgba(255, 255, 255, 0.22);
 
   /* Shadows */
   --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.3);
   --shadow-glass-hover: 0 12px 40px rgba(0, 0, 0, 0.4);
-  --shadow-glow-sky: 0 0 20px rgba(125, 211, 252, 0.15);
-  --shadow-glow-purple: 0 0 20px rgba(192, 132, 252, 0.15);
+  --shadow-glow-primary: 0 0 20px rgba(139, 92, 246, 0.15);
+  --shadow-glow-accent: 0 0 20px rgba(45, 212, 191, 0.15);
+  --shadow-glow-sky: 0 0 20px rgba(45, 212, 191, 0.15);
+  --shadow-glow-purple: 0 0 20px rgba(139, 92, 246, 0.15);
 
   /* Radius */
   --radius-organic: 20px;
@@ -84,7 +102,7 @@ body {
   inset: 0;
   z-index: -1;
   overflow: hidden;
-  background: #050510;
+  background: #0A0A1A;
 }
 
 .mesh-background::before,
@@ -102,7 +120,7 @@ body {
   height: 50vw;
   top: -10%;
   left: -10%;
-  background: radial-gradient(circle, #7dd3fc33 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%);
   animation-delay: 0s;
 }
 
@@ -111,7 +129,7 @@ body {
   height: 45vw;
   bottom: -15%;
   right: -10%;
-  background: radial-gradient(circle, #c084fc33 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(45, 212, 191, 0.2) 0%, transparent 70%);
   animation-delay: -10s;
 }
 
@@ -130,7 +148,7 @@ body {
   height: 35vw;
   top: 30%;
   right: 20%;
-  background: radial-gradient(circle, #7dd3fc22 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(216, 180, 254, 0.15) 0%, transparent 70%);
   animation: mesh-float-alt 25s ease-in-out infinite;
 }
 
@@ -139,7 +157,7 @@ body {
   height: 30vw;
   bottom: 10%;
   left: 25%;
-  background: radial-gradient(circle, #c084fc22 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(240, 171, 252, 0.12) 0%, transparent 70%);
   animation: mesh-float 30s ease-in-out infinite reverse;
 }
 
@@ -149,7 +167,7 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: radial-gradient(circle, #7dd3fc18 0%, #c084fc18 50%, transparent 70%);
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, rgba(45, 212, 191, 0.1) 50%, transparent 70%);
   animation: mesh-pulse 15s ease-in-out infinite;
 }
 
@@ -201,23 +219,23 @@ body {
 
 /* ─── Glow Effects ────────────────────────────────────────── */
 .glow-sky {
-  box-shadow: var(--shadow-glow-sky), var(--shadow-glass);
+  box-shadow: var(--shadow-glow-accent), var(--shadow-glass);
 }
 
 .glow-purple {
-  box-shadow: var(--shadow-glow-purple), var(--shadow-glass);
+  box-shadow: var(--shadow-glow-primary), var(--shadow-glass);
 }
 
 .glow-gradient {
   box-shadow:
-    0 0 20px rgba(125, 211, 252, 0.1),
-    0 0 40px rgba(192, 132, 252, 0.08),
+    0 0 20px rgba(139, 92, 246, 0.1),
+    0 0 40px rgba(45, 212, 191, 0.08),
     var(--shadow-glass);
 }
 
 /* ─── Gradient Text ───────────────────────────────────────── */
 .gradient-text {
-  background: linear-gradient(135deg, #7dd3fc 0%, #c084fc 100%);
+  background: linear-gradient(135deg, #A78BFA 0%, #2DD4BF 50%, #F0ABFC 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -228,7 +246,7 @@ body {
   position: relative;
   padding: 10px 24px;
   border-radius: var(--radius-organic);
-  background: linear-gradient(135deg, rgba(125, 211, 252, 0.15), rgba(192, 132, 252, 0.15));
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(45, 212, 191, 0.15));
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: white;
   font-weight: 500;
@@ -242,7 +260,7 @@ body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(135deg, rgba(125, 211, 252, 0.3), rgba(192, 132, 252, 0.3));
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(45, 212, 191, 0.3));
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -251,8 +269,8 @@ body {
   transform: translateY(-1px) scale(1.02);
   border-color: rgba(255, 255, 255, 0.25);
   box-shadow:
-    0 0 20px rgba(125, 211, 252, 0.15),
-    0 0 40px rgba(192, 132, 252, 0.1),
+    0 0 20px rgba(139, 92, 246, 0.15),
+    0 0 40px rgba(45, 212, 191, 0.1),
     0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
@@ -293,16 +311,16 @@ body {
 }
 
 .glass-input:focus {
-  border-color: rgba(125, 211, 252, 0.5);
+  border-color: rgba(139, 92, 246, 0.5);
   background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 0 3px rgba(125, 211, 252, 0.1);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 
 /* Fix Chrome/Edge autofill background & text bleed */
 .glass-input:-webkit-autofill,
 .glass-input:-webkit-autofill:hover,
 .glass-input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0 30px rgba(10, 10, 20, 1) inset !important;
+  -webkit-box-shadow: 0 0 0 30px rgba(10, 10, 26, 1) inset !important;
   -webkit-text-fill-color: white !important;
   caret-color: white;
   transition: background-color 5000s ease-in-out 0s;
@@ -333,15 +351,15 @@ body {
 }
 
 .badge-sky {
-  background: rgba(125, 211, 252, 0.15);
-  color: #7dd3fc;
-  border: 1px solid rgba(125, 211, 252, 0.2);
+  background: rgba(45, 212, 191, 0.15);
+  color: #5EEAD4;
+  border: 1px solid rgba(45, 212, 191, 0.2);
 }
 
 .badge-purple {
-  background: rgba(192, 132, 252, 0.15);
-  color: #c084fc;
-  border: 1px solid rgba(192, 132, 252, 0.2);
+  background: rgba(139, 92, 246, 0.15);
+  color: #A78BFA;
+  border: 1px solid rgba(139, 92, 246, 0.2);
 }
 
 .badge-green {
@@ -368,7 +386,7 @@ body {
   transform: scale(1.03) rotate(2deg);
   box-shadow:
     0 20px 60px rgba(0, 0, 0, 0.5),
-    0 0 30px rgba(125, 211, 252, 0.2);
+    0 0 30px rgba(139, 92, 246, 0.2);
 }
 
 /* ─── Animations ──────────────────────────────────────────── */
@@ -383,8 +401,8 @@ body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 10px rgba(125, 211, 252, 0.1); }
-  50% { box-shadow: 0 0 25px rgba(125, 211, 252, 0.25); }
+  0%, 100% { box-shadow: 0 0 10px rgba(139, 92, 246, 0.1); }
+  50% { box-shadow: 0 0 25px rgba(139, 92, 246, 0.25); }
 }
 
 .animate-fade-in {
@@ -397,4 +415,47 @@ body {
 
 .animate-pulse-glow {
   animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* ─── Responsive Kanban Columns ───────────────────────────── */
+.kanban-columns {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  min-height: calc(100vh - 200px);
+}
+
+.kanban-column {
+  flex-shrink: 0;
+  width: 280px;
+}
+
+/* On very small screens: full-width stacked columns */
+@media (max-width: 639px) {
+  .kanban-columns {
+    flex-direction: column;
+    overflow-x: visible;
+  }
+  .kanban-column {
+    width: 100%;
+  }
+}
+
+/* On tablets: auto-wrap with smaller widths */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .kanban-columns {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+  .kanban-column {
+    width: calc(50% - 0.5rem);
+  }
+}
+
+/* On larger screens: horizontal scrolling with fixed-width columns */
+@media (min-width: 1024px) {
+  .kanban-column {
+    width: 280px;
+  }
 }

@@ -183,7 +183,7 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
                     <option
                       key={opt.value}
                       value={opt.value}
-                      style={{ background: "#1a1a2e", color: "white" }}
+                      style={{ background: "#0A0A1A", color: "white" }}
                     >
                       {opt.label}
                     </option>
@@ -225,14 +225,14 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
                 onChange={(e) => setCategoryId(e.target.value)}
                 disabled={!isEditor}
               >
-                <option value="" style={{ background: "#1a1a2e", color: "white" }}>
+                <option value="" style={{ background: "#0A0A1A", color: "white" }}>
                   No category
                 </option>
                 {categories?.map((cat) => (
                   <option
                     key={cat.id}
                     value={cat.id}
-                    style={{ background: "#1a1a2e", color: "white" }}
+                    style={{ background: "#0A0A1A", color: "white" }}
                   >
                     {cat.name}
                   </option>
@@ -270,13 +270,13 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
                       key={member.user_id}
                       className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs cursor-pointer transition-colors ${
                         isChecked
-                          ? "bg-sky-500/10 border-sky-500/30 text-white"
+                          ? "bg-[#8B5CF6]/10 border-[#8B5CF6]/30 text-white"
                           : "bg-white/5 border-white/10 text-white/60 hover:text-white"
                       }`}
                     >
                       <input
                         type="checkbox"
-                        className="accent-sky-400"
+                        className="accent-[#8B5CF6]"
                         checked={isChecked}
                         onChange={(e) => {
                           if (!isEditor) return;

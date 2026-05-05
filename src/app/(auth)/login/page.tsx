@@ -49,7 +49,7 @@ export default function LoginPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <motion.div
-            className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-sky-300 to-purple-400 flex items-center justify-center"
+            className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-[#A78BFA] to-[#2DD4BF] flex items-center justify-center"
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: "spring", bounce: 0.4, duration: 0.8 }}
@@ -112,7 +112,7 @@ export default function LoginPage() {
             <div className="flex justify-end -mt-1">
               <Link
                 href="/forgot-password"
-                className="text-sky-300/70 hover:text-sky-200 text-xs transition-colors font-medium"
+                className="text-[#A78BFA]/70 hover:text-[#D8B4FE] text-xs transition-colors font-medium"
               >
                 Forgot your password?
               </Link>
@@ -144,7 +144,7 @@ export default function LoginPage() {
               Don&apos;t have an account?{" "}
               <Link
                 href="/register"
-                className="text-sky-300 hover:text-sky-200 transition-colors font-medium"
+                className="text-[#A78BFA] hover:text-[#D8B4FE] transition-colors font-medium"
               >
                 Create one
               </Link>

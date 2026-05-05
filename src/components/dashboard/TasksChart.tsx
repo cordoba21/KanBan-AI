@@ -50,8 +50,8 @@ export default function TasksChart({ data }: TasksChartProps) {
           <AreaChart data={data}>
             <defs>
               <linearGradient id="gradientCreated" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#7dd3fc" stopOpacity={0.3} />
-                <stop offset="100%" stopColor="#7dd3fc" stopOpacity={0} />
+                <stop offset="0%" stopColor="#5EEAD4" stopOpacity={0.3} />
+                <stop offset="100%" stopColor="#5EEAD4" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="gradientCompleted" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#4ade80" stopOpacity={0.3} />
@@ -82,7 +82,7 @@ export default function TasksChart({ data }: TasksChartProps) {
               type="monotone"
               dataKey="created"
               name="Created"
-              stroke="#7dd3fc"
+              stroke="#5EEAD4"
               strokeWidth={2}
               fill="url(#gradientCreated)"
             />

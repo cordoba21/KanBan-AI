@@ -16,7 +16,7 @@ const stats = [
     key: "total",
     label: "Total Tasks",
     icon: ListTodo,
-    color: "#7dd3fc",
+    color: "#5EEAD4",
     getValue: (p: StatsGridProps) => p.totalTasks,
   },
   {
@@ -30,7 +30,7 @@ const stats = [
     key: "progress",
     label: "In Progress",
     icon: Clock,
-    color: "#c084fc",
+    color: "#A78BFA",
     getValue: (p: StatsGridProps) => p.inProgressTasks,
   },
   {
