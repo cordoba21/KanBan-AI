@@ -24,10 +24,13 @@ import {
   Pencil,
   Save,
   X,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { useUser, useSignOut } from "@/lib/auth/hooks";
 import { createClient } from "@/lib/supabase/client";
 import { useUserBoardsQuery, useSwitchBoardMutation, useCreateBoardMutation, useUpdateBoardMutation, useDeleteBoardMutation } from "@/hooks/useBoards";
+import { useTheme } from "@/lib/theme/ThemeContext";
 
 const navItems = [
   { href: "/kanban", label: "Kanban Board", icon: Columns3, hasDropdown: true },
@@ -67,6 +70,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const createBoard = useCreateBoardMutation();
   const updateBoard = useUpdateBoardMutation();
   const deleteBoard = useDeleteBoardMutation();
+  const { theme, toggleTheme } = useTheme();
 
   async function handleDeleteAccount() {
     if (deleteConfirmation !== "Delete my account") return;
@@ -564,6 +568,26 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           </AnimatePresence>
         </button>
 
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          className="flex items-center gap-3 px-3 py-2 w-full text-white/40 hover:text-[#FFB800] rounded-[var(--radius-organic-sm)] hover:bg-[#FFB800]/5 transition-all duration-200 mt-1"
+        >
+          {theme === "dark" ? <Sun size={18} className="flex-shrink-0" /> : <Moon size={18} className="flex-shrink-0" />}
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.span
+                className="text-xs font-medium"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                {theme === "dark" ? "Light Mode" : "Dark Mode"}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </button>
+
         {/* Delete account */}
         <button
           onClick={() => setShowDeleteModal(true)}
@@ -662,14 +686,14 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                     setDeleteConfirmation("");
                     setDeleteError(null);
                   }}
-                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white/60 hover:text-white bg-white/5 hover:bg-white/10 rounded-[var(--radius-organic-sm)] transition-all duration-200 cursor-pointer"
+                  className="flex-1 px-3 py-2.5 text-xs font-semibold text-[#c8c8c8]/60 hover:text-[#c8c8c8] bg-white/5 hover:bg-white/10 rounded-[var(--radius-organic-sm)] transition-all duration-150 cursor-pointer uppercase tracking-wider"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDeleteAccount}
                   disabled={deleteConfirmation !== "Delete my account" || deleteLoading}
-                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-red-500/80 hover:bg-red-500 disabled:opacity-30 disabled:cursor-not-allowed rounded-[var(--radius-organic-sm)] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2"
+                  className="flex-1 px-3 py-2.5 text-xs font-semibold text-[#FF3B3B] bg-[#FF3B3B]/10 hover:bg-[#FF3B3B]/20 disabled:opacity-30 disabled:cursor-not-allowed rounded-[var(--radius-organic-sm)] transition-all duration-150 cursor-pointer flex items-center justify-center gap-2 uppercase tracking-wider border border-[#FF3B3B]/20 hover:border-[#FF3B3B]/40 min-w-0 overflow-hidden"
                 >
                   {deleteLoading ? (
                     <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
@@ -679,7 +703,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                   ) : (
                     <Trash2 size={14} />
                   )}
-                  Delete Forever
+                  Delete
                 </button>
               </div>
             </motion.div>
@@ -744,7 +768,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                     setDeletingBoardId(null);
                     setDeleteBoardConfirm("");
                   }}
-                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white/60 hover:text-white bg-white/5 hover:bg-white/10 rounded-[var(--radius-organic-sm)] transition-all duration-200 cursor-pointer"
+                  className="flex-1 px-3 py-2.5 text-xs font-semibold text-[#c8c8c8]/60 hover:text-[#c8c8c8] bg-white/5 hover:bg-white/10 rounded-[var(--radius-organic-sm)] transition-all duration-150 cursor-pointer uppercase tracking-wider"
                 >
                   Cancel
                 </button>
@@ -768,7 +792,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                     setDeleteBoardConfirm("");
                   }}
                   disabled={deleteBoardConfirm !== "Delete board" || deleteBoard.isPending}
-                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-red-500/80 hover:bg-red-500 disabled:opacity-30 disabled:cursor-not-allowed rounded-[var(--radius-organic-sm)] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2"
+                  className="flex-1 px-3 py-2.5 text-xs font-semibold text-[#FF3B3B] bg-[#FF3B3B]/10 hover:bg-[#FF3B3B]/20 disabled:opacity-30 disabled:cursor-not-allowed rounded-[var(--radius-organic-sm)] transition-all duration-150 cursor-pointer flex items-center justify-center gap-2 uppercase tracking-wider border border-[#FF3B3B]/20 hover:border-[#FF3B3B]/40 min-w-0 overflow-hidden"
                 >
                   {deleteBoard.isPending ? (
                     <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">

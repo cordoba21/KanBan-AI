@@ -429,8 +429,235 @@ body {
   }
 }
 
-/* ─── Select elements ─────────────────────────────────────── */
+/* ─── Select elements — global dropdown arrow ─────────────── */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2300FF41' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 28px !important;
+}
+
 select option {
   background: #0a0a0a !important;
   color: #00FF41 !important;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   LIGHT MODE
+   Triggered by html.light class
+   ────────────────────────────────────────────────────────────── */
+
+html.light body {
+  background: #f4f4f5;
+  color: #1a1a2e;
+}
+
+/* Terminal background → clean light */
+html.light .mesh-background {
+  background: #f4f4f5;
+}
+html.light .mesh-background::before {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 100, 30, 0.02) 2px,
+    rgba(0, 100, 30, 0.02) 4px
+  );
+}
+html.light .mesh-background::after {
+  background: radial-gradient(circle, rgba(0, 180, 60, 0.04) 0%, transparent 60%);
+}
+
+/* Glass panels → light cards */
+html.light .glass {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 100, 30, 0.12);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+html.light .glass-strong {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 100, 30, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+html.light .glass-hover:hover {
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(0, 100, 30, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Text colors */
+html.light .gradient-text {
+  color: #007520;
+  text-shadow: none;
+  -webkit-text-fill-color: #007520;
+}
+
+/* Inputs */
+html.light .glass-input {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 100, 30, 0.15);
+  color: #1a1a2e;
+}
+html.light .glass-input::placeholder {
+  color: rgba(0, 100, 30, 0.3);
+}
+html.light .glass-input:focus {
+  border-color: rgba(0, 100, 30, 0.4);
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 0 0 2px rgba(0, 180, 60, 0.1);
+}
+html.light .glass-input:-webkit-autofill,
+html.light .glass-input:-webkit-autofill:hover,
+html.light .glass-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px #f4f4f5 inset !important;
+  -webkit-text-fill-color: #1a1a2e !important;
+  caret-color: #007520;
+}
+
+/* Buttons */
+html.light .liquid-button {
+  background: rgba(0, 180, 60, 0.1);
+  border: 1px solid rgba(0, 180, 60, 0.3);
+  color: #007520;
+}
+html.light .liquid-button::before {
+  background: rgba(0, 180, 60, 0.15);
+}
+html.light .liquid-button:hover {
+  border-color: rgba(0, 180, 60, 0.5);
+  box-shadow: 0 0 15px rgba(0, 180, 60, 0.1);
+  text-shadow: none;
+}
+
+/* Select arrow for light mode */
+html.light select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23007520' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+html.light select option {
+  background: #ffffff !important;
+  color: #1a1a2e !important;
+}
+
+/* Scrollbar */
+html.light ::-webkit-scrollbar-thumb {
+  background: rgba(0, 100, 30, 0.15);
+}
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 100, 30, 0.3);
+}
+html.light ::-webkit-scrollbar-track {
+  background: #f4f4f5;
+}
+
+/* Glow effects (muted in light mode) */
+html.light .glow-sky,
+html.light .glow-purple,
+html.light .glow-gradient {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* Drag overlay */
+html.light .drag-overlay {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* ─── Light mode: Hardcoded color overrides ───────────────── */
+/* Override white text to dark in light mode */
+html.light {
+  --tw-text-opacity: 1;
+}
+
+/* Common text overrides */
+html.light .text-white {
+  color: #1a1a2e !important;
+}
+html.light .text-white\/80 {
+  color: rgba(26, 26, 46, 0.8) !important;
+}
+html.light .text-white\/70 {
+  color: rgba(26, 26, 46, 0.7) !important;
+}
+html.light .text-white\/60 {
+  color: rgba(26, 26, 46, 0.6) !important;
+}
+html.light .text-white\/50 {
+  color: rgba(26, 26, 46, 0.5) !important;
+}
+html.light .text-white\/40 {
+  color: rgba(26, 26, 46, 0.4) !important;
+}
+html.light .text-white\/30 {
+  color: rgba(26, 26, 46, 0.3) !important;
+}
+html.light .text-white\/25 {
+  color: rgba(26, 26, 46, 0.25) !important;
+}
+html.light .text-white\/20 {
+  color: rgba(26, 26, 46, 0.2) !important;
+}
+
+/* Terminal colors adapt for light mode */
+html.light .text-\[\#c8c8c8\] {
+  color: #2a2a3e !important;
+}
+html.light .text-\[\#c8c8c8\]\/30 {
+  color: rgba(42, 42, 62, 0.4) !important;
+}
+html.light .text-\[\#00FF41\] {
+  color: #007520 !important;
+}
+html.light .text-\[\#00FF41\]\/40 {
+  color: rgba(0, 117, 32, 0.5) !important;
+}
+html.light .text-\[\#00FF41\]\/30 {
+  color: rgba(0, 117, 32, 0.35) !important;
+}
+
+/* Border overrides */
+html.light .border-white\/5 {
+  border-color: rgba(0, 100, 30, 0.08) !important;
+}
+html.light .border-white\/10 {
+  border-color: rgba(0, 100, 30, 0.12) !important;
+}
+html.light .border-\[\#00FF41\]\/10 {
+  border-color: rgba(0, 117, 32, 0.12) !important;
+}
+html.light .border-\[\#00FF41\]\/15 {
+  border-color: rgba(0, 117, 32, 0.15) !important;
+}
+html.light .border-\[\#00FF41\]\/20 {
+  border-color: rgba(0, 117, 32, 0.2) !important;
+}
+html.light .border-\[\#00FF41\]\/30 {
+  border-color: rgba(0, 117, 32, 0.3) !important;
+}
+
+/* Background overrides */
+html.light .bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+html.light .bg-white\/10 {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+html.light .bg-\[\#00FF41\]\/10 {
+  background-color: rgba(0, 180, 60, 0.08) !important;
+}
+html.light .bg-\[\#00FF41\]\/\[0\.02\] {
+  background-color: rgba(0, 180, 60, 0.04) !important;
+}
+html.light .bg-\[\#0a0a0a\] {
+  background-color: #f4f4f5 !important;
+}
+html.light .bg-black\/70 {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Loading states */
+html.light .animate-terminal-blink {
+  color: #007520 !important;
 }

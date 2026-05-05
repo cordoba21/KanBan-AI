@@ -4,10 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Mail, Lock, User, ArrowRight, Terminal } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Terminal, Sun, Moon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import MeshBackground from "@/components/layout/MeshBackground";
 import GlassButton from "@/components/ui/GlassButton";
+import { useTheme } from "@/lib/theme/ThemeContext";
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
@@ -16,6 +17,7 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
@@ -44,6 +46,15 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center relative">
       <MeshBackground />
+
+      {/* Theme toggle */}
+      <button
+        onClick={toggleTheme}
+        className="fixed top-4 right-4 z-50 w-9 h-9 rounded bg-[#00FF41]/10 border border-[#00FF41]/15 flex items-center justify-center text-[#00FF41]/50 hover:text-[#00FF41] transition-colors"
+        title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+      >
+        {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+      </button>
 
       <motion.div
         className="w-full max-w-md mx-4"
