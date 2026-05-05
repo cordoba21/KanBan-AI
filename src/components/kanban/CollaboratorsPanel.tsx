@@ -78,8 +78,8 @@ export default function CollaboratorsPanel({
 
       {mode === "invite" && (
         <div className="flex flex-col gap-2 mb-4">
-          <div className="flex flex-col sm:flex-row gap-2 w-full">
-            <div className="relative flex-1 min-w-0">
+          <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_120px] gap-2 w-full">
+            <div className="relative min-w-0">
               <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
               <input
                 className="glass-input glass-input-with-icon w-full"
@@ -90,9 +90,18 @@ export default function CollaboratorsPanel({
                 disabled={!canManage}
               />
             </div>
-            <div className="w-full sm:w-[120px] shrink-0">
+            <div className="relative w-full">
+              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-white/40">
+                <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                  <path
+                    fillRule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
               <select
-                className="glass-input w-full"
+                className="glass-input w-full appearance-none pr-9"
                 value={role}
                 onChange={(e) => setRole(e.target.value as "EDITOR" | "VIEWER")}
                 disabled={!canManage}
