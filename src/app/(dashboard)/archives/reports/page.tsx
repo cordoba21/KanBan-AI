@@ -15,6 +15,7 @@ export default function ArchivedReportsPage() {
   const deleteReport = useDeleteArchivedReportMutation();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   function formatMonth(m: string) {
     const [year, month] = m.split("-");
@@ -107,20 +108,11 @@ export default function ArchivedReportsPage() {
                         </span>
                       </div>
                       <button
-                        onClick={async (event) => {
+                        onClick={(event) => {
                           event.preventDefault();
                           event.stopPropagation();
                           setDeleteError(null);
-                          const confirmed = window.confirm(
-                            "¿Eliminar este reporte? Esta accion se puede revertir mas tarde si lo decides."
-                          );
-                          if (!confirmed) return;
-                          try {
-                            await deleteReport.mutateAsync({ reportId: report.id });
-                            if (expandedId === report.id) setExpandedId(null);
-                          } catch (error: any) {
-                            setDeleteError(error?.message || "Error deleting report");
-                          }
+                          setDeleteTarget(report.id);
                         }}
                         className="text-white/30 hover:text-red-400"
                         title="Delete report"
@@ -216,6 +208,80 @@ export default function ArchivedReportsPage() {
           {deleteError}
         </motion.div>
       )}
+
+      <AnimatePresence>
+        {deleteTarget && (
+          <motion.div
+            className="fixed inset-0 z-[120] flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+              onClick={() => setDeleteTarget(null)}
+            />
+            <motion.div
+              className="glass-strong relative w-full max-w-sm z-10 p-6"
+              style={{ borderRadius: "var(--radius-organic-lg)" }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-red-500/15 flex items-center justify-center border border-red-500/20">
+                  <Trash2 size={18} className="text-red-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Eliminar reporte</h3>
+                  <p className="text-xs text-white/40">Esta accion se puede revertir mas tarde</p>
+                </div>
+              </div>
+
+              <div className="bg-red-500/5 border border-red-500/15 rounded-xl p-3 mb-4">
+                <p className="text-xs text-red-300/80 leading-relaxed">
+                  Se ocultara este reporte del archivo, pero podras restaurarlo si lo necesitas.
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setDeleteTarget(null)}
+                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white/60 hover:text-white bg-white/5 hover:bg-white/10 rounded-[var(--radius-organic-sm)] transition-all duration-200 cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!deleteTarget) return;
+                    setDeleteError(null);
+                    try {
+                      await deleteReport.mutateAsync({ reportId: deleteTarget });
+                      if (expandedId === deleteTarget) setExpandedId(null);
+                      setDeleteTarget(null);
+                    } catch (error: any) {
+                      setDeleteError(error?.message || "Error deleting report");
+                    }
+                  }}
+                  disabled={deleteReport.isPending}
+                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-red-500/80 hover:bg-red-500 disabled:opacity-30 disabled:cursor-not-allowed rounded-[var(--radius-organic-sm)] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  {deleteReport.isPending ? (
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                  ) : (
+                    <Trash2 size={14} />
+                  )}
+                  Eliminar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

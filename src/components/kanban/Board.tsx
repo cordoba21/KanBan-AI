@@ -10,6 +10,8 @@ import {
   useSensors,
   type DragStartEvent,
   type DragEndEvent,
+  defaultDropAnimationSideEffects,
+  type DropAnimation,
 } from "@dnd-kit/core";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Tag, Archive, UserPlus, Users } from "lucide-react";
@@ -69,6 +71,18 @@ export default function Board() {
       activationConstraint: { distance: 5 },
     })
   );
+
+  const dropAnimation: DropAnimation = {
+    duration: 260,
+    easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+    sideEffects: defaultDropAnimationSideEffects({
+      styles: {
+        active: {
+          opacity: "0.5",
+        },
+      },
+    }),
+  };
 
   const handleDragStart = useCallback(
     (event: DragStartEvent) => {
@@ -304,7 +318,7 @@ export default function Board() {
           ))}
         </div>
 
-        <DragOverlay dropAnimation={null}>
+        <DragOverlay dropAnimation={dropAnimation}>
           {activeTask && (
             <TaskCard task={activeTask} isDragOverlay />
           )}

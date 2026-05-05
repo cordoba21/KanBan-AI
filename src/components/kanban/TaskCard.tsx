@@ -1,6 +1,6 @@
 "use client";
 
-import { useSortable } from "@dnd-kit/sortable";
+import { useSortable, defaultAnimateLayoutChanges } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { motion } from "framer-motion";
 import { GripVertical, AlertCircle, Clock, CheckCircle2, Tag, Calendar, ChevronLeft, ChevronRight, User } from "lucide-react";
@@ -89,11 +89,14 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: task.id });
+  } = useSortable({
+    id: task.id,
+    animateLayoutChanges: (args) => defaultAnimateLayoutChanges({ ...args, wasDragging: true }),
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition: transition || "transform 200ms cubic-bezier(0.25, 1, 0.5, 1)",
+    transition: transition || "transform 250ms cubic-bezier(0.22, 1, 0.36, 1)",
     opacity: isDragging ? 0.3 : 1,
     scale: isDragging ? 0.95 : 1,
   };
@@ -217,6 +220,9 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
       }}
       layout
       layoutId={task.id}
+      transition={{
+        layout: { duration: 0.25, ease: [0.22, 1, 0.36, 1] },
+      }}
       onClick={onClick}
     >
       <div className="p-3.5">
