@@ -5,14 +5,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import {
   FileText, Calendar, BarChart3, ChevronDown, ChevronUp,
-  Archive, TrendingUp,
+  Archive, TrendingUp, Trash2,
 } from "lucide-react";
 import GlassCard from "@/components/ui/GlassCard";
-import { useArchivedReportsQuery } from "@/hooks/useArchives";
+import { useArchivedReportsQuery, useDeleteArchivedReportMutation } from "@/hooks/useArchives";
 
 export default function ArchivedReportsPage() {
   const { data: reports, isLoading } = useArchivedReportsQuery();
+  const deleteReport = useDeleteArchivedReportMutation();
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   function formatMonth(m: string) {
     const [year, month] = m.split("-");
@@ -76,6 +78,12 @@ export default function ArchivedReportsPage() {
                             <Calendar size={9} />
                             {formatMonth(report.report_month)}
                           </span>
+                          {report.board_name && (
+                            <span className="text-[10px] text-white/30 flex items-center gap-1">
+                              <Archive size={9} />
+                              {report.board_name}
+                            </span>
+                          )}
                           <span className="text-[10px] text-white/30 flex items-center gap-1">
                             <BarChart3 size={9} />
                             {report.task_count} tasks
@@ -98,6 +106,28 @@ export default function ArchivedReportsPage() {
                           {report.completion_rate}%
                         </span>
                       </div>
+                      <button
+                        onClick={async (event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          setDeleteError(null);
+                          const confirmed = window.confirm(
+                            "¿Eliminar este reporte? Esta accion se puede revertir mas tarde si lo decides."
+                          );
+                          if (!confirmed) return;
+                          try {
+                            await deleteReport.mutateAsync({ reportId: report.id });
+                            if (expandedId === report.id) setExpandedId(null);
+                          } catch (error: any) {
+                            setDeleteError(error?.message || "Error deleting report");
+                          }
+                        }}
+                        className="text-white/30 hover:text-red-400"
+                        title="Delete report"
+                        disabled={deleteReport.isPending}
+                      >
+                        <Trash2 size={16} />
+                      </button>
                       {isExpanded ? (
                         <ChevronUp size={16} className="text-white/30" />
                       ) : (
@@ -174,6 +204,16 @@ export default function ArchivedReportsPage() {
           <p className="text-white/20 text-xs mt-1">
             Generate and archive reports from AI Insights
           </p>
+        </motion.div>
+      )}
+
+      {deleteError && (
+        <motion.div
+          className="mt-4 text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl p-4"
+          initial={{ opacity: 0, y: -5 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          {deleteError}
         </motion.div>
       )}
     </div>

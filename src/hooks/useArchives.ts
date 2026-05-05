@@ -175,10 +175,32 @@ export function useArchivedReportsQuery() {
         .from("archived_reports")
         .select("*")
         .eq("board_id", profile.active_board_id)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data as ArchivedReport[];
+    },
+  });
+}
+
+/* ─── Soft delete archived report ─────────────────────────── */
+export function useDeleteArchivedReportMutation() {
+  const queryClient = useQueryClient();
+  const supabase = createClient();
+
+  return useMutation({
+    mutationFn: async ({ reportId }: { reportId: string }) => {
+      const { error } = await supabase
+        .from("archived_reports")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", reportId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["archived-reports"] });
+      queryClient.invalidateQueries({ queryKey: ["archived-reports", "active"] });
     },
   });
 }
@@ -197,6 +219,8 @@ export function useArchiveReportMutation() {
       completedCount,
       completionRate,
       metadata,
+      boardId,
+      boardName,
     }: {
       title: string;
       content: string;
@@ -205,17 +229,35 @@ export function useArchiveReportMutation() {
       completedCount: number;
       completionRate: number;
       metadata?: Record<string, unknown>;
+      boardId?: string | null;
+      boardName?: string | null;
     }) => {
       const now = new Date();
       const reportMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("active_board_id")
-        .eq("id", userId)
-        .single();
+      let resolvedBoardId = boardId || null;
+      if (!resolvedBoardId) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("active_board_id")
+          .eq("id", userId)
+          .single();
 
-      if (!profile?.active_board_id) throw new Error("No active board");
+        resolvedBoardId = profile?.active_board_id || null;
+      }
+
+      if (!resolvedBoardId) throw new Error("No active board");
+
+      let resolvedBoardName = boardName || null;
+      if (!resolvedBoardName) {
+        const { data: board } = await supabase
+          .from("boards")
+          .select("name")
+          .eq("id", resolvedBoardId)
+          .single();
+
+        resolvedBoardName = board?.name || null;
+      }
 
       const { data, error } = await supabase
         .from("archived_reports")
@@ -224,7 +266,8 @@ export function useArchiveReportMutation() {
           content,
           report_month: reportMonth,
           user_id: userId,
-          board_id: profile.active_board_id!,
+          board_id: resolvedBoardId,
+          board_name: resolvedBoardName,
           task_count: taskCount,
           completed_count: completedCount,
           completion_rate: completionRate,

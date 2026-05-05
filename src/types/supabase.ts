@@ -450,45 +450,51 @@ export interface Database {
           }
         ];
       };
-      archived_reports: {
-        Row: {
-          id: string;
-          title: string;
-          content: string;
-          report_month: string;
-          user_id: string;
-          board_id: string;
-          task_count: number;
-          completed_count: number;
-          completion_rate: number;
-          metadata: Json | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          title: string;
-          content: string;
-          report_month: string;
-          user_id: string;
-          board_id?: string;
-          task_count?: number;
-          completed_count?: number;
-          completion_rate?: number;
-          metadata?: Json | null;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          title?: string;
-          content?: string;
-          report_month?: string;
-          user_id?: string;
-          board_id?: string;
-          task_count?: number;
-          completed_count?: number;
-          completion_rate?: number;
-          metadata?: Json | null;
-        };
+        archived_reports: {
+          Row: {
+            id: string;
+            title: string;
+            content: string;
+            report_month: string;
+            user_id: string;
+            board_id: string;
+            board_name: string | null;
+            task_count: number;
+            completed_count: number;
+            completion_rate: number;
+            metadata: Json | null;
+            created_at: string;
+            deleted_at: string | null;
+          };
+          Insert: {
+            id?: string;
+            title: string;
+            content: string;
+            report_month: string;
+            user_id: string;
+            board_id?: string;
+            board_name?: string | null;
+            task_count?: number;
+            completed_count?: number;
+            completion_rate?: number;
+            metadata?: Json | null;
+            created_at?: string;
+            deleted_at?: string | null;
+          };
+          Update: {
+            id?: string;
+            title?: string;
+            content?: string;
+            report_month?: string;
+            user_id?: string;
+            board_id?: string;
+            board_name?: string | null;
+            task_count?: number;
+            completed_count?: number;
+            completion_rate?: number;
+            metadata?: Json | null;
+            deleted_at?: string | null;
+          };
         Relationships: [
           {
             foreignKeyName: "archived_reports_user_id_fkey";

@@ -16,11 +16,16 @@ import GlassButton from "@/components/ui/GlassButton";
 import { useDashboardMetrics } from "@/hooks/useDashboardMetrics";
 import { useArchiveReportMutation } from "@/hooks/useArchives";
 import { useUser } from "@/lib/auth/hooks";
+import { useUserBoardsQuery } from "@/hooks/useBoards";
 import { exportToPDF, exportToExcel, exportToWord } from "@/lib/exportReport";
 
 export default function ReportGenerator() {
-  const { user } = useUser();
-  const { data: metrics } = useDashboardMetrics();
+  const { user, profile } = useUser();
+  const { data: userBoards = [] } = useUserBoardsQuery();
+  const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
+  const activeBoardId = selectedBoardId || profile?.active_board_id || null;
+  const activeBoard = userBoards.find((board) => board.id === activeBoardId) || null;
+  const { data: metrics } = useDashboardMetrics(undefined, activeBoardId);
   const archiveReport = useArchiveReportMutation();
 
   const [report, setReport] = useState<string | null>(null);
@@ -36,12 +41,20 @@ export default function ReportGenerator() {
   const chartsRef = useRef<HTMLDivElement>(null);
 
   async function generateReport() {
+    if (!activeBoardId) {
+      setError("Selecciona un tablero para generar el reporte.");
+      return;
+    }
     setLoading(true);
     setError(null);
     setArchived(false);
 
     try {
-      const res = await fetch("/api/ai/report", { method: "POST" });
+      const res = await fetch("/api/ai/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ boardId: activeBoardId }),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
@@ -91,7 +104,7 @@ export default function ReportGenerator() {
   }
 
   async function handleArchiveReport() {
-    if (!report || !user || !metrics) return;
+    if (!report || !user || !metrics || !activeBoardId) return;
     try {
       await archiveReport.mutateAsync({
         title: `Reporte Ejecutivo — ${new Date().toLocaleDateString("es-MX", { year: "numeric", month: "long" })}`,
@@ -101,6 +114,8 @@ export default function ReportGenerator() {
         completedCount: metrics.completedTasks,
         completionRate: metrics.completionRate,
         metadata: { generatedAt: meta?.generatedAt, logCount: meta?.logCount },
+        boardId: activeBoardId,
+        boardName: activeBoard?.name || null,
       });
       setArchived(true);
     } catch (err: any) {
@@ -133,7 +148,33 @@ export default function ReportGenerator() {
               </p>
             </div>
           </div>
-          <GlassButton onClick={generateReport} loading={loading}>
+          <div className="flex items-center gap-2">
+            <select
+              className="glass-input appearance-none pr-8 text-sm"
+              value={activeBoardId || ""}
+              onChange={(e) => {
+                setSelectedBoardId(e.target.value || null);
+                setReport(null);
+                setArchived(false);
+                setMeta(null);
+                setError(null);
+              }}
+              disabled={userBoards.length === 0}
+            >
+              {userBoards.length === 0 && (
+                <option value="">No boards</option>
+              )}
+              {userBoards.map((board) => (
+                <option
+                  key={board.id}
+                  value={board.id}
+                  style={{ background: "#1a1a2e", color: "white" }}
+                >
+                  {board.name}
+                </option>
+              ))}
+            </select>
+            <GlassButton onClick={generateReport} loading={loading}>
             {loading ? (
               <>Analizando...</>
             ) : (
@@ -142,7 +183,8 @@ export default function ReportGenerator() {
                 Generate Report
               </>
             )}
-          </GlassButton>
+            </GlassButton>
+          </div>
         </div>
 
         {meta && (

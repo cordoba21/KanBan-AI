@@ -48,7 +48,6 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [showBoardSelector, setShowBoardSelector] = useState(false);
-  const [showUserBoardSelector, setShowUserBoardSelector] = useState(false);
   const [showCreateBoard, setShowCreateBoard] = useState(false);
   const [showEditNameModal, setShowEditNameModal] = useState(false);
   const [fullNameInput, setFullNameInput] = useState("");
@@ -207,7 +206,6 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                           e.preventDefault();
                           e.stopPropagation();
                           setShowBoardSelector((prev) => !prev);
-                          setShowUserBoardSelector(false);
                         }}
                         className="text-white/30 hover:text-white"
                       >
@@ -506,20 +504,9 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
               >
-                <button
-                  onClick={() => {
-                    setShowUserBoardSelector((prev) => !prev);
-                    setShowBoardSelector(false);
-                  }}
-                  className="flex items-center gap-1 w-full text-left"
-                >
-                  <p className="text-xs font-medium text-white/80 truncate">
-                    {profile?.full_name || profile?.email || "User"}
-                  </p>
-                {userBoards && userBoards.length > 0 && (
-                  <ChevronDown size={12} className="text-white/40" />
-                )}
-              </button>
+                <p className="text-xs font-medium text-white/80 truncate">
+                  {profile?.full_name || profile?.email || "User"}
+                </p>
                 {profile?.role && (
                   <span
                     className={`badge ${roleBadge[profile.role]} mt-0.5`}
@@ -532,45 +519,6 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             )}
           </AnimatePresence>
         </div>
-
-        {/* Board selector dropdown */}
-        <AnimatePresence>
-          {showUserBoardSelector && !collapsed && userBoards && userBoards.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 6 }}
-              transition={{ duration: 0.2 }}
-              className="mx-3 mb-2 p-2 bg-white/5 rounded-lg border border-white/10"
-            >
-              <p className="text-[10px] font-medium text-white/40 uppercase tracking-wider mb-2 px-1">
-                Switch Board
-              </p>
-              {userBoards.map((board) => (
-                <button
-                  key={board.id}
-                  onClick={async () => {
-                    if (board.id !== profile?.active_board_id) {
-                      await switchBoard.mutateAsync({ boardId: board.id });
-                      await refreshProfile();
-                    }
-                    setShowUserBoardSelector(false);
-                  }}
-                  className={`flex items-center justify-between w-full px-2 py-1.5 rounded text-xs transition-colors ${
-                    board.id === profile?.active_board_id
-                      ? "bg-sky-500/20 text-sky-300"
-                      : "text-white/60 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <span className="truncate">{board.name}</span>
-                  <span className={`badge ${board.role === "OWNER" ? "badge-owner" : "badge-viewer"}`}>
-                    {board.role}
-                  </span>
-                </button>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* Edit name */}
         <button

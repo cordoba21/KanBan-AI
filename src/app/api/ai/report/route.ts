@@ -114,6 +114,9 @@ export async function POST(request: Request) {
     const adminSupabase = getAdminSupabase();
     const authedSupabase = await getAuthedSupabase();
 
+    const body = await request.json().catch(() => ({}));
+    const requestedBoardId = typeof body?.boardId === "string" ? body.boardId : null;
+
     const {
       data: { user },
     } = await authedSupabase.auth.getUser();
@@ -125,14 +128,30 @@ export async function POST(request: Request) {
       .eq("id", user?.id || "")
       .single();
 
-    if (!profile?.active_board_id) {
+    const resolvedBoardId = requestedBoardId || profile?.active_board_id || null;
+
+    if (!resolvedBoardId) {
       return NextResponse.json({ error: "No active board" }, { status: 400 });
+    }
+
+    if (requestedBoardId) {
+      const { data: membership, error: membershipError } = await authedSupabase
+        .from("board_members")
+        .select("id")
+        .eq("board_id", requestedBoardId)
+        .eq("user_id", user?.id || "")
+        .eq("status", "active")
+        .maybeSingle();
+
+      if (membershipError || !membership) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+      }
     }
 
     const { data: tasks, error: tasksError } = await adminSupabase
       .from("tasks")
       .select("*")
-      .eq("board_id", profile.active_board_id)
+      .eq("board_id", resolvedBoardId)
       .order("created_at", { ascending: false });
 
     if (tasksError) throw tasksError;
@@ -144,7 +163,7 @@ export async function POST(request: Request) {
     const { data: logs, error: logsError } = await adminSupabase
       .from("activity_logs")
       .select("*")
-      .eq("board_id", profile.active_board_id)
+      .eq("board_id", resolvedBoardId)
       .gte("created_at", thirtyDaysAgo.toISOString())
       .order("created_at", { ascending: false })
       .limit(200);
