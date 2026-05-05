@@ -90,18 +90,20 @@ export default function CollaboratorsPanel({
                 disabled={!canManage}
               />
             </div>
-            <select
-              className="glass-input w-full sm:w-[120px] sm:flex-none shrink-0"
-              value={role}
-              onChange={(e) => setRole(e.target.value as "EDITOR" | "VIEWER")}
-              disabled={!canManage}
-            >
-              {ROLE_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value} style={{ background: "#1a1a2e", color: "white" }}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+            <div className="w-full sm:w-[120px] shrink-0">
+              <select
+                className="glass-input w-full"
+                value={role}
+                onChange={(e) => setRole(e.target.value as "EDITOR" | "VIEWER")}
+                disabled={!canManage}
+              >
+                {ROLE_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value} style={{ background: "#1a1a2e", color: "white" }}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <GlassButton
             size="sm"

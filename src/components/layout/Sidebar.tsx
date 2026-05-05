@@ -763,6 +763,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                         .eq("id", profile.id);
                     }
                     await refreshProfile();
+                    window.location.reload();
                     setDeletingBoardId(null);
                     setDeleteBoardConfirm("");
                   }}
