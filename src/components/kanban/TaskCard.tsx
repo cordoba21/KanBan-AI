@@ -55,7 +55,7 @@ function DueDateBadge({ dueDate }: { dueDate: string | null }) {
   tomorrow.setDate(tomorrow.getDate() + 1);
   const isTomorrow = due.toDateString() === tomorrow.toDateString();
 
-  let color = "#5EEAD4";
+  let color = "#00D4FF";
   let label = due.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
   if (isOverdue) {
@@ -115,21 +115,15 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
   if (isDragOverlay) {
     return (
       <div
-        className="glass-strong cursor-grabbing"
+        className="task-card glass-strong cursor-grabbing"
         style={{
           borderRadius: "var(--radius-organic-sm)",
-          boxShadow: `
-            0 25px 60px rgba(0, 0, 0, 0.5),
-            0 0 40px rgba(139, 92, 246, 0.15),
-            0 0 80px rgba(45, 212, 191, 0.08)
-          `,
-          border: "1px solid rgba(255,255,255,0.2)",
           transform: "scale(1.04) rotate(1.5deg)",
         }}
       >
         <div className="p-3.5">
           <div className="flex items-center justify-between mb-2">
-            <div className="text-white/40">
+            <div className="task-card-muted">
               <GripVertical size={14} />
             </div>
             <div className="flex items-center gap-1.5">
@@ -144,35 +138,35 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
               <CategoryBadge categoryId={task.category_id} boardId={task.board_id} />
             </div>
           )}
-          <h4 className="text-sm font-medium text-white/90 mb-1 line-clamp-2">
+          <h4 className="text-sm font-medium task-card-title mb-1 line-clamp-2">
             {task.title}
           </h4>
           {task.description && (
-            <p className="text-xs text-white/35 line-clamp-2 mb-3">
+            <p className="text-xs task-card-desc line-clamp-2 mb-3">
               {task.description}
             </p>
           )}
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-white/25">{createdFormatted}</span>
+            <span className="text-[10px] task-card-meta">{createdFormatted}</span>
             <DueDateBadge dueDate={task.due_date} />
           </div>
-          <div className="mt-2 flex items-center justify-between text-[10px] text-white/35">
+          <div className="mt-2 flex items-center justify-between text-[10px] task-card-desc">
             <span className="truncate">Created by {creatorName}</span>
             <div className="flex items-center gap-1">
               {assignees.length > 0 ? (
                 assignees.slice(0, 3).map((assignee) => (
                   <div
                     key={assignee.user_id}
-                    className="w-4 h-4 rounded-full bg-gradient-to-br from-purple-400/20 to-teal-400/20 border border-white/10 flex items-center justify-center"
+                    className="w-4 h-4 rounded-full task-card-avatar border flex items-center justify-center"
                     title={assignee.profiles?.full_name || assignee.profiles?.email || "User"}
                   >
-                    <span className="text-[8px] text-white/70">
+                    <span className="text-[8px] task-card-avatar-text">
                       {(assignee.profiles?.full_name || assignee.profiles?.email || "?").slice(0, 1).toUpperCase()}
                     </span>
                   </div>
                 ))
               ) : (
-                <div className="flex items-center gap-1 text-white/25">
+                <div className="flex items-center gap-1 task-card-meta">
                   <User size={10} />
                   Unassigned
                 </div>
@@ -187,23 +181,10 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
   return (
     <div
       ref={setNodeRef}
-      style={{
-        ...style,
-        borderRadius: "var(--radius-organic-sm)",
-        border: isDragging ? "1px dashed rgba(255,255,255,0.1)" : "1px solid rgba(255,255,255,0.08)",
-        background: isDragging
-          ? "rgba(255,255,255,0.02)"
-          : "rgba(255,255,255,0.04)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        boxShadow: isDragging
-          ? "none"
-          : "0 2px 8px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.05)",
-      }}
+      style={style}
       className={`
-        cursor-pointer group relative transition-all duration-200
-        hover:bg-white/[0.07] hover:border-white/12 hover:scale-[1.015] hover:-translate-y-[2px]
-        ${isDragging ? "z-50" : ""}
+        task-card cursor-pointer group relative transition-all duration-200
+        ${isDragging ? "task-card-dragging z-50" : "task-card-idle"}
       `}
       onClick={onClick}
     >
@@ -211,7 +192,7 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
         {/* Drag handle + Priority */}
         <div className="flex items-center justify-between mb-2">
           <div
-            className="text-white/20 hover:text-white/50 cursor-grab active:cursor-grabbing transition-colors"
+            className="task-card-muted hover:opacity-70 cursor-grab active:cursor-grabbing transition-colors"
             {...attributes}
             {...listeners}
           >
@@ -236,20 +217,20 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
         )}
 
         {/* Title */}
-        <h4 className="text-sm font-medium text-white/90 mb-1 line-clamp-2">
+        <h4 className="text-sm font-medium task-card-title mb-1 line-clamp-2">
           {task.title}
         </h4>
 
         {/* Description preview */}
         {task.description && (
-          <p className="text-xs text-white/35 line-clamp-2 mb-3">
+          <p className="text-xs task-card-desc line-clamp-2 mb-3">
             {task.description}
           </p>
         )}
 
         {/* Footer */}
         <div className="flex items-center justify-between">
-          <span className="text-[10px] text-white/25">
+          <span className="text-[10px] task-card-meta">
             {createdFormatted}
           </span>
           <div className="flex items-center gap-2">
@@ -259,16 +240,16 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
                 assignees.slice(0, 3).map((assignee) => (
                   <div
                     key={assignee.user_id}
-                    className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-400/20 to-teal-400/20 border border-white/10 flex items-center justify-center"
+                    className="w-5 h-5 rounded-full task-card-avatar border flex items-center justify-center"
                     title={assignee.profiles?.full_name || assignee.profiles?.email || "User"}
                   >
-                    <span className="text-[9px] text-white/70">
+                    <span className="text-[9px] task-card-avatar-text">
                       {(assignee.profiles?.full_name || assignee.profiles?.email || "?").slice(0, 1).toUpperCase()}
                     </span>
                   </div>
                 ))
               ) : (
-                <div className="flex items-center gap-1 text-white/25">
+                <div className="flex items-center gap-1 task-card-meta">
                   <User size={12} />
                   <span className="text-[9px]">Unassigned</span>
                 </div>
@@ -276,7 +257,7 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
             </div>
           </div>
         </div>
-        <div className="mt-2 text-[10px] text-white/35 truncate">
+        <div className="mt-2 text-[10px] task-card-desc truncate">
           Created by {creatorName}
         </div>
 
@@ -289,7 +270,7 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
                 onMoveLeft?.();
               }}
               disabled={!canMoveLeft}
-              className="flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-white/30 hover:text-[#5EEAD4] hover:bg-[#2DD4BF]/10 disabled:opacity-0 disabled:pointer-events-none transition-all duration-200 cursor-pointer"
+              className="flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-lg task-card-muted hover:text-[#00D4FF] hover:bg-[#00D4FF]/10 disabled:opacity-0 disabled:pointer-events-none transition-all duration-200 cursor-pointer"
               title="Move to previous stage"
             >
               <ChevronLeft size={12} />
@@ -301,7 +282,7 @@ export default function TaskCard({ task, isDragOverlay, onClick, onMoveLeft, onM
                 onMoveRight?.();
               }}
               disabled={!canMoveRight}
-              className="flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-white/30 hover:text-[#A78BFA] hover:bg-[#8B5CF6]/10 disabled:opacity-0 disabled:pointer-events-none transition-all duration-200 cursor-pointer"
+              className="flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-lg task-card-muted hover:text-[#00FF41] hover:bg-[#00FF41]/10 disabled:opacity-0 disabled:pointer-events-none transition-all duration-200 cursor-pointer"
               title="Move to next stage"
             >
               <span className="text-[9px] font-medium">Next</span>

@@ -340,6 +340,87 @@ body {
   box-shadow: 0 0 30px rgba(0, 255, 65, 0.2), 0 0 60px rgba(0, 255, 65, 0.05);
 }
 
+/* ─── Task Card ───────────────────────────────────────────── */
+.task-card {
+  border-radius: var(--radius-organic-sm);
+}
+.task-card-idle {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.task-card-idle:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: scale(1.015) translateY(-2px);
+}
+.task-card-dragging {
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.task-card-title { color: rgba(255, 255, 255, 0.9); }
+.task-card-desc  { color: rgba(255, 255, 255, 0.35); }
+.task-card-meta  { color: rgba(255, 255, 255, 0.25); }
+.task-card-muted { color: rgba(255, 255, 255, 0.2); }
+.task-card-avatar {
+  background: linear-gradient(135deg, rgba(0, 255, 65, 0.15), rgba(0, 212, 255, 0.15));
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.task-card-avatar-text { color: rgba(255, 255, 255, 0.7); }
+
+/* Light mode task cards */
+html.light .task-card-idle {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+html.light .task-card-idle:hover {
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+html.light .task-card-dragging {
+  border: 1px dashed rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.5);
+}
+html.light .task-card-title { color: #1a1a2e; }
+html.light .task-card-desc  { color: rgba(26, 26, 46, 0.55); }
+html.light .task-card-meta  { color: rgba(26, 26, 46, 0.4); }
+html.light .task-card-muted { color: rgba(26, 26, 46, 0.3); }
+html.light .task-card-avatar {
+  background: linear-gradient(135deg, rgba(0, 117, 32, 0.1), rgba(0, 168, 204, 0.1));
+  border-color: rgba(0, 0, 0, 0.1);
+}
+html.light .task-card-avatar-text { color: rgba(26, 26, 46, 0.7); }
+
+/* ─── Kanban Column ───────────────────────────────────────── */
+.kanban-col {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-top-width: 2px;
+}
+.kanban-col-over {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.kanban-col-title { color: rgba(255, 255, 255, 0.8); }
+.kanban-col-empty { border-color: rgba(255, 255, 255, 0.06); }
+.kanban-col-empty-text { color: rgba(255, 255, 255, 0.15); }
+
+html.light .kanban-col {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+html.light .kanban-col-over {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+html.light .kanban-col-title { color: #1a1a2e; }
+html.light .kanban-col-empty { border-color: rgba(0, 0, 0, 0.08); }
+html.light .kanban-col-empty-text { color: rgba(26, 26, 46, 0.25); }
+
+
 /* ─── Animations ──────────────────────────────────────────── */
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(4px); }
@@ -660,4 +741,56 @@ html.light .bg-black\/70 {
 /* Loading states */
 html.light .animate-terminal-blink {
   color: #007520 !important;
+}
+
+/* Additional text opacity levels */
+html.light .text-white\/90 {
+  color: rgba(26, 26, 46, 0.9) !important;
+}
+html.light .text-white\/35 {
+  color: rgba(26, 26, 46, 0.4) !important;
+}
+html.light .text-white\/15 {
+  color: rgba(26, 26, 46, 0.18) !important;
+}
+html.light .text-white\/10 {
+  color: rgba(26, 26, 46, 0.12) !important;
+}
+
+/* More green/cyan text opacity */
+html.light .text-\[\#00FF41\]\/50 {
+  color: rgba(0, 117, 32, 0.55) !important;
+}
+html.light .text-\[\#00FF41\]\/70 {
+  color: rgba(0, 117, 32, 0.75) !important;
+}
+html.light .text-\[\#c8c8c8\]\/40 {
+  color: rgba(42, 42, 62, 0.5) !important;
+}
+html.light .text-\[\#c8c8c8\]\/60 {
+  color: rgba(42, 42, 62, 0.65) !important;
+}
+html.light .text-\[\#c8c8c8\]\/20 {
+  color: rgba(42, 42, 62, 0.25) !important;
+}
+
+/* Red text in light mode — keep visible */
+html.light .text-red-400 {
+  color: #dc2626 !important;
+}
+html.light .text-red-300\/80 {
+  color: rgba(220, 38, 38, 0.85) !important;
+}
+
+/* Sidebar backdrop in light mode */
+html.light .backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+/* Hover bg overrides */
+html.light .hover\:bg-white\/10:hover {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+html.light .hover\:bg-white\/\[0\.07\]:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
 }

@@ -174,17 +174,13 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
                   Status
                 </label>
                 <select
-                  className="glass-input appearance-none"
+                  className="glass-input w-full"
                   value={status}
                   onChange={(e) => setStatus(e.target.value as TaskStatus)}
                   disabled={!isEditor}
                 >
                   {STATUS_OPTIONS.map((opt) => (
-                    <option
-                      key={opt.value}
-                      value={opt.value}
-                      style={{ background: "#0A0A1A", color: "white" }}
-                    >
+                    <option key={opt.value} value={opt.value}>
                       {opt.label}
                     </option>
                   ))}
@@ -195,20 +191,14 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
                   Priority
                 </label>
                 <select
-                  className="glass-input appearance-none"
+                  className="glass-input w-full"
                   value={priority}
                   onChange={(e) => setPriority(Number(e.target.value))}
                   disabled={!isEditor}
                 >
-                  <option value={0} style={{ background: "#1a1a2e" }}>
-                    Low
-                  </option>
-                  <option value={1} style={{ background: "#1a1a2e" }}>
-                    Medium
-                  </option>
-                  <option value={2} style={{ background: "#1a1a2e" }}>
-                    High
-                  </option>
+                  <option value={0}>Low</option>
+                  <option value={1}>Medium</option>
+                  <option value={2}>High</option>
                 </select>
               </div>
             </div>
@@ -220,20 +210,14 @@ export default function TaskModal({ task, onClose }: TaskModalProps) {
                 Category
               </label>
               <select
-                className="glass-input appearance-none"
+                className="glass-input w-full"
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
                 disabled={!isEditor}
               >
-                <option value="" style={{ background: "#0A0A1A", color: "white" }}>
-                  No category
-                </option>
+                <option value="">No category</option>
                 {categories?.map((cat) => (
-                  <option
-                    key={cat.id}
-                    value={cat.id}
-                    style={{ background: "#0A0A1A", color: "white" }}
-                  >
+                  <option key={cat.id} value={cat.id}>
                     {cat.name}
                   </option>
                 ))}

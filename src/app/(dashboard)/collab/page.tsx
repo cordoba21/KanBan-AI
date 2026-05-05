@@ -93,7 +93,7 @@ export default function CollaborationPage() {
                   onChange={(e) => setRole(e.target.value as "EDITOR" | "VIEWER")}
                 >
                   {ROLE_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value} style={{ background: "#1a1a2e", color: "white" }}>
+                    <option key={opt.value} value={opt.value}>
                       {opt.label}
                     </option>
                   ))}
@@ -172,7 +172,7 @@ export default function CollaborationPage() {
                         onChange={(e) => updateRole.mutate({ memberId: member.id, role: e.target.value as "EDITOR" | "VIEWER" })}
                       >
                         {ROLE_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value} style={{ background: "#1a1a2e", color: "white" }}>
+                          <option key={opt.value} value={opt.value}>
                             {opt.label}
                           </option>
                         ))}

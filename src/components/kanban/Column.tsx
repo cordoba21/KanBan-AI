@@ -26,14 +26,12 @@ export default function Column({ id, title, color, tasks, onTaskClick, onMoveTas
   return (
     <motion.div
       ref={setNodeRef}
-      className="glass flex flex-col h-full min-h-[400px] sm:min-h-[400px]"
+      className={`kanban-col flex flex-col h-full min-h-[400px] sm:min-h-[400px] ${isOver ? "kanban-col-over" : ""}`}
       style={{
         borderRadius: "var(--radius-organic)",
         borderTop: `2px solid ${color}`,
       }}
       animate={{
-        borderColor: isOver ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.12)",
-        backgroundColor: isOver ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.06)",
         scale: isOver ? 1.01 : 1,
       }}
       transition={{ duration: 0.2, ease: "easeOut" }}
@@ -47,7 +45,7 @@ export default function Column({ id, title, color, tasks, onTaskClick, onMoveTas
             animate={isOver ? { scale: [1, 1.4, 1] } : { scale: 1 }}
             transition={{ duration: 0.6, repeat: isOver ? Infinity : 0 }}
           />
-          <h3 className="text-sm font-semibold text-white/80">{title}</h3>
+          <h3 className="text-sm font-semibold kanban-col-title">{title}</h3>
         </div>
         <motion.span
           className="text-[11px] font-medium px-2 py-0.5 rounded-full"
@@ -82,16 +80,11 @@ export default function Column({ id, title, color, tasks, onTaskClick, onMoveTas
         </SortableContext>
 
         {tasks.length === 0 && (
-          <motion.div
-            className="flex items-center justify-center h-20 border border-dashed rounded-[var(--radius-organic-sm)] text-white/20 text-xs"
-            animate={{
-              borderColor: isOver ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.1)",
-              backgroundColor: isOver ? "rgba(255,255,255,0.03)" : "transparent",
-            }}
-            transition={{ duration: 0.2 }}
-          >
-            {isOver ? "Drop here ✨" : "Drop tasks here"}
-          </motion.div>
+          <div className="flex items-center justify-center h-20 border border-dashed kanban-col-empty rounded-xl">
+            <span className="text-xs kanban-col-empty-text">
+              Drop tasks here
+            </span>
+          </div>
         )}
       </div>
     </motion.div>

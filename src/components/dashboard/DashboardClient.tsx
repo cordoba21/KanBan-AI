@@ -90,7 +90,6 @@ export default function DashboardClient() {
                 <option
                   key={board.id}
                   value={board.id}
-                  style={{ background: "#0A0A1A", color: "white" }}
                 >
                   {board.name}
                 </option>
