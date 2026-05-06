@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Mail, Shield, UserPlus, Trash2, X, AlertTriangle } from "lucide-react";
+import { Link2, Shield, Copy, Check, Trash2, X, AlertTriangle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import GlassCard from "@/components/ui/GlassCard";
 import GlassButton from "@/components/ui/GlassButton";
 import { useBoardMembersQuery, useUpdateMemberRoleMutation, useRemoveMemberMutation, type BoardMemberView } from "@/hooks/useBoards";
 import { useCreateInvitation } from "@/hooks/useInvitations";
+import { useRealtimeBoardMembers } from "@/hooks/useNotifications";
 import { useUser } from "@/lib/auth/hooks";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -37,9 +38,12 @@ export default function CollaboratorsPanel({
   const updateRole = useUpdateMemberRoleMutation();
   const removeMember = useRemoveMemberMutation();
 
-  const [email, setEmail] = useState("");
+  // Real-time board members subscription
+  useRealtimeBoardMembers(boardId);
+
   const [role, setRole] = useState<"EDITOR" | "VIEWER">("EDITOR");
   const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   // Confirmation state for removing a member
   const [pendingRemove, setPendingRemove] = useState<{ id: string; name: string } | null>(null);
@@ -48,13 +52,24 @@ export default function CollaboratorsPanel({
     return (members || []).filter((member: BoardMemberView) => member.status === "active");
   }, [members]);
 
-  async function handleInvite() {
-    if (!email.trim()) return;
-    const result = await createInvite.mutateAsync({ email: email.trim(), role, boardId });
-    setEmail("");
+  async function handleGenerateLink() {
+    const result = await createInvite.mutateAsync({ role, boardId });
     setInviteLink(result.inviteUrl);
     try {
       await navigator.clipboard.writeText(result.inviteUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      // noop
+    }
+  }
+
+  async function handleCopyLink() {
+    if (!inviteLink) return;
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
     } catch {
       // noop
     }
@@ -67,7 +82,7 @@ export default function CollaboratorsPanel({
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#00FF41]/10">
           <h3 className="text-xs font-semibold text-[#00FF41] flex items-center gap-2 uppercase tracking-wider">
             <Shield size={12} />
-            {mode === "invite" ? "$ invite --user" : "$ users --list"}
+            {mode === "invite" ? "$ invite --link" : "$ users --list"}
           </h3>
           <div className="flex items-center gap-3">
             {mode === "manage" && (
@@ -83,21 +98,10 @@ export default function CollaboratorsPanel({
         </div>
 
         {mode === "invite" && (
-          <div className="flex flex-col gap-2 mb-4">
-            <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_100px] gap-2 w-full">
-              <div className="relative min-w-0">
-                <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#00FF41]/30" />
-                <input
-                  className="glass-input glass-input-with-icon w-full"
-                  placeholder="email@team.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  type="email"
-                  disabled={!canManage}
-                />
-              </div>
+          <div className="flex flex-col gap-3 mb-4">
+            <div className="flex items-center gap-2">
               <select
-                className="glass-input w-full appearance-none text-center"
+                className="glass-input flex-1 appearance-none text-center"
                 value={role}
                 onChange={(e) => setRole(e.target.value as "EDITOR" | "VIEWER")}
                 disabled={!canManage}
@@ -108,16 +112,53 @@ export default function CollaboratorsPanel({
                   </option>
                 ))}
               </select>
+              <GlassButton
+                size="sm"
+                onClick={handleGenerateLink}
+                disabled={!canManage}
+                loading={createInvite.isPending}
+              >
+                <Link2 size={14} />
+                Generate Link
+              </GlassButton>
             </div>
-            <GlassButton
-              size="sm"
-              onClick={handleInvite}
-              disabled={!email.trim() || !canManage}
-              loading={createInvite.isPending}
-            >
-              <UserPlus size={14} />
-              send invite
-            </GlassButton>
+
+            {inviteLink && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-[#00FF41]/[0.03] border border-[#00FF41]/15 p-3"
+                style={{ borderRadius: "var(--radius-organic-sm)" }}
+              >
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <span className="text-[10px] text-[#00FF41]/60 font-mono uppercase tracking-wider">
+                    Invite Link
+                  </span>
+                  <button
+                    onClick={handleCopyLink}
+                    className="flex items-center gap-1 text-[10px] text-[#00D4FF] hover:text-[#00D4FF]/80 transition-colors"
+                  >
+                    {copied ? (
+                      <>
+                        <Check size={10} />
+                        <span>Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={10} />
+                        <span>Copy</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+                <p className="text-[10px] text-[#00FF41]/40 font-mono break-all leading-relaxed select-all">
+                  {inviteLink}
+                </p>
+                <p className="text-[9px] text-[#c8c8c8]/20 mt-2 font-mono">
+                  Anyone with this link can join as {role.toLowerCase()}. Expires in 7 days.
+                </p>
+              </motion.div>
+            )}
           </div>
         )}
 
@@ -125,12 +166,6 @@ export default function CollaboratorsPanel({
           <p className="text-[10px] text-[#FFB800]/60 mb-4 font-mono">
             [ERR] Permission denied. Only root can invite.
           </p>
-        )}
-
-        {mode === "invite" && inviteLink && (
-          <div className="mb-4 text-[10px] text-[#00FF41]/50 font-mono break-all">
-            <span className="text-[#00FF41]/80">LINK:</span> {inviteLink}
-          </div>
         )}
 
         {mode === "manage" && (

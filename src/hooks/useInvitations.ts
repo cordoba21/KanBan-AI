@@ -7,22 +7,20 @@ export function useCreateInvitation() {
 
   return useMutation({
     mutationFn: async ({
-      email,
       role,
       boardId,
     }: {
-      email: string;
       role?: "OWNER" | "EDITOR" | "VIEWER";
       boardId?: string | null;
     }) => {
       const res = await fetch("/api/boards/invitations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, role, boardId }),
+        body: JSON.stringify({ role, boardId }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to invite");
-      return data as { token: string; inviteUrl: string; email: string; expiresAt: string };
+      if (!res.ok) throw new Error(data.error || "Failed to generate link");
+      return data as { token: string; inviteUrl: string; expiresAt: string; boardName: string | null };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["board-invitations"] });
@@ -48,6 +46,7 @@ export function useAcceptInvitation() {
       queryClient.invalidateQueries({ queryKey: ["board-members"] });
       queryClient.invalidateQueries({ queryKey: ["board-membership"] });
       queryClient.invalidateQueries({ queryKey: ["boards"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
   });
 }

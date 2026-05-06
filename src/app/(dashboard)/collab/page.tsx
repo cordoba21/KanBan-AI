@@ -2,11 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Shield, UserPlus, Trash2 } from "lucide-react";
+import { Shield, Link2, Copy, Check, Trash2 } from "lucide-react";
 import GlassCard from "@/components/ui/GlassCard";
 import GlassButton from "@/components/ui/GlassButton";
 import { useBoardMembersQuery, useUpdateMemberRoleMutation, useRemoveMemberMutation, type BoardMemberView } from "@/hooks/useBoards";
 import { useCreateInvitation } from "@/hooks/useInvitations";
+import { useRealtimeBoardMembers } from "@/hooks/useNotifications";
 import { useUser } from "@/lib/auth/hooks";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -28,9 +29,12 @@ export default function CollaborationPage() {
   const updateRole = useUpdateMemberRoleMutation();
   const removeMember = useRemoveMemberMutation();
 
-  const [email, setEmail] = useState("");
+  // Real-time board members subscription
+  useRealtimeBoardMembers(boardId);
+
   const [role, setRole] = useState<"EDITOR" | "VIEWER">("EDITOR");
   const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const currentMember = useMemo(() => {
     return (members || []).find((m: BoardMemberView) => m.user_id === user?.id);
@@ -43,15 +47,26 @@ export default function CollaborationPage() {
     return (members || []).filter((member: BoardMemberView) => member.status === "active");
   }, [members]);
 
-  async function handleInvite() {
-    if (!email.trim()) return;
+  async function handleGenerateLink() {
     try {
-      const result = await createInvite.mutateAsync({ email: email.trim(), role });
-      setEmail("");
+      const result = await createInvite.mutateAsync({ role });
       setInviteLink(result.inviteUrl);
       await navigator.clipboard.writeText(result.inviteUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
     } catch {
       // error shown in UI
+    }
+  }
+
+  async function handleCopyLink() {
+    if (!inviteLink) return;
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      // noop
     }
   }
 
@@ -63,29 +78,21 @@ export default function CollaborationPage() {
           Collaboration
         </h1>
         <p className="text-white/40 text-sm mt-1">
-          Invite team members and manage access
+          Share invite links and manage team access
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <GlassCard padding="md" hover={false}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-white/80">Invite New Member</h3>
+            <h3 className="text-sm font-semibold text-white/80 flex items-center gap-2">
+              <Link2 size={14} className="text-[#00D4FF]" />
+              Generate Invite Link
+            </h3>
           </div>
 
           {isOwner && (
             <div className="space-y-3">
-              <div className="relative">
-                <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
-                <input
-                  className="glass-input glass-input-with-icon"
-                  placeholder="email@team.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  type="email"
-                />
-              </div>
-
               <div className="flex gap-2">
                 <select
                   className="glass-input flex-1"
@@ -99,12 +106,11 @@ export default function CollaborationPage() {
                   ))}
                 </select>
                 <GlassButton
-                  onClick={handleInvite}
-                  disabled={!email.trim()}
+                  onClick={handleGenerateLink}
                   loading={createInvite.isPending}
                 >
-                  <UserPlus size={14} />
-                  Invite
+                  <Link2 size={14} />
+                  Generate
                 </GlassButton>
               </div>
 
@@ -112,17 +118,49 @@ export default function CollaborationPage() {
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-[11px] text-white/40 bg-white/5 rounded-lg p-2"
+                  className="bg-[#00FF41]/[0.03] border border-[#00FF41]/15 rounded-lg p-3"
                 >
-                  Invite link copied: <span className="text-white/70">{inviteLink}</span>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="text-[10px] text-[#00FF41]/60 font-mono uppercase tracking-wider">
+                      Invite Link
+                    </span>
+                    <button
+                      onClick={handleCopyLink}
+                      className="flex items-center gap-1 text-[10px] text-[#00D4FF] hover:text-[#00D4FF]/80 transition-colors"
+                    >
+                      {copied ? (
+                        <>
+                          <Check size={10} />
+                          <span>Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy size={10} />
+                          <span>Copy</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-white/50 font-mono break-all leading-relaxed select-all">
+                    {inviteLink}
+                  </p>
+                  <p className="text-[9px] text-white/20 mt-2 font-mono">
+                    Anyone with this link can join as {role.toLowerCase()}. Expires in 7 days.
+                  </p>
                 </motion.div>
+              )}
+
+              {createInvite.isError && (
+                <p className="text-xs text-red-300">
+                  {(createInvite.error as Error)?.message || "Error generating link"}
+                </p>
               )}
             </div>
           )}
 
           {!isOwner && (
             <p className="text-xs text-white/40">
-              Only the board owner can invite new members.
+              Only the board owner can generate invite links.
             </p>
           )}
         </GlassCard>

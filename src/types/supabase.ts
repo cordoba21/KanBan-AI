@@ -139,7 +139,7 @@ export interface Database {
         Row: {
           id: string;
           board_id: string;
-          email: string;
+          email: string | null;
           role: BoardRole;
           token: string;
           invited_by: string | null;
@@ -151,7 +151,7 @@ export interface Database {
         Insert: {
           id?: string;
           board_id: string;
-          email: string;
+          email?: string | null;
           role?: BoardRole;
           token: string;
           invited_by?: string | null;
@@ -163,7 +163,7 @@ export interface Database {
         Update: {
           id?: string;
           board_id?: string;
-          email?: string;
+          email?: string | null;
           role?: BoardRole;
           token?: string;
           invited_by?: string | null;
@@ -510,6 +510,54 @@ export interface Database {
           }
         ];
       };
+      notifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          board_id: string | null;
+          type: string;
+          title: string;
+          body: string | null;
+          metadata: Json | null;
+          read: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          board_id?: string | null;
+          type: string;
+          title: string;
+          body?: string | null;
+          metadata?: Json | null;
+          read?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          board_id?: string | null;
+          type?: string;
+          title?: string;
+          body?: string | null;
+          metadata?: Json | null;
+          read?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notifications_board_id_fkey";
+            columns: ["board_id"];
+            referencedRelation: "boards";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -562,6 +610,9 @@ export type ArchivedTaskInsert = Database["public"]["Tables"]["archived_tasks"][
 
 export type ArchivedReport = Database["public"]["Tables"]["archived_reports"]["Row"];
 export type ArchivedReportInsert = Database["public"]["Tables"]["archived_reports"]["Insert"];
+
+export type Notification = Database["public"]["Tables"]["notifications"]["Row"];
+export type NotificationInsert = Database["public"]["Tables"]["notifications"]["Insert"];
 
 export type ProfileSummary = Pick<Profile, "id" | "full_name" | "email" | "avatar_url">;
 export type TaskAssigneeView = { user_id: string; profiles: ProfileSummary | null };

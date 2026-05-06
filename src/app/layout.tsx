@@ -3,7 +3,7 @@ import "./globals.css";
 import Providers from "./providers";
 
 export const metadata: Metadata = {
-  title: "KanBan AI — Project Management",
+  title: "Project Management",
   description:
     "A stunning project management platform with Kanban boards, analytics, and AI-powered insights.",
   keywords: ["project management", "kanban", "AI insights", "dashboard"],

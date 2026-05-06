@@ -25,6 +25,7 @@ import GlassButton from "@/components/ui/GlassButton";
 import { useGroupedTasks, useMoveTask } from "@/hooks/useTasks";
 import { useArchiveTasksMutation } from "@/hooks/useArchives";
 import { useBoardMembersQuery, useUserBoardsQuery } from "@/hooks/useBoards";
+import { useRealtimeBoardMembers } from "@/hooks/useNotifications";
 import { useUser } from "@/lib/auth/hooks";
 import { useBoardRole } from "@/lib/boards/access";
 import type { TaskStatus, TaskWithPeople } from "@/types/supabase";
@@ -46,6 +47,9 @@ export default function Board() {
   const { data: members } = useBoardMembersQuery(profile?.active_board_id || null);
   const { data: userBoards } = useUserBoardsQuery();
   const activeBoardName = userBoards?.find((b) => b.id === profile?.active_board_id)?.name;
+
+  // Real-time board members subscription
+  useRealtimeBoardMembers(profile?.active_board_id || null);
 
   const [activeTask, setActiveTask] = useState<TaskWithPeople | null>(null);
   const [editingTask, setEditingTask] = useState<TaskWithPeople | null>(null);

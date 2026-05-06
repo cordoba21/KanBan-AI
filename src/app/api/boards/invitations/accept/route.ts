@@ -67,39 +67,52 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invitation expired" }, { status: 400 });
     }
 
-    if (invite.email.toLowerCase() !== (user.email || "").toLowerCase()) {
-      return NextResponse.json({ error: "Email mismatch" }, { status: 403 });
+    // No email check — any authenticated user can accept a link invitation
+
+    // Check if user already a member of this board
+    const { data: existingMember } = await admin
+      .from("board_members")
+      .select("id, status")
+      .eq("board_id", invite.board_id)
+      .eq("user_id", user.id)
+      .single();
+
+    if (existingMember && existingMember.status === "active") {
+      // Already a member, just mark invitation accepted
+      await admin
+        .from("board_invitations")
+        .update({ accepted_at: now.toISOString() })
+        .eq("id", invite.id);
+      return NextResponse.json({ status: "already_member", boardId: invite.board_id });
     }
 
-    let profileData: { id: string; active_board_id: string | null } | null = null;
-
-    const { data: profile, error: profileError } = await admin
+    // Ensure profile exists
+    const { data: profile } = await admin
       .from("profiles")
-      .select("id, active_board_id")
+      .select("id, active_board_id, full_name")
       .eq("id", user.id)
       .single();
 
-    if (profileError || !profile) {
+    if (!profile) {
       const { error: createProfileError } = await admin
         .from("profiles")
         .insert({
           id: user.id,
-          email: user.email || invite.email,
+          email: user.email || "",
           full_name: user.user_metadata?.full_name || null,
           avatar_url: user.user_metadata?.avatar_url || null,
           active_board_id: invite.board_id,
         });
       if (createProfileError) throw createProfileError;
-      profileData = { id: user.id, active_board_id: invite.board_id };
-    } else {
-      profileData = profile;
     }
 
+    // Switch active board
     await admin
       .from("profiles")
       .update({ active_board_id: invite.board_id })
       .eq("id", user.id);
 
+    // Add as board member
     const { error: memberError } = await admin
       .from("board_members")
       .upsert({
@@ -112,12 +125,44 @@ export async function POST(request: Request) {
 
     if (memberError) throw memberError;
 
-    const { error: invitationUpdateError } = await admin
+    // Mark invitation as accepted
+    await admin
       .from("board_invitations")
       .update({ accepted_at: now.toISOString() })
       .eq("id", invite.id);
 
-    if (invitationUpdateError) throw invitationUpdateError;
+    // Get board name for notification
+    const { data: board } = await admin
+      .from("boards")
+      .select("name")
+      .eq("id", invite.board_id)
+      .single();
+
+    const userName = profile?.full_name || user.email || "Someone";
+
+    // Notify all existing board members about the new member
+    const { data: boardMembers } = await admin
+      .from("board_members")
+      .select("user_id")
+      .eq("board_id", invite.board_id)
+      .eq("status", "active");
+
+    if (boardMembers) {
+      const notifications = boardMembers
+        .filter(m => m.user_id !== user.id)
+        .map(m => ({
+          user_id: m.user_id,
+          board_id: invite.board_id,
+          type: "member_joined",
+          title: "New collaborator joined",
+          body: `${userName} joined the board "${board?.name || "Unknown"}"`,
+          metadata: { new_user_id: user.id, role: invite.role },
+        }));
+
+      if (notifications.length > 0) {
+        await admin.from("notifications").insert(notifications);
+      }
+    }
 
     return NextResponse.json({ status: "accepted", boardId: invite.board_id });
   } catch (error: any) {

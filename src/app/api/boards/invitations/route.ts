@@ -42,10 +42,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { email, role, boardId } = await request.json();
-    if (!email || typeof email !== "string") {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
-    }
+    const { role, boardId } = await request.json();
 
     const resolvedBoardId = typeof boardId === "string" && boardId.length > 0
       ? boardId
@@ -67,7 +64,7 @@ export async function POST(request: Request) {
 
     const { data: board } = await supabase
       .from("boards")
-      .select("owner_id")
+      .select("owner_id, name")
       .eq("id", boardToInvite)
       .single();
 
@@ -95,7 +92,7 @@ export async function POST(request: Request) {
       .from("board_invitations")
       .insert({
         board_id: boardToInvite,
-        email: email.toLowerCase(),
+        email: null,
         role: role || "VIEWER",
         token,
         invited_by: user.id,
@@ -104,11 +101,35 @@ export async function POST(request: Request) {
 
     if (error) throw error;
 
+    // Create notification for the board owner about the invite link
+    const { data: boardMembers } = await admin
+      .from("board_members")
+      .select("user_id")
+      .eq("board_id", boardToInvite)
+      .eq("status", "active");
+
+    if (boardMembers) {
+      const notifications = boardMembers
+        .filter(m => m.user_id !== user.id)
+        .map(m => ({
+          user_id: m.user_id,
+          board_id: boardToInvite!,
+          type: "invite_created",
+          title: "New invite link created",
+          body: `An invite link was generated for board "${board?.name || "Unknown"}"`,
+          metadata: { invited_by: user.id, role: role || "VIEWER" },
+        }));
+
+      if (notifications.length > 0) {
+        await admin.from("notifications").insert(notifications);
+      }
+    }
+
     return NextResponse.json({
       token,
       inviteUrl,
-      email: email.toLowerCase(),
       expiresAt,
+      boardName: board?.name || null,
     });
   } catch (error: any) {
     console.error("Invite Error:", error);

@@ -15,6 +15,10 @@ const ChatBot = dynamic(() => import("@/components/ai/ChatBot"), {
   ssr: false,
 });
 
+const NotificationPanel = dynamic(() => import("@/components/layout/NotificationPanel"), {
+  ssr: false,
+});
+
 export default function DashboardLayout({
   children,
 }: {
@@ -67,6 +71,11 @@ export default function DashboardLayout({
       >
         <Menu size={20} />
       </button>
+
+      {/* Notification Bell — fixed top right */}
+      <div className="fixed top-4 right-4 z-50 lg:top-6 lg:right-8">
+        <NotificationPanel />
+      </div>
 
       {/* Mobile overlay */}
       {mobileMenuOpen && (
