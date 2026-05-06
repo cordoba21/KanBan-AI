@@ -240,3 +240,73 @@ export function useDeleteBoardMutation() {
     },
   });
 }
+
+export function useLeaveBoardMutation() {
+  const supabase = createClient();
+  const queryClient = useQueryClient();
+  const { user } = useUser();
+
+  return useMutation({
+    mutationFn: async ({ boardId }: { boardId: string }) => {
+      if (!user?.id) throw new Error("Not authenticated");
+
+      // Delete own membership row (RLS allows user to delete their own)
+      const { error } = await supabase
+        .from("board_members")
+        .delete()
+        .eq("board_id", boardId)
+        .eq("user_id", user.id);
+      if (error) throw error;
+
+      // Notify the board owner
+      const { data: board } = await supabase
+        .from("boards")
+        .select("owner_id, name")
+        .eq("id", boardId)
+        .single();
+
+      if (board) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name, email")
+          .eq("id", user.id)
+          .single();
+
+        const memberName = profile?.full_name || profile?.email || "A member";
+
+        await supabase.from("notifications").insert({
+          user_id: board.owner_id,
+          board_id: boardId,
+          type: "member_left",
+          title: "Member left",
+          body: `${memberName} has left the board "${board.name}".`,
+          metadata: { left_user_id: user.id },
+        });
+      }
+
+      // Switch to user's own board
+      const { data: ownBoard } = await supabase
+        .from("boards")
+        .select("id")
+        .eq("owner_id", user.id)
+        .limit(1)
+        .single();
+
+      if (ownBoard) {
+        await supabase
+          .from("profiles")
+          .update({ active_board_id: ownBoard.id })
+          .eq("id", user.id);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-boards"] });
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      queryClient.invalidateQueries({ queryKey: ["board-members"] });
+      queryClient.invalidateQueries({ queryKey: ["board-membership"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["archives"] });
+    },
+  });
+}

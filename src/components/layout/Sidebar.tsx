@@ -26,10 +26,11 @@ import {
   X,
   Moon,
   Sun,
+  DoorOpen,
 } from "lucide-react";
 import { useUser, useSignOut } from "@/lib/auth/hooks";
 import { createClient } from "@/lib/supabase/client";
-import { useUserBoardsQuery, useSwitchBoardMutation, useCreateBoardMutation, useUpdateBoardMutation, useDeleteBoardMutation } from "@/hooks/useBoards";
+import { useUserBoardsQuery, useSwitchBoardMutation, useCreateBoardMutation, useUpdateBoardMutation, useDeleteBoardMutation, useLeaveBoardMutation } from "@/hooks/useBoards";
 import { useTheme } from "@/lib/theme/ThemeContext";
 
 const navItems = [
@@ -61,6 +62,8 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [editingBoardName, setEditingBoardName] = useState("");
   const [deletingBoardId, setDeletingBoardId] = useState<string | null>(null);
   const [deleteBoardConfirm, setDeleteBoardConfirm] = useState("");
+  const [leavingBoardId, setLeavingBoardId] = useState<string | null>(null);
+  const [leavingBoardName, setLeavingBoardName] = useState("");
   const pathname = usePathname();
   const router = useRouter();
   const { profile, refreshProfile } = useUser();
@@ -70,6 +73,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const createBoard = useCreateBoardMutation();
   const updateBoard = useUpdateBoardMutation();
   const deleteBoard = useDeleteBoardMutation();
+  const leaveBoard = useLeaveBoardMutation();
   const { theme, toggleTheme } = useTheme();
 
   async function handleDeleteAccount() {
@@ -254,9 +258,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                               >
                                 {board.name}
                               </button>
-                              {board.role === "OWNER" && (
-                                <span className="text-[9px] text-white/30">{board.role}</span>
-                              )}
+                              <span className="text-[9px] text-white/30">{board.role}</span>
                               {board.role === "OWNER" && (
                                 <button
                                   onClick={(e) => {
@@ -280,6 +282,19 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                                   title="Delete board"
                                 >
                                   <Trash2 size={12} />
+                                </button>
+                              )}
+                              {board.role !== "OWNER" && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setLeavingBoardId(board.id);
+                                    setLeavingBoardName(board.name);
+                                  }}
+                                  className="text-white/20 hover:text-orange-400"
+                                  title="Leave board"
+                                >
+                                  <DoorOpen size={12} />
                                 </button>
                               )}
                             </div>
@@ -803,6 +818,87 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                     <Trash2 size={14} />
                   )}
                   Delete Board
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Leave Board Modal */}
+      <AnimatePresence>
+        {leavingBoardId && (
+          <motion.div
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+              onClick={() => {
+                if (!leaveBoard.isPending) {
+                  setLeavingBoardId(null);
+                  setLeavingBoardName("");
+                }
+              }}
+            />
+            <motion.div
+              className="glass-strong relative w-full max-w-md z-10 p-6"
+              style={{ borderRadius: "var(--radius-organic-lg)" }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-orange-500/15 flex items-center justify-center border border-orange-500/20">
+                  <DoorOpen size={20} className="text-orange-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Leave Board</h3>
+                  <p className="text-xs text-white/40">You can rejoin later with a new invitation</p>
+                </div>
+              </div>
+
+              <div className="bg-orange-500/5 border border-orange-500/15 rounded-xl p-3 mb-4">
+                <p className="text-xs text-orange-300/80 leading-relaxed">
+                  Are you sure you want to leave <span className="font-semibold text-orange-300">&ldquo;{leavingBoardName}&rdquo;</span>? You will lose access to all tasks and data on this board. You will need a new invitation to rejoin.
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    if (leaveBoard.isPending) return;
+                    setLeavingBoardId(null);
+                    setLeavingBoardName("");
+                  }}
+                  className="flex-1 px-3 py-2.5 text-xs font-semibold text-[#c8c8c8]/60 hover:text-[#c8c8c8] bg-white/5 hover:bg-white/10 rounded-[var(--radius-organic-sm)] transition-all duration-150 cursor-pointer uppercase tracking-wider"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!leavingBoardId) return;
+                    await leaveBoard.mutateAsync({ boardId: leavingBoardId });
+                    await refreshProfile();
+                    window.location.reload();
+                    setLeavingBoardId(null);
+                    setLeavingBoardName("");
+                  }}
+                  disabled={leaveBoard.isPending}
+                  className="flex-1 px-3 py-2.5 text-xs font-semibold text-orange-400 bg-orange-500/10 hover:bg-orange-500/20 disabled:opacity-30 disabled:cursor-not-allowed rounded-[var(--radius-organic-sm)] transition-all duration-150 cursor-pointer flex items-center justify-center gap-2 uppercase tracking-wider border border-orange-500/20 hover:border-orange-500/40 min-w-0 overflow-hidden"
+                >
+                  {leaveBoard.isPending ? (
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                  ) : (
+                    <DoorOpen size={14} />
+                  )}
+                  Leave
                 </button>
               </div>
             </motion.div>
