@@ -72,11 +72,6 @@ export default function DashboardLayout({
         <Menu size={20} />
       </button>
 
-      {/* Notification Bell — fixed top right */}
-      <div className="fixed top-4 right-4 z-50 lg:top-6 lg:right-8">
-        <NotificationPanel />
-      </div>
-
       {/* Mobile overlay */}
       {mobileMenuOpen && (
         <div
@@ -97,7 +92,11 @@ export default function DashboardLayout({
       </div>
 
       <main className="flex-1 overflow-y-auto w-full">
-        <div className="p-4 pt-16 lg:pt-6 lg:p-8 max-w-[1600px] mx-auto">{children}</div>
+        {/* Notification bar — sits at the top of the content area, not overlapping */}
+        <div className="flex justify-end items-center px-4 pt-14 lg:pt-4 lg:px-8 pb-0">
+          <NotificationPanel />
+        </div>
+        <div className="p-4 pt-2 lg:pt-2 lg:px-8 lg:pb-8 max-w-[1600px] mx-auto">{children}</div>
       </main>
       <ChatBot />
     </div>

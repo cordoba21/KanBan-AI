@@ -1,15 +1,19 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/lib/auth/hooks";
 import type { Notification } from "@/types/supabase";
 
+let realtimeBoardChannelId = 0;
+let realtimeNotifChannelId = 0;
+
 export function useNotifications() {
   const supabase = createClient();
   const { user } = useUser();
   const queryClient = useQueryClient();
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   const query = useQuery({
     queryKey: ["notifications", user?.id],
@@ -31,36 +35,15 @@ export function useNotifications() {
   useEffect(() => {
     if (!user?.id) return;
 
+    const id = ++realtimeNotifChannelId;
+    const channelName = `notif_${user.id}_${id}`;
+
     const channel = supabase
-      .channel(`notifications:${user.id}`)
+      .channel(channelName)
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
-          schema: "public",
-          table: "notifications",
-          filter: `user_id=eq.${user.id}`,
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["notifications", user.id] });
-        }
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "notifications",
-          filter: `user_id=eq.${user.id}`,
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["notifications", user.id] });
-        }
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "DELETE",
+          event: "*",
           schema: "public",
           table: "notifications",
           filter: `user_id=eq.${user.id}`,
@@ -71,10 +54,13 @@ export function useNotifications() {
       )
       .subscribe();
 
+    channelRef.current = channel;
+
     return () => {
       supabase.removeChannel(channel);
+      channelRef.current = null;
     };
-  }, [user?.id, supabase, queryClient]);
+  }, [user?.id]);
 
   const unreadCount = (query.data || []).filter(n => !n.read).length;
 
@@ -144,15 +130,25 @@ export function useClearNotifications() {
   });
 }
 
+/**
+ * Subscribe to real-time board member changes.
+ * IMPORTANT: Only call this hook ONCE per boardId in the component tree.
+ * Do NOT call it in both a parent and child component.
+ */
 export function useRealtimeBoardMembers(boardId: string | null) {
   const supabase = createClient();
   const queryClient = useQueryClient();
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {
     if (!boardId) return;
 
+    // Use a unique channel name to avoid collisions with stale subscriptions
+    const id = ++realtimeBoardChannelId;
+    const channelName = `bm_${boardId}_${id}`;
+
     const channel = supabase
-      .channel(`board_members:${boardId}`)
+      .channel(channelName)
       .on(
         "postgres_changes",
         {
@@ -168,8 +164,11 @@ export function useRealtimeBoardMembers(boardId: string | null) {
       )
       .subscribe();
 
+    channelRef.current = channel;
+
     return () => {
       supabase.removeChannel(channel);
+      channelRef.current = null;
     };
-  }, [boardId, supabase, queryClient]);
+  }, [boardId]);
 }

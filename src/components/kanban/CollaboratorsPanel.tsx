@@ -7,7 +7,6 @@ import GlassCard from "@/components/ui/GlassCard";
 import GlassButton from "@/components/ui/GlassButton";
 import { useBoardMembersQuery, useUpdateMemberRoleMutation, useRemoveMemberMutation, type BoardMemberView } from "@/hooks/useBoards";
 import { useCreateInvitation } from "@/hooks/useInvitations";
-import { useRealtimeBoardMembers } from "@/hooks/useNotifications";
 import { useUser } from "@/lib/auth/hooks";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -37,9 +36,6 @@ export default function CollaboratorsPanel({
   const createInvite = useCreateInvitation();
   const updateRole = useUpdateMemberRoleMutation();
   const removeMember = useRemoveMemberMutation();
-
-  // Real-time board members subscription
-  useRealtimeBoardMembers(boardId);
 
   const [role, setRole] = useState<"EDITOR" | "VIEWER">("EDITOR");
   const [inviteLink, setInviteLink] = useState<string | null>(null);
