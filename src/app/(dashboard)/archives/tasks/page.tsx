@@ -82,7 +82,7 @@ export default function ArchivedTasksPage() {
             <select
               value={selectedBoard || ""}
               onChange={(e) => setSelectedBoard(e.target.value || undefined)}
-              className="glass-input py-2 text-sm min-w-[160px]"
+              className="glass-input py-2 text-sm min-w-[160px] cursor-pointer"
             >
               <option value="">All Boards</option>
               {boards.map((board) => (
@@ -101,7 +101,7 @@ export default function ArchivedTasksPage() {
             <select
               value={selectedMonth || ""}
               onChange={(e) => setSelectedMonth(e.target.value || undefined)}
-              className="glass-input py-2 text-sm min-w-[160px]"
+              className="glass-input py-2 text-sm min-w-[160px] cursor-pointer"
             >
               <option value="">All Months</option>
               {months.map((m) => (

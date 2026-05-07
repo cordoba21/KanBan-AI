@@ -74,7 +74,7 @@ export default function ArchivedReportsPage() {
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
           <input
             type="text"
-            placeholder="Search reports..."
+            placeholder="  Search reports..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="glass-input w-full pl-9 pr-3 py-2 text-sm"
@@ -88,7 +88,7 @@ export default function ArchivedReportsPage() {
             <select
               value={selectedBoard || ""}
               onChange={(e) => setSelectedBoard(e.target.value || undefined)}
-              className="glass-input py-2 text-sm min-w-[160px]"
+              className="glass-input py-2 text-sm min-w-[160px] cursor-pointer"
             >
               <option value="">All Boards</option>
               {boards.map((board) => (
@@ -107,7 +107,7 @@ export default function ArchivedReportsPage() {
             <select
               value={selectedMonth || ""}
               onChange={(e) => setSelectedMonth(e.target.value || undefined)}
-              className="glass-input py-2 text-sm min-w-[160px]"
+              className="glass-input py-2 text-sm min-w-[160px] cursor-pointer"
             >
               <option value="">All Months</option>
               {months.map((m) => (
