@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckSquare, Calendar, Tag, AlertCircle, Clock,
-  CheckCircle2, Filter, Archive,
+  CheckCircle2, Filter, Archive, Search,
 } from "lucide-react";
 import GlassCard from "@/components/ui/GlassCard";
 import GlassButton from "@/components/ui/GlassButton";
@@ -18,10 +18,24 @@ const priorityConfig = [
 
 export default function ArchivedTasksPage() {
   const [selectedMonth, setSelectedMonth] = useState<string | undefined>();
+  const [searchQuery, setSearchQuery] = useState("");
   const { data: months, isLoading: monthsLoading } = useArchiveMonthsQuery();
   const { data: tasks, isLoading: tasksLoading } = useArchivedTasksQuery(selectedMonth);
 
   const isLoading = monthsLoading || tasksLoading;
+
+  const filteredTasks = useMemo(() => {
+    if (!tasks) return [];
+    if (!searchQuery.trim()) return tasks;
+    const query = searchQuery.toLowerCase();
+    return tasks.filter(
+      (task) =>
+        task.title.toLowerCase().includes(query) ||
+        task.description?.toLowerCase().includes(query) ||
+        task.category_name?.toLowerCase().includes(query) ||
+        task.status.toLowerCase().includes(query)
+    );
+  }, [tasks, searchQuery]);
 
   function formatMonth(m: string) {
     const [year, month] = m.split("-");
@@ -41,6 +55,20 @@ export default function ArchivedTasksPage() {
           <p className="text-white/40 text-sm mt-1">
             Completed tasks archived by month
           </p>
+        </div>
+      </div>
+
+      {/* Search */}
+      <div className="mb-4">
+        <div className="relative max-w-md">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="glass-input w-full pl-9 pr-3 py-2 text-sm"
+          />
         </div>
       </div>
 
@@ -84,10 +112,10 @@ export default function ArchivedTasksPage() {
       )}
 
       {/* Tasks Grid */}
-      {!isLoading && tasks && tasks.length > 0 && (
+      {!isLoading && filteredTasks.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <AnimatePresence mode="popLayout">
-            {tasks.map((task, index) => {
+            {filteredTasks.map((task, index) => {
               const priority = priorityConfig[Math.min(task.priority, 2)];
               const PriorityIcon = priority.icon;
 
@@ -166,7 +194,7 @@ export default function ArchivedTasksPage() {
       )}
 
       {/* Empty state */}
-      {!isLoading && (!tasks || tasks.length === 0) && (
+      {!isLoading && filteredTasks.length === 0 && (
         <motion.div
           className="flex flex-col items-center justify-center h-[40vh]"
           initial={{ opacity: 0 }}
@@ -175,9 +203,11 @@ export default function ArchivedTasksPage() {
           <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-4 border border-white/10">
             <CheckSquare size={28} className="text-white/15" />
           </div>
-          <p className="text-white/30 text-sm">No archived tasks</p>
+          <p className="text-white/30 text-sm">
+            {searchQuery ? "No matching tasks" : "No archived tasks"}
+          </p>
           <p className="text-white/20 text-xs mt-1">
-            Completed tasks will be archived here
+            {searchQuery ? "Try adjusting your search" : "Completed tasks will be archived here"}
           </p>
         </motion.div>
       )}

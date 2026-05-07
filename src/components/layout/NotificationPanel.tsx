@@ -64,7 +64,7 @@ export default function NotificationPanel() {
       {/* Bell Button */}
       <button
         onClick={() => setIsOpen((prev) => !prev)}
-        className="relative flex items-center justify-center w-9 h-9 rounded bg-[#00FF41]/10 border border-[#00FF41]/15 text-white/60 hover:text-[#00FF41] hover:border-[#00FF41]/30 transition-all duration-200"
+        className="relative flex items-center justify-center w-9 h-9 rounded bg-[#00FF41]/10 border border-[#00FF41]/15 text-white/60 hover:text-[#00FF41] hover:border-[#00FF41]/30 transition-all duration-200 cursor-pointer"
         title="Notifications"
         id="notification-bell"
       >

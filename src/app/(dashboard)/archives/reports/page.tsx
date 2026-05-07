@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import {
   FileText, Calendar, BarChart3, ChevronDown, ChevronUp,
-  Archive, TrendingUp, Trash2,
+  Archive, TrendingUp, Trash2, Search, Filter,
 } from "lucide-react";
 import GlassCard from "@/components/ui/GlassCard";
+import GlassButton from "@/components/ui/GlassButton";
 import { useArchivedReportsQuery, useDeleteArchivedReportMutation } from "@/hooks/useArchives";
 
 export default function ArchivedReportsPage() {
@@ -16,6 +17,32 @@ export default function ArchivedReportsPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState<string | undefined>();
+
+  const months = useMemo(() => {
+    if (!reports) return [];
+    const uniqueMonths = [...new Set(reports.map((r) => r.report_month))];
+    return uniqueMonths.sort((a, b) => b.localeCompare(a));
+  }, [reports]);
+
+  const filteredReports = useMemo(() => {
+    if (!reports) return [];
+    let filtered = [...reports];
+    if (selectedMonth) {
+      filtered = filtered.filter((r) => r.report_month === selectedMonth);
+    }
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (r) =>
+          r.title.toLowerCase().includes(query) ||
+          r.board_name?.toLowerCase().includes(query) ||
+          r.content.toLowerCase().includes(query)
+      );
+    }
+    return filtered;
+  }, [reports, selectedMonth, searchQuery]);
 
   function formatMonth(m: string) {
     const [year, month] = m.split("-");
@@ -36,6 +63,42 @@ export default function ArchivedReportsPage() {
         </p>
       </div>
 
+      {/* Search and Filter */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6">
+        <div className="relative flex-1 max-w-md w-full">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+          <input
+            type="text"
+            placeholder="Search reports..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="glass-input w-full pl-9 pr-3 py-2 text-sm"
+          />
+        </div>
+        {months.length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <Filter size={14} className="text-white/30" />
+            <GlassButton
+              variant={!selectedMonth ? "primary" : "ghost"}
+              size="sm"
+              onClick={() => setSelectedMonth(undefined)}
+            >
+              All
+            </GlassButton>
+            {months.map((m) => (
+              <GlassButton
+                key={m}
+                variant={selectedMonth === m ? "primary" : "ghost"}
+                size="sm"
+                onClick={() => setSelectedMonth(m)}
+              >
+                {formatMonth(m)}
+              </GlassButton>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Loading */}
       {isLoading && (
         <div className="flex items-center justify-center h-[40vh]">
@@ -48,9 +111,9 @@ export default function ArchivedReportsPage() {
       )}
 
       {/* Reports List */}
-      {!isLoading && reports && reports.length > 0 && (
+      {!isLoading && filteredReports.length > 0 && (
         <div className="space-y-4">
-          {reports.map((report, index) => {
+          {filteredReports.map((report, index) => {
             const isExpanded = expandedId === report.id;
 
             return (
@@ -63,7 +126,7 @@ export default function ArchivedReportsPage() {
                 <GlassCard padding="none" hover={false}>
                   {/* Report Header */}
                   <button
-                    className="w-full flex items-center justify-between p-5 text-left"
+                    className="w-full flex items-center justify-between p-5 text-left cursor-pointer"
                     onClick={() => setExpandedId(isExpanded ? null : report.id)}
                   >
                     <div className="flex items-center gap-4">
@@ -114,7 +177,7 @@ export default function ArchivedReportsPage() {
                           setDeleteError(null);
                           setDeleteTarget(report.id);
                         }}
-                        className="text-white/30 hover:text-red-400"
+                        className="text-white/30 hover:text-red-400 cursor-pointer"
                         title="Delete report"
                         disabled={deleteReport.isPending}
                       >
@@ -183,7 +246,7 @@ export default function ArchivedReportsPage() {
       )}
 
       {/* Empty state */}
-      {!isLoading && (!reports || reports.length === 0) && (
+      {!isLoading && filteredReports.length === 0 && (
         <motion.div
           className="flex flex-col items-center justify-center h-[40vh]"
           initial={{ opacity: 0 }}
@@ -192,9 +255,11 @@ export default function ArchivedReportsPage() {
           <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-4 border border-white/10">
             <FileText size={28} className="text-white/15" />
           </div>
-          <p className="text-white/30 text-sm">No archived reports</p>
+          <p className="text-white/30 text-sm">
+            {searchQuery || selectedMonth ? "No matching reports" : "No archived reports"}
+          </p>
           <p className="text-white/20 text-xs mt-1">
-            Generate and archive reports from AI Insights
+            {searchQuery || selectedMonth ? "Try adjusting your search or filters" : "Generate and archive reports from AI Insights"}
           </p>
         </motion.div>
       )}

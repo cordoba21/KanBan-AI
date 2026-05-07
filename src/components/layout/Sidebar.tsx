@@ -254,7 +254,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                                   }
                                   setShowBoardSelector(false);
                                 }}
-                                className="flex-1 text-left truncate"
+                                className="flex-1 text-left truncate cursor-pointer"
                               >
                                 {board.name}
                               </button>
@@ -266,7 +266,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                                     setEditingBoardId(board.id);
                                     setEditingBoardName(board.name);
                                   }}
-                                  className="text-white/20 hover:text-white"
+                                  className="text-white/20 hover:text-white cursor-pointer"
                                 >
                                   <Pencil size={12} />
                                 </button>
@@ -278,7 +278,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                                     setDeletingBoardId(board.id);
                                     setDeleteBoardConfirm("");
                                   }}
-                                  className="text-white/20 hover:text-red-400"
+                                  className="text-white/20 hover:text-red-400 cursor-pointer"
                                   title="Delete board"
                                 >
                                   <Trash2 size={12} />
@@ -291,7 +291,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                                     setLeavingBoardId(board.id);
                                     setLeavingBoardName(board.name);
                                   }}
-                                  className="text-white/20 hover:text-orange-400"
+                                  className="text-white/20 hover:text-orange-400 cursor-pointer"
                                   title="Leave board"
                                 >
                                   <DoorOpen size={12} />
@@ -338,7 +338,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                               }
                             }}
                             disabled={!newBoardName.trim() || createBoard.isPending}
-                            className="text-white/40 hover:text-white"
+                            className="text-white/40 hover:text-white cursor-pointer"
                           >
                             <Plus size={14} />
                           </button>
@@ -347,7 +347,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                               setShowCreateBoard(false);
                               setNewBoardName("");
                             }}
-                            className="text-white/30 hover:text-white"
+className="text-white/30 hover:text-white cursor-pointer"
                           >
                             <X size={12} />
                           </button>
@@ -355,7 +355,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                       ) : (
                           <button
                             onClick={() => setShowCreateBoard(true)}
-                            className="flex items-center gap-2 px-2 py-1.5 text-xs text-white/30 hover:text-white/60 w-full"
+                            className="flex items-center gap-2 px-2 py-1.5 text-xs text-white/30 hover:text-white/60 w-full cursor-pointer"
                           >
                             <Plus size={12} />
                             Create board
