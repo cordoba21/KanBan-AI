@@ -285,3 +285,156 @@ export function useArchiveReportMutation() {
     },
   });
 }
+
+/* ─── Fetch all user boards for filter ─────────────────────── */
+export function useUserBoardsForFilterQuery() {
+  const supabase = createClient();
+
+  return useQuery({
+    queryKey: ["user-boards-for-filter"],
+    queryFn: async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return [] as { id: string; name: string }[];
+
+      const { data, error } = await supabase
+        .from("board_members")
+        .select("board_id, boards(id, name)")
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+      
+      const boards = data?.map((d) => ({
+        id: d.boards.id,
+        name: d.boards.name,
+      })) || [];
+      
+      return boards as { id: string; name: string }[];
+    },
+  });
+}
+
+/* ─── Fetch archived tasks from all user boards ───────────── */
+export function useAllArchivedTasksQuery(boardId?: string, month?: string) {
+  const supabase = createClient();
+
+  return useQuery({
+    queryKey: ["all-archived-tasks", boardId || "all", month],
+    queryFn: async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return [] as ArchivedTask[];
+
+      let boardIds: string[] = [];
+      
+      if (boardId && boardId !== "all") {
+        boardIds = [boardId];
+      } else {
+        const { data: members } = await supabase
+          .from("board_members")
+          .select("board_id")
+          .eq("user_id", user.id);
+        
+        boardIds = members?.map((m) => m.board_id) || [];
+      }
+
+      if (boardIds.length === 0) return [] as ArchivedTask[];
+
+      let query = supabase
+        .from("archived_tasks")
+        .select("*")
+        .in("board_id", boardIds)
+        .order("archived_at", { ascending: false });
+
+      if (month) {
+        query = query.eq("archive_month", month);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data as ArchivedTask[];
+    },
+  });
+}
+
+/* ─── Get unique archive months from all user boards ──────── */
+export function useAllArchiveMonthsQuery(boardId?: string) {
+  const supabase = createClient();
+
+  return useQuery({
+    queryKey: ["all-archive-months", boardId || "all"],
+    queryFn: async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return [] as string[];
+
+      let boardIds: string[] = [];
+      
+      if (boardId && boardId !== "all") {
+        boardIds = [boardId];
+      } else {
+        const { data: members } = await supabase
+          .from("board_members")
+          .select("board_id")
+          .eq("user_id", user.id);
+        
+        boardIds = members?.map((m) => m.board_id) || [];
+      }
+
+      if (boardIds.length === 0) return [] as string[];
+
+      const { data, error } = await supabase
+        .from("archived_tasks")
+        .select("archive_month")
+        .in("board_id", boardIds)
+        .order("archive_month", { ascending: false });
+
+      if (error) throw error;
+      const unique = [...new Set(data?.map((d) => d.archive_month))];
+      return unique;
+    },
+  });
+}
+
+/* ─── Fetch archived reports from all user boards ─────────── */
+export function useAllArchivedReportsQuery(boardId?: string) {
+  const supabase = createClient();
+
+  return useQuery({
+    queryKey: ["all-archived-reports", boardId || "all"],
+    queryFn: async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return [] as ArchivedReport[];
+
+      let boardIds: string[] = [];
+      
+      if (boardId && boardId !== "all") {
+        boardIds = [boardId];
+      } else {
+        const { data: members } = await supabase
+          .from("board_members")
+          .select("board_id")
+          .eq("user_id", user.id);
+        
+        boardIds = members?.map((m) => m.board_id) || [];
+      }
+
+      if (boardIds.length === 0) return [] as ArchivedReport[];
+
+      const { data, error } = await supabase
+        .from("archived_reports")
+        .select("*")
+        .in("board_id", boardIds)
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data as ArchivedReport[];
+    },
+  });
+}

@@ -5,20 +5,24 @@ import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import {
   FileText, Calendar, BarChart3, ChevronDown, ChevronUp,
-  Archive, TrendingUp, Trash2, Search, Filter,
+  Archive, TrendingUp, Trash2, Search, Filter, Layers,
 } from "lucide-react";
 import GlassCard from "@/components/ui/GlassCard";
-import GlassButton from "@/components/ui/GlassButton";
-import { useArchivedReportsQuery, useDeleteArchivedReportMutation } from "@/hooks/useArchives";
+import { useAllArchivedReportsQuery, useUserBoardsForFilterQuery, useDeleteArchivedReportMutation } from "@/hooks/useArchives";
 
 export default function ArchivedReportsPage() {
-  const { data: reports, isLoading } = useArchivedReportsQuery();
-  const deleteReport = useDeleteArchivedReportMutation();
+  const [selectedBoard, setSelectedBoard] = useState<string | undefined>();
+  const [selectedMonth, setSelectedMonth] = useState<string | undefined>();
+  const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState<string | undefined>();
+
+  const { data: boards, isLoading: boardsLoading } = useUserBoardsForFilterQuery();
+  const { data: reports, isLoading: reportsLoading } = useAllArchivedReportsQuery(selectedBoard);
+  const deleteReport = useDeleteArchivedReportMutation();
+
+  const isLoading = boardsLoading || reportsLoading;
 
   const months = useMemo(() => {
     if (!reports) return [];
@@ -63,38 +67,55 @@ export default function ArchivedReportsPage() {
         </p>
       </div>
 
-      {/* Search and Filter */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6">
-        <div className="relative flex-1 max-w-md w-full">
+      {/* Search and Filters */}
+      <div className="flex flex-col lg:flex-row gap-4 mb-6">
+        {/* Search */}
+        <div className="relative flex-1 max-w-md">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
           <input
             type="text"
-            placeholder="  Search reports..."
+            placeholder="Search reports..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="glass-input w-full pl-9 pr-3 py-2 text-sm"
           />
         </div>
-        {months.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <Filter size={14} className="text-white/30" />
-            <GlassButton
-              variant={!selectedMonth ? "primary" : "ghost"}
-              size="sm"
-              onClick={() => setSelectedMonth(undefined)}
+
+        {/* Board Filter */}
+        {boards && boards.length > 0 && (
+          <div className="flex items-center gap-2">
+            <Layers size={14} className="text-white/30" />
+            <select
+              value={selectedBoard || ""}
+              onChange={(e) => setSelectedBoard(e.target.value || undefined)}
+              className="glass-input py-2 text-sm min-w-[160px]"
             >
-              All
-            </GlassButton>
-            {months.map((m) => (
-              <GlassButton
-                key={m}
-                variant={selectedMonth === m ? "primary" : "ghost"}
-                size="sm"
-                onClick={() => setSelectedMonth(m)}
-              >
-                {formatMonth(m)}
-              </GlassButton>
-            ))}
+              <option value="">All Boards</option>
+              {boards.map((board) => (
+                <option key={board.id} value={board.id}>
+                  {board.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Month Filter */}
+        {months.length > 0 && (
+          <div className="flex items-center gap-2">
+            <Filter size={14} className="text-white/30" />
+            <select
+              value={selectedMonth || ""}
+              onChange={(e) => setSelectedMonth(e.target.value || undefined)}
+              className="glass-input py-2 text-sm min-w-[160px]"
+            >
+              <option value="">All Months</option>
+              {months.map((m) => (
+                <option key={m} value={m}>
+                  {formatMonth(m)}
+                </option>
+              ))}
+            </select>
           </div>
         )}
       </div>
@@ -144,7 +165,7 @@ export default function ArchivedReportsPage() {
                           </span>
                           {report.board_name && (
                             <span className="text-[10px] text-white/30 flex items-center gap-1">
-                              <Archive size={9} />
+                              <Layers size={9} />
                               {report.board_name}
                             </span>
                           )}
@@ -256,10 +277,10 @@ export default function ArchivedReportsPage() {
             <FileText size={28} className="text-white/15" />
           </div>
           <p className="text-white/30 text-sm">
-            {searchQuery || selectedMonth ? "No matching reports" : "No archived reports"}
+            {searchQuery || selectedBoard || selectedMonth ? "No matching reports" : "No archived reports"}
           </p>
           <p className="text-white/20 text-xs mt-1">
-            {searchQuery || selectedMonth ? "Try adjusting your search or filters" : "Generate and archive reports from AI Insights"}
+            {searchQuery || selectedBoard || selectedMonth ? "Try adjusting your filters" : "Generate and archive reports from AI Insights"}
           </p>
         </motion.div>
       )}
