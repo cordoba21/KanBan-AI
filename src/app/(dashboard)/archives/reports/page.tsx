@@ -69,7 +69,7 @@ export default function ArchivedReportsPage() {
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
           <input
             type="text"
-            placeholder="Search reports..."
+            placeholder="  Search reports..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="glass-input w-full pl-9 pr-3 py-2 text-sm"
