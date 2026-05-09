@@ -246,3 +246,48 @@ export function useMoveTask() {
 
   return { moveTask, isPending: updateMutation.isPending };
 }
+
+/* ─── Update single task position (no status change) ───────── */
+export function useUpdateTaskPosition() {
+  const queryClient = useQueryClient();
+  const supabase = createClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      status,
+      position,
+    }: {
+      id: string;
+      status: TaskStatus;
+      position: number;
+    }) => {
+      const { error } = await supabase
+        .from("tasks")
+        .update({ status, position })
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onMutate: async ({ id, status, position }) => {
+      await queryClient.cancelQueries({ queryKey: ["tasks"] });
+      queryClient.setQueryData<TaskWithPeople[]>(["tasks"], (old) =>
+        old?.map((task) =>
+          task.id === id ? { ...task, status, position } : task
+        ) ?? []
+      );
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", "active"] });
+    },
+  });
+}
+
+export function updateTaskPosition(id: string, status: TaskStatus, position: number, _userId: string) {
+  const supabase = createClient();
+  return supabase
+    .from("tasks")
+    .update({ status, position })
+    .eq("id", id);
+}

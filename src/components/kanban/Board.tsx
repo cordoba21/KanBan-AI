@@ -11,9 +11,8 @@ import {
   useSensors,
   type DragStartEvent,
   type DragEndEvent,
-  defaultDropAnimationSideEffects,
-  type DropAnimation,
 } from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Tag, Archive, UserPlus, Users } from "lucide-react";
 import Column from "./Column";
@@ -22,7 +21,7 @@ import TaskModal from "./TaskModal";
 import CategoryManager from "./CategoryManager";
 import CollaboratorsPanel from "./CollaboratorsPanel";
 import GlassButton from "@/components/ui/GlassButton";
-import { useGroupedTasks, useMoveTask } from "@/hooks/useTasks";
+import { useGroupedTasks, useMoveTask, updateTaskPosition } from "@/hooks/useTasks";
 import { useArchiveTasksMutation } from "@/hooks/useArchives";
 import { useBoardMembersQuery, useUserBoardsQuery } from "@/hooks/useBoards";
 import { useRealtimeBoardMembers } from "@/hooks/useNotifications";
@@ -73,29 +72,20 @@ export default function Board() {
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: { distance: 5 },
+      activationConstraint: { distance: 8 },
     }),
     useSensor(TouchSensor, {
       activationConstraint: { delay: 200, tolerance: 5 },
     })
   );
 
-  const dropAnimation: DropAnimation = {
-    duration: 260,
-    easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-    sideEffects: defaultDropAnimationSideEffects({
-      styles: {
-        active: {
-          opacity: "0.5",
-        },
-      },
-    }),
-  };
+  const groupedRef = useRef(grouped);
 
   const handleDragStart = useCallback(
     (event: DragStartEvent) => {
+      groupedRef.current = grouped;
       const taskId = event.active.id as string;
-      const allTasks = Object.values(grouped).flat();
+      const allTasks = Object.values(groupedRef.current).flat();
       const task = allTasks.find((t) => t.id === taskId);
       if (task) setActiveTask(task);
     },
@@ -112,25 +102,48 @@ export default function Board() {
       const taskId = active.id as string;
       const overId = over.id as string;
 
+      const currentGrouped = groupedRef.current;
+
       // Check if dropped over a column
       const targetColumn = COLUMNS.find((col) => col.id === overId);
       if (targetColumn) {
-        const tasksInColumn = grouped[targetColumn.id];
-        moveTask(taskId, targetColumn.id, tasksInColumn.length, user.id);
+        const tasksInColumn = currentGrouped[targetColumn.id];
+        const task = Object.values(currentGrouped).flat().find((t) => t.id === taskId);
+        if (task) {
+          moveTask(taskId, targetColumn.id, tasksInColumn.length, user.id);
+        }
         return;
       }
 
-      // Dropped over another task — find which column
-      const allTasks = Object.values(grouped).flat();
+      // Dropped over another task
+      const allTasks = Object.values(currentGrouped).flat();
       const overTask = allTasks.find((t) => t.id === overId);
       if (overTask) {
-        const tasksInColumn = grouped[overTask.status];
-        const overIndex = tasksInColumn.findIndex((t) => t.id === overId);
-        moveTask(taskId, overTask.status, overIndex, user.id);
+        const task = Object.values(currentGrouped).flat().find((t) => t.id === taskId);
+        if (!task) return;
+
+        const column = currentGrouped[task.status];
+        const sourceIndex = column.findIndex((t) => t.id === taskId);
+        const overIndex = column.findIndex((t) => t.id === overId);
+
+        if (task.status === overTask.status) {
+          moveTask(taskId, task.status, overIndex, user.id);
+          arrayMove(column, sourceIndex, overIndex).forEach((t, i) => {
+            if (t.id !== taskId) {
+              updateTaskPosition(t.id, task.status, i, user.id);
+            }
+          });
+        } else {
+          moveTask(taskId, overTask.status, overIndex, user.id);
+        }
       }
     },
-    [grouped, moveTask, user]
+    [moveTask, user]
   );
+
+  const handleDragCancel = useCallback(() => {
+    setActiveTask(null);
+  }, []);
 
   // Handle arrow-based movement between columns
   const handleMoveTaskByArrow = useCallback(
@@ -303,6 +316,7 @@ export default function Board() {
         collisionDetection={closestCorners}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
       >
         <div className="kanban-columns">
           {COLUMNS.map((column, index) => (
@@ -329,7 +343,7 @@ export default function Board() {
           ))}
         </div>
 
-        <DragOverlay dropAnimation={dropAnimation}>
+        <DragOverlay>
           {activeTask && (
             <TaskCard task={activeTask} isDragOverlay />
           )}
