@@ -73,7 +73,12 @@ export default function CollaboratorsPanel({
 
   return (
     <>
-      <GlassCard padding="md" hover={false} className="glass-strong">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+      >
+        <GlassCard padding="md" hover={false} className="glass-strong">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#00FF41]/10">
           <h3 className="text-xs font-semibold text-[#00FF41] flex items-center gap-2 uppercase tracking-wider">
@@ -241,6 +246,7 @@ export default function CollaboratorsPanel({
           </>
         )}
       </GlassCard>
+      </motion.div>
 
       {/* Remove Collaborator Confirmation Modal */}
       <AnimatePresence>
