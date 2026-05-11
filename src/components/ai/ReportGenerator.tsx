@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import {
-  Sparkles, FileText, Loader2, Download,
+  Sparkles, FileText, Download,
   FileSpreadsheet, FileType, Archive,
 } from "lucide-react";
 import {
@@ -46,6 +46,9 @@ export default function ReportGenerator() {
   const [error, setError] = useState<string | null>(null);
   const [archived, setArchived] = useState(false);
   const chartsRef = useRef<HTMLDivElement>(null);
+  const skeletonWidths = useMemo(() => 
+    Array.from({ length: 8 }, () => 60 + Math.random() * 40), 
+  []);
 
   async function generateReport() {
     if (!activeBoardId) {
@@ -137,83 +140,129 @@ export default function ReportGenerator() {
     { name: "In Progress", value: metrics?.inProgressTasks || 0, fill: "#FFB800" },
   ];
 
-  return (
-    <div className="space-y-6">
-      {/* Generate Button */}
-      <GlassCard padding="lg" glow="gradient" hover={false}>
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded bg-[#00FF41]/10 border border-[#00FF41]/20 flex items-center justify-center">
-              <Sparkles size={22} className="text-[#00FF41]" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-white">
-                Monthly Executive Report
-              </h3>
-              <p className="text-xs text-white/40 mt-0.5">
-                Powered by Gemini — analyzes all tasks and activity
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <select
-              className="glass-input appearance-none pr-8 text-sm"
-              value={activeBoardId || ""}
-              onChange={(e) => {
-                setSelectedBoardId(e.target.value || null);
-                setReport(null);
-                setArchived(false);
-                setMeta(null);
-                setError(null);
-              }}
-              disabled={userBoards.length === 0}
-            >
-              {userBoards.length === 0 && (
-                <option value="">No boards</option>
-              )}
-              {userBoards.map((board) => (
-                <option
-                  key={board.id}
-                  value={board.id}
-                >
-                  {board.name}
-                </option>
-              ))}
-            </select>
-            <GlassButton onClick={generateReport} loading={loading}>
-            {loading ? (
-              <>Analyzing...</>
-            ) : (
-              <>
-                <FileText size={16} />
-                Generate Report
-              </>
-            )}
-            </GlassButton>
-          </div>
-        </div>
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+    },
+  };
 
-        {meta && (
-          <div className="flex gap-4 mt-4 pt-4 border-t border-white/5 flex-wrap">
-            <span className="text-[10px] text-white/30">
-              Generated: {new Date(meta.generatedAt).toLocaleString("en-US")}
-            </span>
-            <span className="text-[10px] text-white/30">
-              Tasks analyzed: {meta.taskCount}
-            </span>
-            <span className="text-[10px] text-white/30">
-              Activity logs: {meta.logCount}
-            </span>
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 80, damping: 20 },
+    },
+  };
+
+  const chartVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: { type: "spring", stiffness: 100, damping: 15, delay: 0.3 },
+    },
+  };
+
+  return (
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6"
+    >
+      {/* Generate Button */}
+      <motion.div variants={itemVariants}>
+        <GlassCard padding="lg" glow="gradient" hover={false}>
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-4">
+              <motion.div
+                className="w-12 h-12 rounded bg-[#00FF41]/10 border border-[#00FF41]/20 flex items-center justify-center"
+                whileHover={{ scale: 1.05, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <Sparkles size={22} className="text-[#00FF41]" />
+              </motion.div>
+              <div>
+                <h3 className="text-lg font-semibold text-white">
+                  Monthly Executive Report
+                </h3>
+                <p className="text-xs text-white/40 mt-0.5">
+                  Powered by Gemini — analyzes all tasks and activity
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <motion.select
+                className="glass-input appearance-none pr-8 text-sm"
+                value={activeBoardId || ""}
+                onChange={(e) => {
+                  setSelectedBoardId(e.target.value || null);
+                  setReport(null);
+                  setArchived(false);
+                  setMeta(null);
+                  setError(null);
+                }}
+                disabled={userBoards.length === 0}
+                whileFocus={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 200 }}
+              >
+                {userBoards.length === 0 && (
+                  <option value="">No boards</option>
+                )}
+                {userBoards.map((board) => (
+                  <option
+                    key={board.id}
+                    value={board.id}
+                  >
+                    {board.name}
+                  </option>
+                ))}
+              </motion.select>
+              <GlassButton onClick={generateReport} loading={loading}>
+              {loading ? (
+                <>Analyzing...</>
+              ) : (
+                <>
+                  <FileText size={16} />
+                  Generate Report
+                </>
+              )}
+              </GlassButton>
+            </div>
           </div>
-        )}
-      </GlassCard>
+
+          {meta && (
+            <motion.div
+              className="flex gap-4 mt-4 pt-4 border-t border-white/5 flex-wrap"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <span className="text-[10px] text-white/30">
+                Generated: {new Date(meta.generatedAt).toLocaleString("en-US")}
+              </span>
+              <span className="text-[10px] text-white/30">
+                Tasks analyzed: {meta.taskCount}
+              </span>
+              <span className="text-[10px] text-white/30">
+                Activity logs: {meta.logCount}
+              </span>
+            </motion.div>
+          )}
+        </GlassCard>
+      </motion.div>
 
       {/* Error */}
       {error && (
         <motion.div
+          variants={itemVariants}
           className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl p-4"
-          initial={{ opacity: 0, y: -5 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: -5, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ type: "spring", stiffness: 200, damping: 20 }}
         >
           {error}
         </motion.div>
@@ -221,19 +270,21 @@ export default function ReportGenerator() {
 
       {/* Loading Skeleton */}
       {loading && (
-        <GlassCard padding="lg" hover={false}>
-          <div className="space-y-3">
-            {[...Array(8)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="h-4 rounded-full bg-white/5"
-                style={{ width: `${60 + Math.random() * 40}%` }}
-                animate={{ opacity: [0.3, 0.6, 0.3] }}
-                transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.1 }}
-              />
-            ))}
-          </div>
-        </GlassCard>
+        <motion.div variants={itemVariants}>
+          <GlassCard padding="lg" hover={false}>
+            <div className="space-y-3">
+              {skeletonWidths.map((width, i) => (
+                <motion.div
+                  key={i}
+                  className="h-4 rounded-full bg-white/5"
+                  style={{ width: `${width}%` }}
+                  animate={{ opacity: [0.2, 0.5, 0.2] }}
+                  transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.12, ease: "easeInOut" }}
+                />
+              ))}
+            </div>
+          </GlassCard>
+        </motion.div>
       )}
 
       {/* Report Content */}
@@ -241,171 +292,216 @@ export default function ReportGenerator() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
           className="space-y-6"
         >
           {/* Export Buttons */}
-          <GlassCard padding="md" hover={false}>
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              <h3 className="text-sm font-semibold text-white/70 flex items-center gap-2">
-                <Download size={16} />
-                Download Report
-              </h3>
-              <div className="flex gap-2 flex-wrap">
-                <GlassButton
-                  variant="ghost" size="sm"
-                  onClick={() => handleExport("pdf")}
-                  loading={exporting === "pdf"}
-                >
-                  <FileText size={14} className="text-red-400" />
-                  PDF
-                </GlassButton>
-                <GlassButton
-                  variant="ghost" size="sm"
-                  onClick={() => handleExport("word")}
-                  loading={exporting === "word"}
-                >
-                  <FileType size={14} className="text-blue-400" />
-                  Word
-                </GlassButton>
-                <GlassButton
-                  variant="ghost" size="sm"
-                  onClick={() => handleExport("excel")}
-                  loading={exporting === "excel"}
-                >
-                  <FileSpreadsheet size={14} className="text-green-400" />
-                  Excel
-                </GlassButton>
-                <div className="w-px bg-white/10 mx-1" />
-                <GlassButton
-                  variant={archived ? "ghost" : "primary"}
-                  size="sm"
-                  onClick={handleArchiveReport}
-                  loading={archiveReport.isPending}
-                  disabled={archived}
-                >
-                  <Archive size={14} />
-                  {archived ? "Archived ✓" : "Archive"}
-                </GlassButton>
+          <motion.div variants={itemVariants}>
+            <GlassCard padding="md" hover={false}>
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <h3 className="text-sm font-semibold text-white/70 flex items-center gap-2">
+                  <motion.span whileHover={{ scale: 1.1, rotate: -5 }} transition={{ type: "spring", stiffness: 300 }}>
+                    <Download size={16} />
+                  </motion.span>
+                  Download Report
+                </h3>
+                <div className="flex gap-2 flex-wrap">
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <GlassButton
+                      variant="ghost" size="sm"
+                      onClick={() => handleExport("pdf")}
+                      loading={exporting === "pdf"}
+                    >
+                      <FileText size={14} className="text-red-400" />
+                      PDF
+                    </GlassButton>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <GlassButton
+                      variant="ghost" size="sm"
+                      onClick={() => handleExport("word")}
+                      loading={exporting === "word"}
+                    >
+                      <FileType size={14} className="text-blue-400" />
+                      Word
+                    </GlassButton>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <GlassButton
+                      variant="ghost" size="sm"
+                      onClick={() => handleExport("excel")}
+                      loading={exporting === "excel"}
+                    >
+                      <FileSpreadsheet size={14} className="text-green-400" />
+                      Excel
+                    </GlassButton>
+                  </motion.div>
+                  <div className="w-px bg-white/10 mx-1" />
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <GlassButton
+                      variant={archived ? "ghost" : "primary"}
+                      size="sm"
+                      onClick={handleArchiveReport}
+                      loading={archiveReport.isPending}
+                      disabled={archived}
+                    >
+                      <Archive size={14} />
+                      {archived ? "Archived ✓" : "Archive"}
+                    </GlassButton>
+                  </motion.div>
+                </div>
               </div>
-            </div>
-          </GlassCard>
+            </GlassCard>
+          </motion.div>
 
           {/* Charts for export */}
-          <div ref={chartsRef}>
+          <motion.div ref={chartsRef} variants={chartVariants}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <GlassCard padding="md" hover={false}>
-                <h3 className="text-sm font-semibold text-white/70 mb-4">
-                  Status Distribution
-                </h3>
-                <div className="h-[260px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={statusDistribution}
-                        cx="50%" cy="50%"
-                        innerRadius={55} outerRadius={85}
-                        paddingAngle={3} dataKey="value"
-                        stroke="none"
-                      >
-                        {statusDistribution.map((entry, index) => (
-                          <Cell key={index} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          background: isLight ? "rgba(255,255,255,0.95)" : "rgba(10,10,26,0.95)",
-                          border: isLight ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.1)",
-                          borderRadius: "12px",
-                          color: isLight ? "#1a1a2e" : "white",
-                          fontSize: "12px",
-                        }}
-                      />
-                      <Legend
-                        wrapperStyle={{ fontSize: "11px", color: legendColor }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </GlassCard>
+              <motion.div whileHover={{ y: -4, transition: { type: "spring", stiffness: 200 } }}>
+                <GlassCard padding="md" hover={false}>
+                  <h3 className="text-sm font-semibold text-white/70 mb-4">
+                    Status Distribution
+                  </h3>
+                  <div className="h-[260px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={statusDistribution}
+                          cx="50%" cy="50%"
+                          innerRadius={55} outerRadius={85}
+                          paddingAngle={3} dataKey="value"
+                          stroke="none"
+                        >
+                          {statusDistribution.map((entry, index) => (
+                            <Cell key={index} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{
+                            background: isLight ? "rgba(255,255,255,0.95)" : "rgba(10,10,26,0.95)",
+                            border: isLight ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.1)",
+                            borderRadius: "12px",
+                            color: isLight ? "#1a1a2e" : "white",
+                            fontSize: "12px",
+                          }}
+                        />
+                        <Legend
+                          wrapperStyle={{ fontSize: "11px", color: legendColor }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </GlassCard>
+              </motion.div>
 
-              <GlassCard padding="md" hover={false}>
-                <h3 className="text-sm font-semibold text-white/70 mb-4">
-                  Task Summary
-                </h3>
-                <div className="h-[260px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={barData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-                      <XAxis dataKey="name" stroke={axisColor} fontSize={11} tick={{ fill: tickColor }} />
-                      <YAxis stroke={axisColor} fontSize={11} tick={{ fill: tickColor }} />
-                      <Tooltip
-                        contentStyle={{
-                          background: isLight ? "rgba(255,255,255,0.95)" : "rgba(10,10,26,0.95)",
-                          border: isLight ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.1)",
-                          borderRadius: "12px",
-                          color: isLight ? "#1a1a2e" : "white",
-                          fontSize: "12px",
-                        }}
-                      />
-                      <Bar dataKey="value" radius={[8, 8, 0, 0]}>
-                        {barData.map((entry, index) => (
-                          <Cell key={index} fill={entry.fill} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </GlassCard>
+              <motion.div whileHover={{ y: -4, transition: { type: "spring", stiffness: 200 } }}>
+                <GlassCard padding="md" hover={false}>
+                  <h3 className="text-sm font-semibold text-white/70 mb-4">
+                    Task Summary
+                  </h3>
+                  <div className="h-[260px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={barData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                        <XAxis dataKey="name" stroke={axisColor} fontSize={11} tick={{ fill: tickColor }} />
+                        <YAxis stroke={axisColor} fontSize={11} tick={{ fill: tickColor }} />
+                        <Tooltip
+                          contentStyle={{
+                            background: isLight ? "rgba(255,255,255,0.95)" : "rgba(10,10,26,0.95)",
+                            border: isLight ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.1)",
+                            borderRadius: "12px",
+                            color: isLight ? "#1a1a2e" : "white",
+                            fontSize: "12px",
+                          }}
+                        />
+                        <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                          {barData.map((entry, index) => (
+                            <Cell key={index} fill={entry.fill} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </GlassCard>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
 
           {/* AI Report Text */}
-          <GlassCard padding="lg" hover={false}>
-            <div className="prose prose-invert prose-sm max-w-none">
-              <ReactMarkdown
-                components={{
-                  h1: ({ children }) => (
-                    <h1 className="text-2xl font-bold gradient-text mb-4">
-                      {children}
-                    </h1>
-                  ),
-                  h2: ({ children }) => (
-                    <h2 className="text-lg font-semibold text-white/90 mt-6 mb-3 border-b border-white/5 pb-2">
-                      {children}
-                    </h2>
-                  ),
-                  h3: ({ children }) => (
-                    <h3 className="text-base font-medium text-white/80 mt-4 mb-2">
-                      {children}
-                    </h3>
-                  ),
-                  p: ({ children }) => (
-                    <p className="text-sm text-white/60 leading-relaxed mb-3">
-                      {children}
-                    </p>
-                  ),
-                  li: ({ children }) => (
-                    <li className="text-sm text-white/60 mb-1">{children}</li>
-                  ),
-                  strong: ({ children }) => (
-                    <strong className="text-white/90 font-semibold">
-                      {children}
-                    </strong>
-                  ),
-                  code: ({ children }) => (
-                    <code className="text-[#FFB800] bg-[#FFB800]/10 px-1.5 py-0.5 rounded text-xs">
-                      {children}
-                    </code>
-                  ),
-                }}
-              >
-                {report}
-              </ReactMarkdown>
-            </div>
-          </GlassCard>
+          <motion.div variants={itemVariants}>
+            <GlassCard padding="lg" hover={false}>
+              <div className="prose prose-invert prose-sm max-w-none">
+                <ReactMarkdown
+                  components={{
+                    h1: ({ children }) => (
+                      <motion.h1
+                        className="text-2xl font-bold gradient-text mb-4"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {children}
+                      </motion.h1>
+                    ),
+                    h2: ({ children }) => (
+                      <motion.h2
+                        className="text-lg font-semibold text-white/90 mt-6 mb-3 border-b border-white/5 pb-2"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: 0.1 }}
+                      >
+                        {children}
+                      </motion.h2>
+                    ),
+                    h3: ({ children }) => (
+                      <motion.h3
+                        className="text-base font-medium text-white/80 mt-4 mb-2"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3, delay: 0.15 }}
+                      >
+                        {children}
+                      </motion.h3>
+                    ),
+                    p: ({ children }) => (
+                      <motion.p
+                        className="text-sm text-white/60 leading-relaxed mb-3"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {children}
+                      </motion.p>
+                    ),
+                    li: ({ children }) => (
+                      <motion.li
+                        className="text-sm text-white/60 mb-1"
+                        initial={{ opacity: 0, x: -5 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {children}
+                      </motion.li>
+                    ),
+                    strong: ({ children }) => (
+                      <strong className="text-white/90 font-semibold">
+                        {children}
+                      </strong>
+                    ),
+                    code: ({ children }) => (
+                      <code className="text-[#FFB800] bg-[#FFB800]/10 px-1.5 py-0.5 rounded text-xs">
+                        {children}
+                      </code>
+                    ),
+                  }}
+                >
+                  {report}
+                </ReactMarkdown>
+              </div>
+            </GlassCard>
+          </motion.div>
         </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }
