@@ -153,7 +153,7 @@ export default function ReportGenerator() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { type: "spring", stiffness: 80, damping: 20 },
+      transition: { type: "spring" as const, stiffness: 80, damping: 20 },
     },
   };
 
@@ -162,7 +162,7 @@ export default function ReportGenerator() {
     visible: {
       opacity: 1,
       scale: 1,
-      transition: { type: "spring", stiffness: 100, damping: 15, delay: 0.3 },
+      transition: { type: "spring" as const, stiffness: 100, damping: 15, delay: 0.3 },
     },
   };
 
@@ -357,7 +357,7 @@ export default function ReportGenerator() {
           {/* Charts for export */}
           <motion.div ref={chartsRef} variants={chartVariants}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <motion.div whileHover={{ y: -4, transition: { type: "spring", stiffness: 200 } }}>
+              <motion.div whileHover={{ y: -4, transition: { type: "spring" as const, stiffness: 200 } }}>
                 <GlassCard padding="md" hover={false}>
                   <h3 className="text-sm font-semibold text-white/70 mb-4">
                     Status Distribution
@@ -394,7 +394,7 @@ export default function ReportGenerator() {
                 </GlassCard>
               </motion.div>
 
-              <motion.div whileHover={{ y: -4, transition: { type: "spring", stiffness: 200 } }}>
+              <motion.div whileHover={{ y: -4, transition: { type: "spring" as const, stiffness: 200 } }}>
                 <GlassCard padding="md" hover={false}>
                   <h3 className="text-sm font-semibold text-white/70 mb-4">
                     Task Summary
